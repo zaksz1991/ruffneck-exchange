@@ -32,6 +32,17 @@ export type PublicListing = {
   supplier: PublicSupplier;
 };
 
+export type ListingSort = 'newest' | 'oldest' | 'title';
+export type ListingFilters = {
+  q?: string;
+  state?: string;
+  category?: string;
+  listingType?: PublicListing['listing_type'];
+  priceType?: PublicListing['price_type'];
+  sort?: ListingSort;
+  limit?: number;
+};
+
 function cleanSearch(value: string): string {
   return value.toLocaleLowerCase().trim().replace(/[^\p{L}\p{N}\s-]/gu, ' ').replace(/\s+/g, ' ').slice(0, 100);
 }
@@ -42,27 +53,38 @@ function containsTerms(value: string, query: string): boolean {
   return terms.length === 0 || terms.every((term) => haystack.includes(term));
 }
 
-export async function getApprovedListings(filters: { q?: string; state?: string; category?: string; limit?: number } = {}): Promise<PublicListing[]> {
+export async function getApprovedListings(filters: ListingFilters = {}): Promise<PublicListing[]> {
   try {
     const db = supabaseAdmin();
-    const { data, error } = await db
+    let query = db
       .from('rnx_listings')
       .select('id,slug,title,listing_type,category,description,state,city,price_type,price,currency,condition,keywords,created_at,supplier:rnx_supplier_applications!inner(id,public_slug,business_name,business_type,category,state,website,description,status)')
       .eq('status', 'approved')
       .eq('supplier.status', 'approved')
-      .not('supplier.public_slug', 'is', null)
-      .order('created_at', { ascending: false })
-      .limit(Math.min(Math.max(filters.limit ?? 100, 1), 100));
+      .not('supplier.public_slug', 'is', null);
+
+    // Apply structured filters in Postgres before the bounded result set is fetched.
+    if (filters.state) query = query.eq('state', filters.state);
+    if (filters.listingType) query = query.eq('listing_type', filters.listingType);
+    if (filters.priceType) query = query.eq('price_type', filters.priceType);
+
+    if (filters.sort === 'title') {
+      query = query.order('title', { ascending: true }).order('created_at', { ascending: false });
+    } else {
+      query = query.order('created_at', { ascending: filters.sort === 'oldest' });
+    }
+
+    const { data, error } = await query.limit(Math.min(Math.max(filters.limit ?? 100, 1), 100));
     if (error) {
       console.error('[RNX] Approved listings query failed:', { code: error.code, message: error.message });
       return [];
     }
+
     const rows = (data ?? []) as unknown as PublicListing[];
     const q = cleanSearch(filters.q ?? '');
-    const state = cleanSearch(filters.state ?? '');
     const category = cleanSearch(filters.category ?? '');
+
     return rows.filter((listing) => {
-      if (state && cleanSearch(listing.state) !== state) return false;
       if (category && !cleanSearch(listing.category).includes(category) && !category.includes(cleanSearch(listing.category))) return false;
       if (q) {
         const searchable = [listing.title, listing.category, listing.description, listing.state, listing.city ?? '', ...(listing.keywords ?? []), listing.supplier.business_name].join(' ');

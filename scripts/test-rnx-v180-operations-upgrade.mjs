@@ -8,7 +8,7 @@ const requestPage = await readFile(new URL('../app/request/page.tsx', import.met
 const requestForm = await readFile(new URL('../components/request-form.tsx', import.meta.url), 'utf8');
 const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 
-assert.equal(pkg.version, '1.8.0');
+assert.match(pkg.version, /^1\.(8|9)\.0$/);
 assert.match(action, /SUPPLIER_EMAIL_CONFIRMATION_REQUIRED/);
 assert.match(action, /Supplier email must be confirmed before approval/i);
 assert.match(action, /RNX_SCHEMA_MISMATCH/);

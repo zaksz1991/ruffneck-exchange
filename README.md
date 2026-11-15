@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v1.8.0
+# RuffNeck Exchange (RNX) — v1.9.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,19 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v1.9.0 — Marketplace discovery upgrade
+
+- Adds marketplace filters for offer type: product, service, wholesale and rental.
+- Adds pricing filters: fixed price, starting price and price on request.
+- Adds sorting by newest, oldest and offer name A–Z.
+- Applies listing-type and pricing filters in the Supabase query before fetching the bounded catalogue result set.
+- Retains the search phrase, category, state and active filters when browsing category and state links.
+- Adds a live result count, active-filter summary and clear-filter route.
+- Keeps the free sourcing request path visible when the current search produces no approved offer.
+- Retains the v1.8.0 operations error diagnostics, safer empty-marketplace state, category/state request prefill and the type-safe request-state allow-list repair.
+
+No database migration or new environment variable is required. Existing approved catalogue fields are reused. Price sorting is intentionally not offered because comparing nominal amounts across different currencies without conversion would be misleading.
 
 ## How RNX operates
 
@@ -20,18 +33,10 @@ Canonical domain: `https://ruffneck-exchange.vercel.app`
 
 Customers can submit requests without paying RNX. Supplier memberships, promoted listings, advertising and qualified introductions are services of RuffNeck Knowledge Hub's RNX marketplace operation. Purchases of third-party goods and services are arranged and paid for directly with the relevant supplier. **Automated payment-gateway checkout is not active in this release; applicable RNX fees still use manual payment verification.**
 
-## Current v1.8.0 changes
-
-- Classifies supplier/listing/lead update failures with actionable operational messages instead of masking all Supabase errors as one generic failure.
-- Explains the supplier email-confirmation rule when migration 013 blocks a new supplier approval. The rule is preserved; the application does not bypass email ownership checks.
-- Distinguishes database business-rule, schema, permission and duplicate-record failures without returning database internals to the browser.
-- Improves empty marketplace conversion by clearly presenting the free sourcing request route and supplier registration route when no approved inventory is available.
-- Retains a selected category and location when a visitor moves from filtered marketplace discovery into a sourcing request, pre-filling those fields without inventing customer details.
-- Updates the public process explanation to match the implemented operations model and accurately disclose manual fee verification.
-
 ## Platform features
 
 - Multi-industry department and state discovery, approved supplier profiles and separately moderated product/service listings.
+- Marketplace search by keyword and state, now extended with offer-type, pricing-type and sort controls.
 - Customer sourcing requests, private guest tracking links, optional customer accounts and customer-to-operations messages.
 - Staff operations console with role-based access, supplier/listing moderation, lead qualification and audit records.
 - Supplier matching recommendations for staff review; recommendations do not automatically create offers or disclose customer details.
@@ -93,13 +98,11 @@ Do not paste, commit or expose actual secret values.
 
 ## Supabase migrations
 
-RNX migrations are additive and use only `rnx_*` application objects, except narrowly scoped RNX Storage policies. Review the target project and its migration history. Apply only missing migrations, in order: `001_rnx_core.sql` through `013_rnx_email_verification.sql`.
+This release uses the existing RNX schema and adds no migration. Do not run SQL for v1.9.0. For earlier releases, apply only missing RNX migrations in numerical order and never rerun completed migrations. Do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects.
 
-Never rerun completed migrations or alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects. Refer to individual migration files and feature guides for exact scope.
+## Verification boundary
 
-## Verification status for v1.8.0
-
-The included focused operations contract test is designed to run with `npm run test:rnx-v180`. It does not prove that production Supabase migrations, environment variables, live email delivery or Vercel deployment are correct. Run the full repository `npm run check` against the complete project and review the Vercel production build before treating this release as deployed.
+The included focused v1.8 operations test and v1.9 marketplace-search test validate the packaged source contracts. They do not prove production Supabase behaviour or a complete Next.js build. Run the full repository check against the complete project and inspect the Vercel production build before treating this release as deployed.
 
 ## Commercial deployment
 

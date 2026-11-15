@@ -1,0 +1,45 @@
+RUFFNECK EXCHANGE v1.9.0 — MARKETPLACE DISCOVERY UPGRADE
+
+PACKAGE TYPE
+This is a cumulative incremental source overlay. It includes the v1.8 operations changes and request-page TypeScript fix, plus the v1.9 marketplace filters. It is NOT a complete repository replacement ZIP. Merge the included folders into the existing ruffneck-exchange repository; do not delete unrelated files.
+
+REPLACE THESE COMPLETE FILES
+- package.json
+- README.md
+- BUILD_STATUS.md
+- app/api/admin/actions/route.ts
+- app/how-it-works/page.tsx
+- app/marketplace/page.tsx
+- app/request/page.tsx
+- components/request-form.tsx
+- lib/catalog.ts
+
+ADD THESE COMPLETE FILES
+- scripts/test-rnx-v180-operations-upgrade.mjs
+- scripts/test-rnx-v190-marketplace-search.mjs
+- RELEASE-NOTES-v1.9.0.md
+
+The v1.8 operations code is included so the package retains the supplier-approval diagnostics, safe database error classification, and empty marketplace/request-prefill improvements. The request-page type repair uses a Set-based allow-list; do not replace it with a type cast or remove state validation.
+
+WHAT CHANGES IN THE MARKETPLACE
+- Filter approved offers by Product, Service, Wholesale or Rental.
+- Filter by Fixed price, Starting price or Price on request.
+- Sort by Newest, Oldest or offer name A–Z.
+- Keep category, state and relevant search context when navigating marketplace category/state links.
+- Show the number of matching offers returned, active filters, a clear-filter route and a free sourcing-request route when no published offer matches.
+
+DATABASE / ENVIRONMENT
+- No Supabase migration.
+- No new environment variable.
+- No payment gateway change.
+- No modification to non-RNX database objects.
+- Uses existing rnx_listings listing_type, price_type and created_at fields.
+
+FOCUSED TESTS
+The package adds:
+- npm run test:rnx-v180
+- npm run test:rnx-v190
+
+The v1.8 focused test contains 20 assertions. The v1.9 focused search test contains 29 assertions. These checks do not replace the complete repository test suite or full Next.js production build.
+
+After merging, use the repository's normal Vercel deployment and inspect the complete build log. Do not treat a successful focused test as proof that the whole app deployed successfully.
