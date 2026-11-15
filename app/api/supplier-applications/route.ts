@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase-server';
+import { slugify } from '@/lib/site';
 
 export const runtime = 'nodejs';
 const schema = z.object({
@@ -13,22 +14,83 @@ const schema = z.object({
   state: z.string().trim().min(2).max(60),
   website: z.union([z.string().trim().url().max(300), z.literal('')]).optional(),
   description: z.string().trim().min(30).max(3000),
+  first_listing_title: z.string().trim().max(180).optional().or(z.literal('')),
+  first_listing_type: z.enum(['product', 'service', 'wholesale', 'rental']).optional(),
+  first_listing_price_type: z.enum(['enquiry', 'fixed', 'from']).optional(),
+  first_listing_price: z.string().trim().max(20).optional().or(z.literal('')),
+  first_listing_description: z.string().trim().max(3000).optional().or(z.literal('')),
   consent: z.literal('yes')
+}).superRefine((data, ctx) => {
+  const hasTitle = Boolean(data.first_listing_title?.trim());
+  const hasDescription = Boolean(data.first_listing_description?.trim());
+  if (hasTitle && (!data.first_listing_description || data.first_listing_description.trim().length < 30)) {
+    ctx.addIssue({ code: 'custom', path: ['first_listing_description'], message: 'Describe the offer in at least 30 characters.' });
+  }
+  if (!hasTitle && hasDescription) {
+    ctx.addIssue({ code: 'custom', path: ['first_listing_title'], message: 'Enter a listing title or clear the offer description.' });
+  }
+  if (data.first_listing_price_type !== 'enquiry' && hasTitle) {
+    const price = Number(data.first_listing_price);
+    if (!data.first_listing_price || !Number.isFinite(price) || price <= 0) {
+      ctx.addIssue({ code: 'custom', path: ['first_listing_price'], message: 'Enter a positive price for fixed or from pricing.' });
+    }
+  }
 });
 
 export async function POST(request: Request) {
   const payload: unknown = await request.json().catch(() => null);
   const parsed = schema.safeParse(payload);
-  if (!parsed.success) return NextResponse.json({ error: 'Some business details are missing or invalid. Review the form and try again.', issues: parsed.error.issues.map(i => ({ field: i.path.join('.'), message: i.message })) }, { status: 400 });
+  if (!parsed.success) return NextResponse.json({ error: 'Some business or listing details are missing or invalid. Review the form and try again.', issues: parsed.error.issues.map(i => ({ field: i.path.join('.'), message: i.message })) }, { status: 400 });
 
+  const values = parsed.data;
   try {
     const db = supabaseAdmin();
-    const { error } = await db.from('rnx_supplier_applications').insert({ ...parsed.data, website: parsed.data.website || null, status: 'pending' });
-    if (error) {
-      console.error('[RNX] Supplier application insert failed:', { code: error.code, message: error.message });
+    const publicSlug = `${slugify(values.business_name) || 'business'}-${Math.random().toString(36).slice(2, 7)}`;
+    const { data: application, error } = await db.from('rnx_supplier_applications').insert({
+      business_name: values.business_name,
+      contact_name: values.contact_name,
+      email: values.email,
+      phone: values.phone,
+      business_type: values.business_type,
+      category: values.category,
+      state: values.state,
+      website: values.website || null,
+      description: values.description,
+      consent: values.consent,
+      public_slug: publicSlug,
+      status: 'pending'
+    }).select('id').single();
+
+    if (error || !application) {
+      console.error('[RNX] Supplier application insert failed:', { code: error?.code, message: error?.message });
       return NextResponse.json({ error: 'We could not save the application right now. Please try again later.' }, { status: 503 });
     }
-    return NextResponse.json({ ok: true, message: 'Application received for review.' }, { status: 201 });
+
+    let listingSubmitted: boolean | null = null;
+    if (values.first_listing_title) {
+      listingSubmitted = false;
+      const listingSlug = `${slugify(values.first_listing_title) || 'offer'}-${Date.now().toString(36)}`;
+      const { error: listingError } = await db.from('rnx_listings').insert({
+        supplier_application_id: application.id,
+        title: values.first_listing_title,
+        slug: listingSlug,
+        listing_type: values.first_listing_type ?? 'product',
+        category: values.category,
+        description: values.first_listing_description,
+        state: values.state,
+        price_type: values.first_listing_price_type ?? 'enquiry',
+        price: values.first_listing_price ? Number(values.first_listing_price) : null,
+        currency: 'NGN',
+        status: 'pending'
+      });
+      if (listingError) {
+        console.error('[RNX] Initial listing insert failed:', { code: listingError.code, message: listingError.message, applicationId: application.id });
+      } else {
+        listingSubmitted = true;
+      }
+    }
+
+    return NextResponse.json({ ok: true, listingSubmitted, message: 'Application received for review.' }, { status: 201 });
   } catch (error) {
     console.error('[RNX] Supplier endpoint unavailable:', error instanceof Error ? error.message : 'Unknown server error');
     return NextResponse.json({ error: 'Business application submission is temporarily unavailable. Please try again later.' }, { status: 503 });

@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v0.2.0
+# RuffNeck Exchange (RNX) — v0.3.0
 
 RuffNeck Exchange is a multi-industry, multi-location customer-acquisition marketplace. It is not a directory and is not limited to refrigeration, solar or any single vertical.
 
@@ -23,9 +23,12 @@ Never sell customer contact details without clear disclosure and permission. Nev
 - RNX home page and 14 industry departments.
 - Category search and state selector (taxonomy matching, not live stock search).
 - Customer sourcing request form with server-side validation.
-- Supplier application form with server-side validation.
+- Supplier application form with server-side validation and optional first product/service listing.
+- Approved supplier directory and public supplier profile pages.
+- Approved product/service catalogue with search, state/category filtering and individual offer pages.
+- Independent moderation states: businesses and individual listings must both be approved before public display.
 - Server-only Supabase persistence routes.
-- Additive `rnx_*` database migration with RLS and revoked browser-role access.
+- Additive `rnx_*` database migrations with RLS and revoked browser-role access.
 - RuffNeck Entertainment product showcase.
 - About, how-it-works, privacy and terms draft pages.
 - Metadata, canonical URL, robots and sitemap.
@@ -33,7 +36,7 @@ Never sell customer contact details without clear disclosure and permission. Nev
 
 ## Not yet implemented
 
-This release does **not** include self-service authentication, member dashboards, listing CRUD, live product inventory, supplier search by verified stock, subscriptions, payment gateway, admin moderation console, automated matching, email/WhatsApp/Telegram notifications or a complete dispute/refund workflow. Supplier review and lead allocation remain manual. The policy pages are launch drafts and require professional legal review before commercial operation.
+This release does **not** include self-service authentication, member dashboards, supplier self-service listing CRUD, image upload, live product inventory or stock syncing, subscriptions, payment gateway, admin moderation console, automated matching, email/WhatsApp/Telegram notifications or a complete dispute/refund workflow. Catalogue moderation remains manual; see `RNX_CATALOGUE_MODERATION.md`. Supplier review and lead allocation remain manual. The policy pages are launch drafts and require professional legal review before commercial operation.
 
 ## Requirements and setup
 

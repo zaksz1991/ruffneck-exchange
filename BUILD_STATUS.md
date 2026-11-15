@@ -1,27 +1,35 @@
-# Build and release status — v0.2.0
+# Build and release status — v0.3.0
 
 ## Included
-- Full Next.js source tree, routing, layout and responsive styling.
-- Multi-industry category taxonomy and search-term matching.
-- State request entry pages marked `noindex` until local content and supplier coverage are verified.
-- Customer and business application forms.
-- Server-side Zod validation and Supabase persistence.
-- Server-only database key handling.
-- SEO metadata, canonical host, robots and sitemap.
-- Additive RNX SQL schema with row-level security enabled and browser-role privileges revoked.
+- Complete Next.js application source, responsive styling and route structure.
+- Multi-industry taxonomy and state navigation.
+- Customer sourcing request form and supplier application form.
+- Optional first product/service listing submitted with a supplier application.
+- Approved supplier directory and public supplier profile pages.
+- Approved catalogue with product/service/wholesale/rental categories, search and state/category filtering.
+- Individual listing detail pages.
+- Separate approval requirements for supplier applications and each listing.
+- Server-side catalogue reads; public pages never select supplier contact-person, private email or phone fields.
+- Additive SQL migration `002_rnx_catalogue.sql` for the catalogue.
+- Dynamic sitemap entries for approved supplier profiles and approved listings.
+- RuffNeck Entertainment product showcase, SEO and Vercel setup files.
+
+## Manual work required before inventory appears
+- Apply migration 002 after the existing RNX core migration 001.
+- Configure `SUPABASE_URL` and `SUPABASE_SECRET_KEY` in Vercel as server-only environment variables.
+- Review supplier applications and individual listings in Supabase Table Editor.
+- Set supplier status to `approved` and listing status to `approved` only after separate reviews.
 
 ## Not included
-- Authentication, supplier/member dashboards, inventory listings, payment gateway, subscription billing, moderation console, automated supplier matching or notifications.
-- Live supplier stock or price data.
-- A verified supplier directory.
+- Login, supplier/member dashboard, self-service listing management, image storage, payments, subscriptions, admin moderation interface, automated supplier matching, notifications, live inventory sync or stock reservation.
+- No live supplier inventory or market prices are fabricated.
 
 ## Validation status
-- JSON configuration files authored and syntax-checked while packaging.
-- ZIP archive integrity checked after creation.
-- Full dependency installation and production compilation: NOT RUN.
-- Supabase migration execution: NOT RUN.
-- Live customer and supplier form submissions: NOT RUN.
-- Vercel production deployment: NOT RUN by this packaging process.
+- Source files and JSON configuration created.
+- SQL migration reviewed for additive `rnx_*` scope.
+- ZIP archive will be integrity-checked.
+- Dependency installation and `next build`: not verified in this environment because package installation did not complete before timeout.
+- Supabase migration execution, live database queries, form submissions and Vercel deployment: not performed.
 
-## Important deployment distinction
-The Vercel error `A repository ID is required for GitHub deployments` is a Git deployment integration error that occurs before application compilation. Replacing application source does not, by itself, repair a missing repository identifier in Vercel's Git integration.
+## Deployment integration distinction
+The Vercel message `A repository ID is required for GitHub deployments` is a Git integration error that occurs outside the Next.js application build. Replacing source files does not independently fix a missing repository identifier in Vercel's deployment integration.

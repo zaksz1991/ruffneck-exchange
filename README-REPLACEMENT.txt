@@ -1,17 +1,26 @@
-RUFFNECK EXCHANGE v0.2.0 — COMPLETE PROJECT REPLACEMENT
+RUFFNECK EXCHANGE v0.3.0 — COMPLETE PROJECT REPLACEMENT
 
-This archive contains the complete project source, not a patch. It includes the application, shared components, API routes, styles, configuration, SQL migration and operating documents.
+This archive contains the complete project source plus the catalogue and approved-supplier release. It is not a patch.
 
-To replace the contents of the existing GitHub repository:
-1. Extract this ZIP on your computer.
-2. Open the extracted ruffneck-exchange-full folder.
-3. In the existing GitHub repository, replace the matching files and upload the full folder structure from this package.
-4. Remove obsolete files from the repository that are not present in this full replacement, while preserving GitHub's repository settings and history.
-5. Commit the replacement to the main branch.
-6. Vercel should detect the commit and start a deployment.
+1. Extract the ZIP.
+2. Open the extracted `ruffneck-exchange-full` folder.
+3. In the existing GitHub repository, replace the application source and configuration files with this full folder structure. Do not create a new GitHub repository or Vercel project.
+4. Commit the replacement to the existing `main` branch.
+5. Keep Vercel Root Directory set to `./`.
+6. Confirm Vercel detects the commit and inspect the build log.
 
-Do not create a second Vercel project. Keep Root Directory as `./`.
+DATABASE:
+- If RNX migration 001 has not been applied, apply 001 first and then 002.
+- If migration 001 and the four RNX core tables already exist, apply only `002_rnx_catalogue.sql`.
+- Do not rerun migrations blindly and do not change non-RNX RuffNeck tables.
+- Set SUPABASE_URL and SUPABASE_SECRET_KEY as server-only Vercel environment variables.
 
-DATABASE WARNING: No Supabase migration has been executed by creating this ZIP. Do not run the migration again if the four RNX tables already exist. Do not modify any non-RNX tables.
+PUBLIC VISIBILITY:
+- New business applications and listings default to pending.
+- A business profile appears only after its application is approved.
+- A listing appears only after both the supplier application and listing are approved.
+- Use `RNX_CATALOGUE_MODERATION.md` for manual review steps.
 
-LIMITATION: This complete source package has not had dependencies installed or a production build executed in this environment. Verify the Vercel build log before treating the deployment as successful.
+LIMITATIONS:
+- No supplier login/dashboard, admin UI, payment gateway, image uploads, stock sync or automated matching.
+- Full dependency installation, production build, database migration and live form submissions have not been verified in this packaging environment.

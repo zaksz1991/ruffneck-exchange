@@ -4,7 +4,7 @@
 - Framework: Next.js.
 - Root Directory: `./`.
 - Build Command: `npm run build` (default Next.js build is also valid).
-- Node.js: 22.x LTS is the conservative baseline for this project.
+- Node.js: use the version selected in the Vercel project. Node.js 22 LTS or newer is supported by the package engine declaration.
 
 ## Environment variables
 Set in Vercel Project Settings → Environment Variables:
@@ -15,7 +15,7 @@ Set in Vercel Project Settings → Environment Variables:
 Do not paste secret values into source files, GitHub, browser code or variables prefixed with `NEXT_PUBLIC_`.
 
 ## Supabase caution
-RNX uses only the `rnx_*` tables. Confirm that the core tables exist before applying the migration. Do not alter RuffNeck Entertainment LMS, Social Hub, billing, product or profile tables. The migration is additive but still requires review against the actual target project.
+RNX uses only the `rnx_*` tables. Confirm the target project and existing RNX schema before applying anything. If `001_rnx_core.sql` has not been applied, review and apply it first; if the four core RNX tables already exist, apply only `002_rnx_catalogue.sql`. Do not rerun migration 001 blindly. Do not alter RuffNeck Entertainment LMS, Social Hub, billing, product or profile tables. The catalogue migration adds `public_slug` to `rnx_supplier_applications` and creates `rnx_listings` only. The migration is additive but still requires review against the actual target project.
 
 ## Deployment check
 1. Confirm a new deployment was created from the latest `main` commit.
