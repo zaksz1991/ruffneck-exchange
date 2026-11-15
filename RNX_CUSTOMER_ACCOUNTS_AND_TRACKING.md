@@ -22,7 +22,7 @@
 ## Email notifications
 Configure `RESEND_API_KEY` and `RNX_NOTIFICATION_FROM_EMAIL` in Vercel to attempt email via Resend. Configure `RNX_OPERATIONS_NOTIFICATION_EMAIL` to receive new request and customer-message alerts.
 
-Every outbound email is first recorded in `rnx_notifications`. Without Resend credentials it stays `pending`; failures are marked `failed`. This release does not run a background retry worker and does not claim queued messages have been delivered. Configure a scheduled worker before relying on automatic retries.
+Every outbound email is first recorded in `rnx_notifications`. Without Resend credentials it stays `pending`; failures are marked `failed`. In v0.9.0, a protected scheduled worker retries transient delivery failures, with a maximum of five total attempts. See `RNX_NOTIFICATION_DELIVERY.md`. A provider API acceptance is not a delivery receipt.
 
 ## Database migration
 Apply `supabase/migrations/006_rnx_customer_accounts_tracking_messaging.sql` only after 001–005 are confirmed applied. It creates only `rnx_*` objects and adds nullable RNX fields to `rnx_leads`. It does not edit non-RNX RuffNeck Entertainment tables. Review the SQL and take a backup before production migration.

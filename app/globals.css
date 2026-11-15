@@ -49,3 +49,7 @@
 .admin-match-listings small { color: var(--muted, #657080); font-weight: 700; }
 .admin-match-listings p { margin: .35rem 0; font-size: .82rem; }
 @media (max-width: 640px) { .admin-match-assistant { padding: .8rem; } .admin-match-assistant-head .button { width: 100%; } }
+
+/* v0.9.0: notification queue controls */
+.admin-outbox-actions { display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; }
+@media (max-width:640px) { .admin-outbox-actions { width:100%; } .admin-outbox-actions .button { width:100%; } }

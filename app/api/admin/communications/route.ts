@@ -14,7 +14,7 @@ export async function GET() {
     if (error) throw error;
     const ids = [...new Set((messages || []).map((m: any) => m.lead_id))]; let leads: any[] = [];
     if (ids.length) { const result = await db.from('rnx_leads').select('id,name,email,phone,category,state,city,status,created_at').in('id',ids); if (result.error) throw result.error; leads = result.data || []; }
-    const { data: notices } = await db.from('rnx_notifications').select('id,status,recipient_email,subject,attempts,last_error,created_at').order('created_at',{ascending:false}).limit(50);
+    const { data: notices } = await db.from('rnx_notifications').select('id,status,recipient_email,subject,attempts,last_error,failure_code,next_attempt_at,created_at').order('created_at',{ascending:false}).limit(50);
     return NextResponse.json({ messages: (messages || []).map((m: any) => ({ ...m, lead: leads.find((l: any) => l.id === m.lead_id) || null })), notifications: notices || [] }, { headers: { 'Cache-Control': 'no-store, private' } });
   } catch (error) { console.error('[RNX admin communications] Load failed:', error instanceof Error ? error.message : 'unknown'); return NextResponse.json({ error: 'Customer communications could not be loaded. Confirm migration 006.' }, { status: 503 }); }
 }

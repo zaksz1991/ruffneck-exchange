@@ -34,12 +34,18 @@ Keep the Supabase URL and server secret server-only. Add `RNX_SUPPLIER_SESSION_S
 Apply `005_rnx_supplier_memberships_portal.sql` only after confirming migrations 001–004 are applied. It adds RNX-prefixed portal, membership and independently verified payment-evidence structures. It does not change unrelated RuffNeck Entertainment tables. The membership payment verifier requires the actual amount, currency and receiving-account reference entered by operations; the supplier's submitted reference alone cannot activate membership.
 
 
-## v0.7.0 customer portal and notification variables
+## v0.7.0 customer portal and v0.9.0 notification delivery variables
 Add `RNX_CUSTOMER_SESSION_SECRET` (at least 32 random characters; a dedicated secret is recommended). It falls back to `RNX_ADMIN_SESSION_SECRET` if omitted.
 
-Optional email delivery uses Resend: `RESEND_API_KEY`, `RNX_NOTIFICATION_FROM_EMAIL` (a sender verified by Resend), and `RNX_OPERATIONS_NOTIFICATION_EMAIL`. Without a valid provider key and sender, notification rows stay pending in the database. Do not describe them as delivered. WhatsApp and SMS are not implemented.
+Email delivery uses Resend: `RESEND_API_KEY`, `RNX_NOTIFICATION_FROM_EMAIL` (a sender verified by Resend), and `RNX_OPERATIONS_NOTIFICATION_EMAIL` (optional). `CRON_SECRET` must be a random server-side value of at least 24 characters to authorize the scheduled notification worker. Without a valid Resender API key and verified sender, notification rows stay pending in the database. WhatsApp and SMS are not implemented.
 
-Apply `006_rnx_customer_accounts_tracking_messaging.sql` only after confirming migrations 001–005 are present. Customer registration, login, guest tracking, messaging and operations replies all require migration 006.
+Apply `006_rnx_customer_accounts_tracking_messaging.sql` only after confirming migrations 001–005 are present. Apply `007_rnx_notification_delivery_worker.sql` only after 001–006 are present. Migration 007 changes only `public.rnx_notifications` and creates the service-role-only claim function. Check the migration history and apply only missing SQL files.
+
+The daily cron is registered in `vercel.json`: `/api/cron/notifications` at 06:00 UTC (07:00 in Nigeria). It is protected by `Authorization: Bearer <CRON_SECRET>`. Vercel Hobby cron runs once a day and is not minute-precise; see `RNX_NOTIFICATION_DELIVERY.md`. The Operations console also has a manual **Process email queue** control.
 
 ## v0.7.0 release checks
 After deployment, test account registration, customer sign-in, request submission while signed in, guest tracking-link access, customer message submission, administrator replies and privacy boundaries. Confirm that the supplier portal cannot retrieve customer message threads. If Resend is configured, verify a real receipt and sender-domain authentication; otherwise verify the outbox correctly shows pending/failed rather than delivered.
+
+
+## v0.9.0 notification worker
+See `RNX_NOTIFICATION_DELIVERY.md` for worker semantics, attempt limits, backoff schedule and acceptance testing. A database status of `sent` means the Resend API accepted the request; it is not a verified inbox delivery event.

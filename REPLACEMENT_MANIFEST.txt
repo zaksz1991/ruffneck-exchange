@@ -1,7 +1,8 @@
-RuffNeck Exchange v0.8.0 — complete repository replacement
+RuffNeck Exchange v0.9.0 — complete repository replacement
 
-This archive contains the full project source, not a patch.
+This archive contains the full cumulative project source, not a patch.
 Upload the contents of the ruffneck-exchange folder to the root of the existing GitHub repository.
 Keep Vercel Root Directory at ./ .
-No new Supabase migration is included or required for v0.8.0. Existing migrations 001–006 must already be applied.
+New SQL migration: 007_rnx_notification_delivery_worker.sql (apply only after confirming migrations 001–006).
+Migration 007 changes only public.rnx_notifications and adds an RNX service-role-only notification claim function.
 Do not modify unrelated RuffNeck Entertainment database tables.

@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v0.8.0
+# RuffNeck Exchange (RNX) — v0.9.0
 
 A multi-industry, multi-location customer-acquisition marketplace connecting customers with products, services, suppliers, businesses, wholesale providers and procurement opportunities. Refrigeration, cold rooms and solar remain categories only; they do not define the brand.
 
@@ -6,6 +6,14 @@ A multi-industry, multi-location customer-acquisition marketplace connecting cus
 RNX receives a customer's sourcing request, verifies the requirement and permission, shares an anonymised opportunity with suitable approved suppliers, records supplier acceptance and payment, then obtains the customer's authorisation before contact details are released. Customer browsing and requests are free. This release implements supplier memberships and manually qualified opportunity fees. Promoted placement is a possible future revenue stream, not a feature currently offered by this release.
 
 Never sell or release customer contact information without disclosure and permission. Membership does not guarantee leads or ranking. Supplier approval is not a guarantee of stock, licence, product condition, delivery or transaction performance.
+
+## v0.9.0 features
+- Reliable notification outbox worker with atomic database claims and short processing leases.
+- Immediate Resend attempts when configured, plus protected daily retries for due pending/failed messages.
+- Stable per-notification Resend idempotency keys, bounded retry/backoff and a five-attempt ceiling.
+- Manual queue processing in the administrator communications console.
+- No customer email is marked delivered; `sent` means the provider accepted the API request.
+- Adds migration 007, which alters only `rnx_notifications` and adds a service-role-only claim function.
 
 ## v0.8.0 features
 - Explainable supplier matching recommendations in the private operations offer workflow.
@@ -59,7 +67,7 @@ Copy `.env.example` to `.env.local` for local development, then configure values
 - `RNX_ADMIN_SESSION_SECRET` (at least 32 characters)
 - `RNX_SUPPLIER_SESSION_SECRET` (recommended separate random value, at least 32 characters; falls back to the admin secret if omitted)
 - `RNX_CUSTOMER_SESSION_SECRET` (recommended separate random value, at least 32 characters; falls back to the admin secret if omitted)
-- Optional `RESEND_API_KEY`, `RNX_NOTIFICATION_FROM_EMAIL`, and `RNX_OPERATIONS_NOTIFICATION_EMAIL` for transactional email attempts
+- `RESEND_API_KEY`, `RNX_NOTIFICATION_FROM_EMAIL`, and `CRON_SECRET` for transactional email delivery and the protected daily worker; `RNX_OPERATIONS_NOTIFICATION_EMAIL` is optional
 - `RNX_PAYMENT_INSTRUCTIONS` (optional server-only instructions, shown only to signed-in suppliers after a quote)
 
 Never commit actual secrets or expose them through `NEXT_PUBLIC_` variables.
@@ -73,8 +81,9 @@ The RNX schema is additive and uses `rnx_*` tables. Review target project conten
 4. `004_rnx_introduction_workflow.sql`
 5. `005_rnx_supplier_memberships_portal.sql`
 6. `006_rnx_customer_accounts_tracking_messaging.sql`
+7. `007_rnx_notification_delivery_worker.sql`
 
-For an installation where 001–005 are already applied, apply only migration 006. The v0.8.0 release requires migrations 001–006; check the actual migration history and apply only missing files in numerical order. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
+For an installation where migrations 001–006 are already applied, apply only migration 007. For a fresh RNX installation, apply 001–007 in order. Check the actual migration history and apply only missing files in numerical order. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
 
 ## Supplier introduction operating sequence
 1. Qualify the customer request in the operations console.
@@ -85,7 +94,7 @@ For an installation where 001–005 are already applied, apply only migration 00
 6. Customer can approve or decline the specific supplier introduction. Declining does not incur a customer fee.
 7. Only after supplier acceptance, verified payment and customer approval may staff share the customer's contact information with that supplier. Record the release after it actually happens.
 
-The database functions enforce supplier acceptance before lead-fee payment verification, exact fee matching, and both paid status plus customer approval before contact release. Membership payments also require an independently recorded receipt amount, currency and receiving-account reference to match the quotation before paid access is activated. The application can attempt transactional email through Resend when valid credentials and a verified sender are configured. Without those settings, notifications remain queued. WhatsApp and SMS delivery are not implemented. Staff still send the anonymised supplier brief and customer consent link manually using approved channels.
+The database functions enforce supplier acceptance before lead-fee payment verification, exact fee matching, and both paid status plus customer approval before contact release. Membership payments also require an independently recorded receipt amount, currency and receiving-account reference to match the quotation before paid access is activated. The application can attempt transactional email through Resend when valid credentials and a verified sender are configured. Without Resend credentials and a verified sender, notifications remain queued. The worker retries transient failures up to five total attempts, and the admin console can process due notifications manually. WhatsApp and SMS delivery are not implemented. `sent` means the provider accepted the API call, not that inbox delivery was confirmed. Staff still send the anonymised supplier brief and customer consent link manually using approved channels.
 
 ## Vercel
 - Framework: Next.js
@@ -113,3 +122,6 @@ The operations console is a single-password operator gate. Use a strong unique p
 
 
 See `RNX_CUSTOMER_ACCOUNTS_AND_TRACKING.md` for migration 006, privacy boundaries and optional Resend configuration. See `RNX_SUPPLIER_MATCHING_ENGINE.md` for the v0.8.0 recommendation rules and limitations.
+
+
+See `RNX_NOTIFICATION_DELIVERY.md` for migration 007, retry policy, Vercel schedule, Resend setup and testing.
