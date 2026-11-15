@@ -1,26 +1,28 @@
-# Build status — RuffNeck Exchange v1.8.0 build repair
+# RuffNeck Exchange v1.8.0 — build repair status
 
-## Release scope
-Marketplace operations clarity, supplier approval diagnostics and sourcing-request conversion.
+## Included
+- Supplier approval diagnostics for the supplier email-confirmation restriction; verification is not bypassed.
+- More useful database error classification without exposing raw Supabase internals to the client.
+- Marketplace empty-state guidance for customers and suppliers.
+- Safe prefill of category and state context in the sourcing request form.
+- Updated How It Works and README operating descriptions.
+- TypeScript fix for URL-prefilled state validation in `app/request/page.tsx`.
 
-## Implemented in this source update
-- Admin status update route maps the migration 013 supplier email-confirmation trigger to a clear HTTP 409 response. It does not bypass verification.
-- Database rule, duplicate, schema and server-permission errors are classified without exposing raw Supabase internals to the client.
-- Marketplace empty state offers clear customer and supplier next steps.
-- Filtered category/state context can be carried into the request form and prefilled safely.
-- How It Works and README now reflect manual RNX fee verification and current supplier-introduction safeguards.
+## Exact Vercel failure addressed
+Vercel previously stopped at `app/request/page.tsx:18` because a URL query parameter is a plain `string`, while `site.states.includes()` expected one member of a literal union. The replacement uses `new Set<string>(site.states).has(requestedState)`. This preserves the configured state allow-list and rejects unsupported query values.
+
+## Validation actually completed in this package workspace
+- Focused v1.8.0 test: 20 assertions passed.
+- ZIP integrity: passed.
+- Static check confirms the Set-based allow-list and absence of the failing `site.states.includes(requestedState)` call.
+
+## Not verified
+- Full repository TypeScript project check.
+- Full Next.js production build.
+- Vercel deployment.
+- Production Supabase operations or email delivery.
+
+The complete repository and installed project dependencies were not present in this package workspace. Do not treat the focused test as proof of a complete production build.
 
 ## Database and environment
-- No SQL migration.
-- No new environment variable.
-- No payment gateway changes.
-- No changes to shared non-RNX tables.
-
-## Build repair from deployment log
-- Vercel compiled the Next.js application successfully, then TypeScript failed at `app/request/page.tsx:18` because `site.states.includes()` expects a literal-union value while URL query parameters are plain strings.
-- The state allow-list check now uses `new Set<string>(site.states).has(requestedState)`. This preserves the configured state allow-list, rejects arbitrary query values and resolves the specific argument-type mismatch without casting untrusted input.
-
-## Validation scope
-- Focused v1.8.0 static contract test now includes the state-query type-safety contract.
-- The complete project typecheck and Vercel production build must be rerun against the connected repository; they have not been executed in this repair workspace because the full repository and installed dependencies are not present here.
-- Production database behaviour, email verification delivery, GitHub commit and Vercel deployment have not been performed here.
+No SQL migration, new environment variable, payment gateway or change to non-RNX database objects is included.

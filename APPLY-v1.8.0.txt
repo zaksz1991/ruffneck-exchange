@@ -1,27 +1,34 @@
-RUFFNECK EXCHANGE v1.8.0 — OPERATIONS UPGRADE + VERCEL TYPE REPAIR
+RUFFNECK EXCHANGE v1.8.0 — OPERATIONS UPGRADE + TYPESCRIPT STATE FIX
 
-This is an incremental source overlay, NOT a full repository archive. It must be merged into the existing ruffneck-exchange main branch. It is intentionally limited to the files listed below and does not replace the repository's app, assets, credentials, or database history.
+PACKAGE TYPE
+This is an incremental source overlay, NOT a full repository replacement ZIP. Merge its files into the existing ruffneck-exchange main branch. Do not delete the repository or replace unrelated files.
 
-REPLACE
-- app/request/page.tsx (includes the TypeScript build repair for URL-prefilled state validation)
+REPLACE COMPLETE FILES
+- app/request/page.tsx
 - package.json
 - README.md
 - BUILD_STATUS.md
 - app/api/admin/actions/route.ts
 - app/marketplace/page.tsx
 - app/how-it-works/page.tsx
-- app/request/page.tsx
 - components/request-form.tsx
 
-ADD
+ADD COMPLETE FILES
 - scripts/test-rnx-v180-operations-upgrade.mjs
 - RELEASE-NOTES-v1.8.0.md
 
-DATABASE
-No migration required. Do not rerun any RNX or shared RuffNeck migrations.
+BUILD ERROR FIXED
+The request page validates a URL-provided state with:
+  new Set<string>(site.states).has(requestedState)
+This avoids passing an arbitrary URL string to Array.prototype.includes() on a literal-union array. Invalid state query values still resolve to an empty state. Do not replace this with a type cast or remove the allow-list.
 
-VERCEL
-No environment variable changes. No payment provider is connected by this release.
+DATABASE AND ENVIRONMENT
+- No Supabase migration.
+- No new environment variable.
+- No payment gateway changes.
+- No changes to non-RNX database objects.
 
 VALIDATION
-The focused test is `npm run test:rnx-v180` (20 assertions). The state-query fix addresses the exact TypeScript error reported by Vercel at `app/request/page.tsx:18`. Re-run the Vercel deployment to verify the full repository build. Before treating this as production-ready, run the existing full `npm run check` against the complete repository and confirm the Vercel production build. These checks have not been run in the complete repository in this preparation environment.
+The focused test script is:
+  npm run test:rnx-v180
+The packaged focused test passed 20 assertions in the preparation workspace. ZIP integrity was checked. The full repository TypeScript check, full Next.js production build, Vercel deployment and live database behaviour have NOT been run here. Re-run the Vercel deployment and inspect the complete build log after merging.
