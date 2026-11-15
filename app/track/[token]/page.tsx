@@ -1,0 +1,3 @@
+import type { Metadata } from 'next'; import { TrackingPage } from '@/components/tracking-page';
+export const dynamic='force-dynamic'; export const metadata:Metadata={title:'Private Request Tracking',robots:{index:false,follow:false},referrer:'no-referrer'};
+export default async function TrackPage({params}:{params:Promise<{token:string}>}){const {token}=await params;return <main className="page-shell container narrow-shell"><div className="page-intro"><p className="eyebrow">PRIVATE CUSTOMER LINK</p><h1>Track your request.</h1><p>This private link grants access to your request and its conversation. Do not forward it or share it with suppliers.</p></div><TrackingPage token={token}/></main>;}

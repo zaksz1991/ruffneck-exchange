@@ -1,0 +1,3 @@
+import type { Metadata } from 'next'; import { redirect } from 'next/navigation'; import { currentCustomerId } from '@/lib/customer-auth'; import { CustomerDashboard } from '@/components/customer-dashboard';
+export const dynamic='force-dynamic'; export const metadata:Metadata={title:'Your Customer Requests',robots:{index:false,follow:false}};
+export default async function CustomerDashboardPage(){if(!(await currentCustomerId()))redirect('/customer/login');return <main className="page-shell container supplier-page-shell"><div className="page-intro"><p className="eyebrow">YOUR RNX ACCOUNT</p><h1>Request centre.</h1><p>Review progress, read replies and send messages about your customer requests.</p></div><CustomerDashboard/></main>;}

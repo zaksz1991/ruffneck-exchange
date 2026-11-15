@@ -14,6 +14,7 @@ export function SiteHeader() {
           <Link href="/how-it-works">How it works</Link>
           <Link href="/plans">Supplier plans</Link>
           <Link href="/supplier/login">Supplier portal</Link>
+          <Link href="/customer/login">Customer account</Link>
           <Link href="/ruffneck">RuffNeck products</Link>
           <Link href="/about">About</Link>
         </nav>

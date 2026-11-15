@@ -15,7 +15,7 @@ Set in Vercel Project Settings → Environment Variables:
 Do not paste secret values into source files, GitHub, browser code or variables prefixed with `NEXT_PUBLIC_`.
 
 ## Supabase caution
-RNX uses only `rnx_*` tables. Confirm the target project and migration history before applying anything. Apply only missing migrations in numerical order: 001 core, 002 catalogue, 003 admin operations, 004 consent-based introductions, and 005 supplier memberships and portal. Do not rerun a migration that has already been applied successfully. These migrations are additive to RNX objects and do not modify RuffNeck Entertainment LMS, Social Hub, billing, product, profile or Prospector tables.
+RNX uses only `rnx_*` tables. Confirm the target project and migration history before applying anything. Apply only missing migrations in numerical order: 001 core, 002 catalogue, 003 admin operations, 004 consent-based introductions, 005 supplier memberships and portal, and 006 customer accounts, tracking, messaging and notifications. Do not rerun a migration that has already been applied successfully. These migrations are additive to RNX objects and do not modify RuffNeck Entertainment LMS, Social Hub, billing, product, profile or Prospector tables.
 
 ## Deployment check
 1. Confirm a new deployment was created from the latest `main` commit.
@@ -32,3 +32,14 @@ Keep the Supabase URL and server secret server-only. Add `RNX_SUPPLIER_SESSION_S
 
 ## v0.6.0 database
 Apply `005_rnx_supplier_memberships_portal.sql` only after confirming migrations 001–004 are applied. It adds RNX-prefixed portal, membership and independently verified payment-evidence structures. It does not change unrelated RuffNeck Entertainment tables. The membership payment verifier requires the actual amount, currency and receiving-account reference entered by operations; the supplier's submitted reference alone cannot activate membership.
+
+
+## v0.7.0 customer portal and notification variables
+Add `RNX_CUSTOMER_SESSION_SECRET` (at least 32 random characters; a dedicated secret is recommended). It falls back to `RNX_ADMIN_SESSION_SECRET` if omitted.
+
+Optional email delivery uses Resend: `RESEND_API_KEY`, `RNX_NOTIFICATION_FROM_EMAIL` (a sender verified by Resend), and `RNX_OPERATIONS_NOTIFICATION_EMAIL`. Without a valid provider key and sender, notification rows stay pending in the database. Do not describe them as delivered. WhatsApp and SMS are not implemented.
+
+Apply `006_rnx_customer_accounts_tracking_messaging.sql` only after confirming migrations 001–005 are present. Customer registration, login, guest tracking, messaging and operations replies all require migration 006.
+
+## v0.7.0 release checks
+After deployment, test account registration, customer sign-in, request submission while signed in, guest tracking-link access, customer message submission, administrator replies and privacy boundaries. Confirm that the supplier portal cannot retrieve customer message threads. If Resend is configured, verify a real receipt and sender-domain authentication; otherwise verify the outbox correctly shows pending/failed rather than delivered.

@@ -1,0 +1,33 @@
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { z } from 'zod';
+import { ADMIN_COOKIE, isValidAdminSession } from '@/lib/admin-auth';
+import { supabaseAdmin } from '@/lib/supabase-server';
+import { queueNotification } from '@/lib/notifications';
+export const runtime = 'nodejs'; export const dynamic = 'force-dynamic';
+const schema = z.object({ lead_id: z.string().uuid(), body: z.string().trim().min(2).max(3000) });
+async function authorised() { const jar = await cookies(); return isValidAdminSession(jar.get(ADMIN_COOKIE)?.value); }
+export async function GET() {
+  if (!(await authorised())) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
+  try {
+    const db = supabaseAdmin(); const { data: messages, error } = await db.from('rnx_lead_messages').select('id,lead_id,sender_role,sender_name,body,created_at').order('created_at',{ascending:false}).limit(200);
+    if (error) throw error;
+    const ids = [...new Set((messages || []).map((m: any) => m.lead_id))]; let leads: any[] = [];
+    if (ids.length) { const result = await db.from('rnx_leads').select('id,name,email,phone,category,state,city,status,created_at').in('id',ids); if (result.error) throw result.error; leads = result.data || []; }
+    const { data: notices } = await db.from('rnx_notifications').select('id,status,recipient_email,subject,attempts,last_error,created_at').order('created_at',{ascending:false}).limit(50);
+    return NextResponse.json({ messages: (messages || []).map((m: any) => ({ ...m, lead: leads.find((l: any) => l.id === m.lead_id) || null })), notifications: notices || [] }, { headers: { 'Cache-Control': 'no-store, private' } });
+  } catch (error) { console.error('[RNX admin communications] Load failed:', error instanceof Error ? error.message : 'unknown'); return NextResponse.json({ error: 'Customer communications could not be loaded. Confirm migration 006.' }, { status: 503 }); }
+}
+export async function POST(request: Request) {
+  if (!(await authorised())) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
+  const parsed = schema.safeParse(await request.json().catch(() => null)); if (!parsed.success) return NextResponse.json({ error: 'Choose a request and enter a message.' }, { status: 400 });
+  try {
+    const db = supabaseAdmin(); const { data: lead, error: leadError } = await db.from('rnx_leads').select('id,name,email,category').eq('id',parsed.data.lead_id).maybeSingle();
+    if (leadError || !lead) return NextResponse.json({ error: 'Customer request not found.' }, { status: 404 });
+    const { error } = await db.from('rnx_lead_messages').insert({ lead_id: lead.id, sender_role: 'operations', sender_name: 'RNX Operations', body: parsed.data.body });
+    if (error) throw error;
+    await db.from('rnx_leads').update({ last_activity_at: new Date().toISOString() }).eq('id',lead.id);
+    if (lead.email) await queueNotification(db,{recipientEmail:lead.email,subject:`Update from RuffNeck Exchange — ${lead.category}`,bodyText:`Hello ${lead.name},\n\nRNX Operations has replied to your request. Open your private request tracking link to read the message and reply.\n\nFor security, this notification does not include a private tracking link. Use the link you saved when you submitted your request.`,relatedLeadId:lead.id});
+    return NextResponse.json({ ok: true }, { status: 201 });
+  } catch (error) { console.error('[RNX admin communications] Reply failed:', error instanceof Error ? error.message : 'unknown'); return NextResponse.json({ error: 'The reply could not be saved.' }, { status: 503 }); }
+}

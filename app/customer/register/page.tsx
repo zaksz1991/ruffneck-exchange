@@ -1,0 +1,3 @@
+import type { Metadata } from 'next'; import Link from 'next/link'; import { CustomerAuthForm } from '@/components/customer-auth-form';
+export const metadata: Metadata={title:'Create Customer Account',robots:{index:false,follow:false},alternates:{canonical:'/customer/register'}};
+export default function CustomerRegisterPage(){return <main className="page-shell container narrow-shell"><div className="page-intro"><p className="eyebrow">CUSTOMER ACCOUNT</p><h1>Create your account.</h1><p>Keep your RuffNeck Exchange requests together and message the operations team from one place.</p></div><CustomerAuthForm mode="register"/><p className="fine-print">Already have an account? <Link href="/customer/login">Sign in</Link>.</p></main>;}

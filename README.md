@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v0.6.0
+# RuffNeck Exchange (RNX) — v0.7.0
 
 A multi-industry, multi-location customer-acquisition marketplace connecting customers with products, services, suppliers, businesses, wholesale providers and procurement opportunities. Refrigeration, cold rooms and solar remain categories only; they do not define the brand.
 
@@ -6,6 +6,13 @@ A multi-industry, multi-location customer-acquisition marketplace connecting cus
 RNX receives a customer's sourcing request, verifies the requirement and permission, shares an anonymised opportunity with suitable approved suppliers, records supplier acceptance and payment, then obtains the customer's authorisation before contact details are released. Customer browsing and requests are free. This release implements supplier memberships and manually qualified opportunity fees. Promoted placement is a possible future revenue stream, not a feature currently offered by this release.
 
 Never sell or release customer contact information without disclosure and permission. Membership does not guarantee leads or ranking. Supplier approval is not a guarantee of stock, licence, product condition, delivery or transaction performance.
+
+## v0.7.0 features
+- Customer accounts with scrypt password hashes and signed HttpOnly sessions.
+- Guest request tracking links; customers can follow status and message RNX without creating an account.
+- Customer account dashboard for requests submitted while signed in.
+- Private customer-to-operations message threads and administrator reply console.
+- Notification outbox with optional Resend email delivery; pending/failed states are visible to operations.
 
 ## v0.6.0 features
 - Responsive multi-industry marketplace, supplier directory and approved catalogue.
@@ -44,6 +51,8 @@ Copy `.env.example` to `.env.local` for local development, then configure values
 - `RNX_ADMIN_PASSWORD`
 - `RNX_ADMIN_SESSION_SECRET` (at least 32 characters)
 - `RNX_SUPPLIER_SESSION_SECRET` (recommended separate random value, at least 32 characters; falls back to the admin secret if omitted)
+- `RNX_CUSTOMER_SESSION_SECRET` (recommended separate random value, at least 32 characters; falls back to the admin secret if omitted)
+- Optional `RESEND_API_KEY`, `RNX_NOTIFICATION_FROM_EMAIL`, and `RNX_OPERATIONS_NOTIFICATION_EMAIL` for transactional email attempts
 - `RNX_PAYMENT_INSTRUCTIONS` (optional server-only instructions, shown only to signed-in suppliers after a quote)
 
 Never commit actual secrets or expose them through `NEXT_PUBLIC_` variables.
@@ -56,19 +65,20 @@ The RNX schema is additive and uses `rnx_*` tables. Review target project conten
 3. `003_rnx_admin_operations.sql`
 4. `004_rnx_introduction_workflow.sql`
 5. `005_rnx_supplier_memberships_portal.sql`
+6. `006_rnx_customer_accounts_tracking_messaging.sql`
 
-For an installation where 001–004 are already applied, apply only migration 005. The v0.6.0 release requires all five RNX migrations; check the actual migration history and apply only missing files in numerical order. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
+For an installation where 001–005 are already applied, apply only migration 006. The v0.7.0 release requires migrations 001–006; check the actual migration history and apply only missing files in numerical order. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
 
 ## Supplier introduction operating sequence
 1. Qualify the customer request in the operations console.
 2. Create a supplier offer using an anonymised brief. Do not include the customer's name, email, phone number or other identifying information.
-3. Assign the anonymised opportunity and proposed fee to the approved supplier. The supplier sees it in the private portal and explicitly accepts or declines. Staff may separately confirm the commercial terms through the agreed business channel; no automated message delivery is connected.
+3. Assign the anonymised opportunity and proposed fee to the approved supplier. The supplier sees it in the private portal and explicitly accepts or declines. Staff may separately confirm supplier commercial terms through the agreed business channel; supplier-facing opportunity briefs are not automatically delivered by this release.
 4. Verify the exact fee against the bank or payment-provider transaction record. Record the transaction reference and exact amount. A transfer screenshot or verbal claim is not proof.
 5. Send the customer approval link privately through the customer's preferred channel. The link expires after seven days and can be regenerated before the customer decides.
 6. Customer can approve or decline the specific supplier introduction. Declining does not incur a customer fee.
 7. Only after supplier acceptance, verified payment and customer approval may staff share the customer's contact information with that supplier. Record the release after it actually happens.
 
-The database functions enforce supplier acceptance before lead-fee payment verification, exact fee matching, and both paid status plus customer approval before contact release. Membership payments also require an independently recorded receipt amount, currency and receiving-account reference to match the quotation before paid access is activated. The application does not send WhatsApp, SMS or email automatically. Staff must send the anonymised supplier brief and customer consent link manually using approved channels.
+The database functions enforce supplier acceptance before lead-fee payment verification, exact fee matching, and both paid status plus customer approval before contact release. Membership payments also require an independently recorded receipt amount, currency and receiving-account reference to match the quotation before paid access is activated. The application can attempt transactional email through Resend when valid credentials and a verified sender are configured. Without those settings, notifications remain queued. WhatsApp and SMS delivery are not implemented. Staff still send the anonymised supplier brief and customer consent link manually using approved channels.
 
 ## Vercel
 - Framework: Next.js
@@ -88,8 +98,11 @@ A connected Git repository does not prove that a deployment build succeeds. Insp
 
 ## Not included
 - Payment gateway or automatic bank reconciliation.
-- Automatic WhatsApp, SMS or email delivery.
-- Public customer account or request tracking.
+- WhatsApp or SMS delivery.
+- Customer email verification, password reset and account recovery.
 - Inventory synchronisation, automated supplier matching, multi-user staff roles, supplier password reset, independent supplier identity/KYB checks, and promoted-placement controls.
 
 The operations console is a single-password operator gate. Use a strong unique password, restrict Vercel project access and keep all secrets server-side. Vercel Hobby is not assumed to grant a commercial-use entitlement; check the plan terms before monetised production.
+
+
+See `RNX_CUSTOMER_ACCOUNTS_AND_TRACKING.md` for migration 006, privacy boundaries and optional Resend configuration.

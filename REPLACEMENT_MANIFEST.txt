@@ -1,18 +1,9 @@
-RUFFNECK EXCHANGE v0.6.0 — FULL REPLACEMENT MANIFEST
-
-Complete cumulative Next.js application retaining the existing v0.5.0 marketplace, catalogue moderation, admin operations and introduction workflow.
-
-New v0.6.0 additions:
-- lib/supplier-auth.ts and lib/supplier-session.ts
-- app/supplier/login, /supplier/claim and /supplier/dashboard
-- components/supplier-login-form.tsx, supplier-claim-form.tsx, supplier-dashboard.tsx
-- app/api/supplier/login, logout, claim, dashboard, listings, membership and membership/payment
-- app/plans/page.tsx
-- app/admin/memberships/page.tsx and components/admin-membership-console.tsx
-- app/api/admin/memberships and app/api/admin/suppliers/[id]/invite
-- Independent membership payment evidence: operations must enter actual received amount, currency and receiving-account reference before the database activates paid access
-- Single-use, expiry-checked supplier activation links consumed atomically
-- supabase/migrations/005_rnx_supplier_memberships_portal.sql
-- RNX_SUPPLIER_PORTAL.md
-
-All prior RNX v0.5.0 source files and migrations 001–004 are included. Replace the existing GitHub repository contents with this entire extracted project. Do not upload the outer folder as a nested root. Vercel Root Directory remains `./`.
+RuffNeck Exchange v0.7.0 complete replacement
+Base: v0.6.0 cumulative source tree
+New migration: supabase/migrations/006_rnx_customer_accounts_tracking_messaging.sql
+New public routes: /customer/login, /customer/register, /customer/dashboard, /track/[token]
+New admin route: /admin/communications
+New APIs: /api/customer/*, /api/track/[token], /api/admin/communications
+No non-RNX database tables are changed.
+Deployment target: https://ruffneck-exchange.vercel.app/
+Vercel root directory: ./
