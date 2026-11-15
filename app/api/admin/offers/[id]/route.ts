@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createHash, randomBytes } from 'node:crypto';
 import { z } from 'zod';
-import { ADMIN_COOKIE, isSameOriginRequest, isValidAdminSession } from '@/lib/admin-auth';
+import { getAdminSession, hasPermission, isSameOriginRequest } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { site } from '@/lib/site';
+import { recordStaffActivity } from '@/lib/staff-activity';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -20,13 +20,16 @@ const schema = z.discriminatedUnion('action', [
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
   if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Request rejected.' }, { status: 403 });
-  const jar = await cookies();
-  if (!isValidAdminSession(jar.get(ADMIN_COOKIE)?.value)) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
+  const actor = await getAdminSession();
+  if (!actor) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
   const { id } = await context.params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) return NextResponse.json({ error: 'Invalid offer.' }, { status: 400 });
   const raw: unknown = await request.json().catch(() => null);
   const parsed = schema.safeParse(raw);
   if (!parsed.success) return NextResponse.json({ error: 'Invalid offer operation.' }, { status: 400 });
+  const financeAction = ['verify_payment','record_refund','record_credit'].includes(parsed.data.action);
+  const requiredPermission = financeAction ? 'payments:verify' : 'operations:write';
+  if (!hasPermission(actor.role, requiredPermission)) return NextResponse.json({ error: 'You do not have permission to perform this offer action.' }, { status: 403 });
 
   try {
     const db = supabaseAdmin();
@@ -47,6 +50,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       const approvalUrl = new URL('/introduction/approval', site.url);
       approvalUrl.searchParams.set('token', rawToken);
       await db.from('rnx_admin_audit_log').insert({ action: 'consent_link_regenerated', entity_type: 'lead', entity_id: offer.lead_id, details: { offer_id: id, expires_at: expiresAt } });
+      await recordStaffActivity(db, actor, 'customer_consent_link_regenerated', 'lead', offer.lead_id, { offer_id: id, expires_at: expiresAt });
       return NextResponse.json({ ok: true, approvalUrl: approvalUrl.toString(), expiresAt }, { headers: { 'Cache-Control': 'no-store, private' } });
     }
 
@@ -56,6 +60,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       const result = data as { ok?: boolean; error?: string; already_accepted?: boolean };
       if (!result?.ok) return NextResponse.json({ error: result?.error || 'Supplier acceptance was not accepted.' }, { status: 409 });
       await db.from('rnx_admin_audit_log').insert({ action: 'supplier_accepted_offer', entity_type: 'lead', entity_id: offer.lead_id, details: { offer_id: id } });
+      await recordStaffActivity(db, actor, 'supplier_acceptance_recorded', 'lead', offer.lead_id, { offer_id: id });
       return NextResponse.json({ ok: true, message: result.already_accepted ? 'Supplier acceptance was already recorded.' : 'Supplier acceptance recorded. Payment can now be verified.' });
     }
 
@@ -70,6 +75,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       const result = data as { ok?: boolean; error?: string; already_paid?: boolean };
       if (!result?.ok) return NextResponse.json({ error: result?.error || 'Payment verification was rejected.' }, { status: 409 });
       await db.from('rnx_admin_audit_log').insert({ action: 'payment_verified', entity_type: 'lead', entity_id: offer.lead_id, details: { offer_id: id, payment_reference: parsed.data.paymentReference, amount: parsed.data.paymentAmount } });
+      await recordStaffActivity(db, actor, 'lead_fee_payment_verified', 'lead', offer.lead_id, { offer_id: id, amount: parsed.data.paymentAmount });
       return NextResponse.json({ ok: true, message: result.already_paid ? 'Payment was already verified.' : 'Payment verified and recorded.' });
     }
 
@@ -82,6 +88,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       const result = data as { ok?: boolean; error?: string; already_released?: boolean };
       if (!result?.ok) return NextResponse.json({ error: result?.error || 'Contact release is not permitted.' }, { status: 409 });
       await db.from('rnx_admin_audit_log').insert({ action: 'contact_released', entity_type: 'lead', entity_id: offer.lead_id, details: { offer_id: id } });
+      await recordStaffActivity(db, actor, 'customer_contact_release_recorded', 'lead', offer.lead_id, { offer_id: id });
       return NextResponse.json({ ok: true, message: result.already_released ? 'Contact release was already recorded.' : 'Contact release recorded. This entry should only be made after the authorised contact handoff is complete.' });
     }
 
@@ -92,6 +99,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     const result = data as { ok?: boolean; error?: string; status?: string };
     if (!result?.ok) return NextResponse.json({ error: result?.error || 'Payment adjustment was rejected.' }, { status: 409 });
     await db.from('rnx_admin_audit_log').insert({ action: `payment_${result.status}`, entity_type: 'lead', entity_id: offer.lead_id, details: { offer_id: id, reference: parsed.data.reference || null } });
+    await recordStaffActivity(db, actor, `lead_fee_payment_${result.status}`, 'lead', offer.lead_id, { offer_id: id });
     return NextResponse.json({ ok: true, message: `Payment marked ${result.status}.` });
   } catch (error) {
     console.error('[RNX offers] Offer action unavailable:', error instanceof Error ? error.message : 'Unknown error');

@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { z } from 'zod';
-import { ADMIN_COOKIE, isSameOriginRequest, isValidAdminSession } from '@/lib/admin-auth';
+import { getAdminSession, hasPermission, isSameOriginRequest } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase-server';
+import { recordStaffActivity } from '@/lib/staff-activity';
 
 export const runtime = 'nodejs';
 const schema = z.object({
@@ -18,8 +18,9 @@ async function audit(db: ReturnType<typeof supabaseAdmin>, resource: string, id:
 
 export async function PATCH(request: Request) {
   if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Request rejected.' }, { status: 403 });
-  const jar = await cookies();
-  if (!isValidAdminSession(jar.get(ADMIN_COOKIE)?.value)) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
+  const actor = await getAdminSession();
+  if (!actor) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
+  if (!hasPermission(actor.role, 'operations:write')) return NextResponse.json({ error: 'You do not have permission to change marketplace records.' }, { status: 403 });
   const body: unknown = await request.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: 'Invalid operation.' }, { status: 400 });
@@ -50,6 +51,7 @@ export async function PATCH(request: Request) {
     }
     if (!data) return NextResponse.json({ error: 'Record not found.' }, { status: 404 });
     await audit(db, resource, id, status);
+    await recordStaffActivity(db, actor, 'marketplace_record_status_changed', resource, id, { status });
     return NextResponse.json({ ok: true, message: `${resource} status updated to ${status}.` });
   } catch (error) {
     console.error('[RNX admin] Action unavailable:', error instanceof Error ? error.message : 'Unknown error');

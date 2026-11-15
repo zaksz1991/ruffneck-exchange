@@ -15,7 +15,7 @@ Set in Vercel Project Settings → Environment Variables:
 Do not paste secret values into source files, GitHub, browser code or variables prefixed with `NEXT_PUBLIC_`.
 
 ## Supabase caution
-RNX uses only `rnx_*` tables. Confirm the target project and migration history before applying anything. Apply only missing migrations in numerical order: 001 core, 002 catalogue, 003 admin operations, 004 consent-based introductions, 005 supplier memberships and portal, and 006 customer accounts, tracking, messaging and notifications. Do not rerun a migration that has already been applied successfully. These migrations are additive to RNX objects and do not modify RuffNeck Entertainment LMS, Social Hub, billing, product, profile or Prospector tables.
+RNX uses only `rnx_*` tables. Confirm the target project and migration history before applying anything. The current cumulative release contains migrations 001–009: core, catalogue, operations, introductions, supplier memberships/portal, customer accounts/tracking/messaging, notification delivery, consent-first attribution, and staff access control. Apply only missing migrations in numerical order; never rerun a migration that has already succeeded. These migrations are additive to RNX objects and do not modify RuffNeck Entertainment LMS, Social Hub, billing, product, profile or Prospector tables.
 
 ## Deployment check
 1. Confirm a new deployment was created from the latest `main` commit.
@@ -49,3 +49,8 @@ After deployment, test account registration, customer sign-in, request submissio
 
 ## v0.9.0 notification worker
 See `RNX_NOTIFICATION_DELIVERY.md` for worker semantics, attempt limits, backoff schedule and acceptance testing. A database status of `sent` means the Resend API accepted the request; it is not a verified inbox delivery event.
+
+
+## v1.1.0 staff access deployment
+
+After confirming migrations 001–008 exist, apply `supabase/migrations/009_rnx_staff_access_control.sql`. No new Vercel secret is required. Retain `RNX_ADMIN_PASSWORD` and `RNX_ADMIN_SESSION_SECRET` as server-only owner recovery credentials. `RNX_ADMIN_EMAIL` is optional. Redeploy the project with Root Directory `./`. Test the owner login, create a staff invitation at `/admin/staff`, accept it in a private browser session, and verify that each role can reach only its permitted page and API. Suspend the account and confirm its next protected request is rejected.

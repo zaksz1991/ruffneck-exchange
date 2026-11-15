@@ -60,3 +60,8 @@ New applicants set a password on the application form; approval enables the port
 ## v0.6.0 supplier portal operations
 
 Supplier offer accept/decline decisions are now recorded by the supplier in `/supplier/dashboard`; staff should not record acceptance on a supplier's behalf without explicit agreement. Membership quotations and supplier activation links are managed at `/admin/memberships`. For membership payment verification, enter the actual amount, currency and transaction reference independently confirmed in the receiving account. The database compares those values with the quote before activating the paid plan.
+
+
+## v1.1.0 staff accounts and role controls
+
+The owner can manage individual staff accounts at `/admin/staff`. Staff use invited email/password sign-in. Available roles are Owner, Operations administrator, Finance, Customer support and Analyst. The server enforces the role at API and page boundaries. Account suspension is checked against Supabase on each protected request and takes effect on the next request. Owner-only management includes invitations, role changes, suspensions and recent staff activity. Invitation links are single-use, expire after 48 hours and must be shared privately. See `RNX_STAFF_ACCESS_CONTROL.md` for full access matrix and migration 009. The environment-password admin login remains the owner recovery path.

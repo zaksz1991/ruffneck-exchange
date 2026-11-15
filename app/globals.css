@@ -62,3 +62,13 @@
 .rnx-analytics{display:grid;gap:16px}.rnx-analytics-actions{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}.rnx-analytics-actions label{display:grid;gap:4px;font-size:10px;font-weight:900;color:var(--muted)}.rnx-analytics-actions select{min-height:38px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:#fff;color:var(--ink);font:inherit}.rnx-analytics-period{margin:0;padding:11px 14px;border:1px solid #dbe5d8;border-radius:10px;background:#f5f9f2;color:#455a48;font-size:12px}.rnx-analytics-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.rnx-analytics-grid .supplier-panel{min-width:0;margin:0}.rnx-analytics-bars{display:grid;gap:11px}.rnx-analytics-bar-row{display:grid;grid-template-columns:minmax(90px,1fr) minmax(90px,2fr) auto;align-items:center;gap:10px;font-size:11px}.rnx-analytics-bar-row>span{overflow-wrap:anywhere;color:#45544a}.rnx-analytics-bar-row>div{height:9px;border-radius:999px;background:#edf1eb;overflow:hidden}.rnx-analytics-bar-row i{display:block;height:100%;border-radius:999px;background:#527c4c}.rnx-analytics-bar-row strong{font-size:11px;min-width:24px;text-align:right}.rnx-analytics-notes h2{font-size:18px;margin:0 0 8px}.rnx-analytics-notes ul{padding-left:18px;margin:0;color:#4d5b51;font-size:12px;line-height:1.7}.rnx-analytics-notes .admin-footnote{margin-top:10px}
 @media(max-width:800px){.rnx-analytics-grid{grid-template-columns:1fr}.rnx-analytics-actions{width:100%}.rnx-analytics-actions label{flex:1}.rnx-analytics-actions select{width:100%}}
 @media(max-width:560px){.analytics-consent-panel{right:10px;bottom:60px;width:calc(100vw - 20px);padding:15px}.analytics-consent-actions{display:grid;grid-template-columns:1fr}.analytics-consent-actions button{width:100%}.rnx-analytics-bar-row{grid-template-columns:minmax(78px,1fr) minmax(60px,1.2fr) auto;gap:7px}}
+
+
+/* v1.1.0 staff access console */
+.admin-staff-console { display: grid; gap: 1.25rem; }
+.admin-staff-invite-form { display: grid; grid-template-columns: minmax(220px, 1.5fr) minmax(180px, 1fr) auto; gap: .85rem; align-items: end; margin-top: 1rem; }
+.admin-staff-invite-form label { display: grid; gap: .4rem; font-weight: 650; }
+.admin-staff-invite-form input, .admin-staff-invite-form select, .admin-table select { min-height: 44px; width: 100%; border: 1px solid var(--line, #d8dfe8); border-radius: 9px; padding: .65rem .75rem; background: #fff; color: inherit; font: inherit; }
+.admin-staff-console .admin-link-box { margin-top: 1rem; }
+.admin-staff-console .admin-table small { display: block; margin-top: .25rem; }
+@media (max-width: 760px) { .admin-staff-invite-form { grid-template-columns: 1fr; } .admin-staff-invite-form .button { width: 100%; } }

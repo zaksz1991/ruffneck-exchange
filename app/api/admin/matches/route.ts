@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { z } from 'zod';
-import { ADMIN_COOKIE, isSameOriginRequest, isValidAdminSession } from '@/lib/admin-auth';
+import { getAdminSession, hasPermission, isSameOriginRequest } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase-server';
 
 export const runtime = 'nodejs';
@@ -55,8 +54,9 @@ function typeAligned(requestType: string, listingType: string): boolean {
 
 export async function POST(request: Request) {
   if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Request rejected.' }, { status: 403 });
-  const jar = await cookies();
-  if (!isValidAdminSession(jar.get(ADMIN_COOKIE)?.value)) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
+  const actor = await getAdminSession();
+  if (!actor) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
+  if (!hasPermission(actor.role, 'operations:write')) return NextResponse.json({ error: 'You do not have permission to prepare supplier matches.' }, { status: 403 });
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: 'Choose a valid customer request.' }, { status: 400 });
 

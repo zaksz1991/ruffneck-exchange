@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { ADMIN_COOKIE, isValidAdminSession } from '@/lib/admin-auth';
+import { getAdminSession, hasPermission } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase-server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const jar = await cookies();
-  if (!isValidAdminSession(jar.get(ADMIN_COOKIE)?.value)) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
+  const actor = await getAdminSession();
+  if (!actor) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
+  if (!hasPermission(actor.role, 'memberships:read')) return NextResponse.json({ error: 'You do not have permission to view membership records.' }, { status: 403 });
   try {
     const db = supabaseAdmin();
     const [subscriptions, suppliers] = await Promise.all([

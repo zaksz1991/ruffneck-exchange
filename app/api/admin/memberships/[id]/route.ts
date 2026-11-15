@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { z } from 'zod';
-import { ADMIN_COOKIE, isSameOriginRequest, isValidAdminSession } from '@/lib/admin-auth';
+import { getAdminSession, hasPermission, isSameOriginRequest } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase-server';
+import { recordStaffActivity } from '@/lib/staff-activity';
 
 export const runtime = 'nodejs';
 const schema = z.discriminatedUnion('action', [
@@ -15,13 +15,15 @@ const schema = z.discriminatedUnion('action', [
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
   if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Request rejected.' }, { status: 403 });
-  const jar = await cookies();
-  if (!isValidAdminSession(jar.get(ADMIN_COOKIE)?.value)) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
+  const actor = await getAdminSession();
+  if (!actor) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
   const { id } = await context.params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) return NextResponse.json({ error: 'Invalid membership request.' }, { status: 400 });
   const body: unknown = await request.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Invalid membership operation.' }, { status: 400 });
+  const requiredPermission = ['verify_payment','reject_payment'].includes(parsed.data.action) ? 'payments:verify' : 'memberships:write';
+  if (!hasPermission(actor.role, requiredPermission)) return NextResponse.json({ error: 'You do not have permission to perform this membership action.' }, { status: 403 });
   try {
     const db = supabaseAdmin();
     const { data: membership, error: lookupError } = await db.from('rnx_membership_subscriptions')
@@ -79,6 +81,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     }
 
     await db.from('rnx_admin_audit_log').insert({ action: `membership_${action}`, entity_type: 'membership', entity_id: id, details: { action } });
+    await recordStaffActivity(db, actor, `membership_${action}`, 'membership', id, { action });
     return NextResponse.json({ ok: true, message });
   } catch (error) {
     console.error('[RNX admin membership action]', error instanceof Error ? error.message : 'Unknown error');

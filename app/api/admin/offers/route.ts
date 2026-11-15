@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createHash, randomBytes } from 'node:crypto';
 import { z } from 'zod';
-import { ADMIN_COOKIE, isSameOriginRequest, isValidAdminSession } from '@/lib/admin-auth';
+import { getAdminSession, hasPermission, isSameOriginRequest } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { site } from '@/lib/site';
+import { recordStaffActivity } from '@/lib/staff-activity';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,10 +16,30 @@ const schema = z.object({
   quotedFee: z.coerce.number().finite().min(0).max(100000000),
 });
 
+
+export async function GET() {
+  const actor = await getAdminSession();
+  if (!actor) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
+  if (!hasPermission(actor.role, 'payments:verify')) return NextResponse.json({ error: 'You do not have permission to view lead-fee payments.' }, { status: 403 });
+  try {
+    const db = supabaseAdmin();
+    const { data, error } = await db.from('rnx_lead_offers')
+      .select('id,lead_id,supplier_application_id,anonymised_summary,quoted_fee,currency,payment_status,payment_reference,payment_amount,supplier_accepted_at,payment_verified_at,customer_approved_at,customer_declined_at,contact_released_at,created_at,supplier:rnx_supplier_applications!inner(business_name),lead:rnx_leads!inner(request_type,category,state,city,status)')
+      .order('created_at', { ascending: false }).limit(200);
+    if (error) throw error;
+    // Finance receives only anonymised offer and payment facts. Customer name, phone and email are excluded.
+    return NextResponse.json({ offers: data || [] }, { headers: { 'Cache-Control': 'no-store, private' } });
+  } catch (error) {
+    console.error('[RNX finance] Offer payment list failed:', error instanceof Error ? error.message : 'Unknown error');
+    return NextResponse.json({ error: 'Lead-fee payment records could not be loaded.' }, { status: 503 });
+  }
+}
+
 export async function POST(request: Request) {
   if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Request rejected.' }, { status: 403 });
-  const jar = await cookies();
-  if (!isValidAdminSession(jar.get(ADMIN_COOKIE)?.value)) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
+  const actor = await getAdminSession();
+  if (!actor) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
+  if (!hasPermission(actor.role, 'operations:write')) return NextResponse.json({ error: 'You do not have permission to prepare supplier offers.' }, { status: 403 });
   const raw: unknown = await request.json().catch(() => null);
   const parsed = schema.safeParse(raw);
   if (!parsed.success) return NextResponse.json({ error: 'Check the lead, supplier, summary and fee.' }, { status: 400 });
@@ -79,6 +99,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'The offer event could not be recorded. Confirm migration 004 is applied.' }, { status: 503 });
     }
     await db.from('rnx_admin_audit_log').insert({ action: 'offer_created', entity_type: 'lead', entity_id: lead.id, details: { offer_id: offer.id, supplier_id: supplier.id } });
+    await recordStaffActivity(db, actor, 'supplier_opportunity_offer_created', 'lead', lead.id, { offer_id: offer.id, supplier_id: supplier.id });
     const approvalUrl = new URL('/introduction/approval', site.url);
     approvalUrl.searchParams.set('token', rawToken);
     return NextResponse.json({ ok: true, offerId: offer.id, approvalUrl: approvalUrl.toString(), expiresAt }, { status: 201, headers: { 'Cache-Control': 'no-store, private' } });

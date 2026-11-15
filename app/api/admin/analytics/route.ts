@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { ADMIN_COOKIE, isValidAdminSession } from '@/lib/admin-auth';
+import { getAdminSession, hasPermission } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase-server';
 
 export const runtime = 'nodejs';
@@ -16,8 +15,9 @@ function increment(map: Map<string, number>, name: string) { map.set(name, (map.
 function sorted(map: Map<string, number>, limit = 12) { return [...map.entries()].map(([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label)).slice(0, limit); }
 
 export async function GET(request: Request) {
-  const jar = await cookies();
-  if (!isValidAdminSession(jar.get(ADMIN_COOKIE)?.value)) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
+  const actor = await getAdminSession();
+  if (!actor) return NextResponse.json({ error: 'Administrator sign-in required.' }, { status: 401 });
+  if (!hasPermission(actor.role, 'analytics:read')) return NextResponse.json({ error: 'You do not have permission to view analytics.' }, { status: 403 });
   const url = new URL(request.url);
   const rawDays = Number(url.searchParams.get('days') || '30');
   const days = [7, 30, 90, 365].includes(rawDays) ? rawDays : 30;

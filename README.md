@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v1.0.1
+# RuffNeck Exchange (RNX) — v1.1.0
 
 A multi-industry, multi-location customer-acquisition marketplace connecting customers with products, services, suppliers, businesses, wholesale providers and procurement opportunities. Refrigeration, cold rooms and solar remain categories only; they do not define the brand.
 
@@ -7,6 +7,19 @@ RNX receives a customer's sourcing request, verifies the requirement and permiss
 
 Never sell or release customer contact information without disclosure and permission. Membership does not guarantee leads or ranking. Supplier approval is not a guarantee of stock, licence, product condition, delivery or transaction performance.
 
+
+
+## v1.1.0 staff access control
+- Individual staff accounts with email/password sign-in and signed, eight-hour HttpOnly sessions.
+- One-time, 48-hour staff invitations; only SHA-256 invitation hashes are stored.
+- Owner, operations administrator, finance, customer support and analyst roles. Finance has a separate lead-fee reconciliation view that excludes customer contact details.
+- Server-side role checks on administrator pages and protected API routes.
+- Immediate suspension enforcement because active role/status is checked against Supabase for each staff request.
+- Owner-only staff directory, invitation history and recent staff activity console at `/admin/staff`.
+- Dedicated finance workspace at `/admin/finance` for lead-fee reconciliation using anonymised offer details, without exposing customer name, phone or email.
+- Scrypt password hashing, atomic invitation acceptance and database protection against suspending/demoting the last active staff owner.
+- Emergency environment-password owner recovery remains available; no existing admin password or Supabase credential is changed by the migration.
+- Adds migration 009 only; no existing non-RNX database objects are modified.
 
 ## v1.0.1 deployment repair
 
@@ -77,7 +90,8 @@ Copy `.env.example` to `.env.local` for local development, then configure values
 - `NEXT_PUBLIC_SITE_URL=https://ruffneck-exchange.vercel.app`
 - `SUPABASE_URL`
 - `SUPABASE_SECRET_KEY`
-- `RNX_ADMIN_PASSWORD`
+- `RNX_ADMIN_PASSWORD` (owner recovery only; normal staff use individual accounts)
+- `RNX_ADMIN_EMAIL` (optional label for owner recovery activity records)
 - `RNX_ADMIN_SESSION_SECRET` (at least 32 characters)
 - `RNX_SUPPLIER_SESSION_SECRET` (recommended separate random value, at least 32 characters; falls back to the admin secret if omitted)
 - `RNX_CUSTOMER_SESSION_SECRET` (recommended separate random value, at least 32 characters; falls back to the admin secret if omitted)
@@ -97,8 +111,9 @@ The RNX schema is additive and uses `rnx_*` tables. Review target project conten
 6. `006_rnx_customer_accounts_tracking_messaging.sql`
 7. `007_rnx_notification_delivery_worker.sql`
 8. `008_rnx_consent_first_attribution.sql`
+9. `009_rnx_staff_access_control.sql`
 
-For an installation where migrations 001–007 are already applied, apply only migration 008. For an installation where migrations 001–006 are already applied, apply missing migrations 007 and 008 in order. For a fresh RNX installation, apply 001–008 in order. Check the actual migration history and apply only missing files in numerical order. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
+For an installation where migrations 001–008 are already applied, apply only migration 009. For an installation where migrations 001–007 are applied, apply missing migrations 008 and 009 in order. For a fresh RNX installation, apply 001–009 in order. Check the actual migration history and apply only missing files in numerical order. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
 
 ## Supplier introduction operating sequence
 1. Qualify the customer request in the operations console.
@@ -132,12 +147,14 @@ A connected Git repository does not prove that a deployment build succeeds. Insp
 - WhatsApp or SMS delivery.
 - Customer email verification, password reset and account recovery.
 - General website traffic, page-view, ad-impression or clickstream analytics; v1.0.0 measures only consented form conversions.
-- Inventory synchronisation, automated supplier outreach and external inventory synchronisation, multi-user staff roles, supplier password reset, independent supplier identity/KYB checks, and promoted-placement controls.
+- Inventory synchronisation, automated supplier outreach, supplier password reset, independent supplier identity/KYB checks, and promoted-placement controls.
 
-The operations console is a single-password operator gate. Use a strong unique password, restrict Vercel project access and keep all secrets server-side. Vercel Hobby is not assumed to grant a commercial-use entitlement; check the plan terms before monetised production.
+The emergency owner recovery path remains environment-password based. Normal staff use individual invited accounts with role-based permissions. Use a strong unique recovery password, restrict Vercel project access and keep all secrets server-side. Vercel Hobby is not assumed to grant a commercial-use entitlement; check the plan terms before monetised production.
 
 
 See `RNX_CUSTOMER_ACCOUNTS_AND_TRACKING.md` for migration 006, privacy boundaries and optional Resend configuration. See `RNX_SUPPLIER_MATCHING_ENGINE.md` for the v0.8.0 recommendation rules and limitations.
 
 
 See `RNX_NOTIFICATION_DELIVERY.md` for migration 007, retry policy, Vercel schedule and Resend setup. See `RNX_ANALYTICS_AND_ATTRIBUTION.md` for migration 008, consent controls and analytics reporting.
+
+See `RNX_STAFF_ACCESS_CONTROL.md` for role permissions, invitation setup, migration 009, password requirements and recovery limitations.
