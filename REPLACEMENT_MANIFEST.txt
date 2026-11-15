@@ -1,15 +1,18 @@
-RUFFNECK EXCHANGE v0.5.0 — FULL REPLACEMENT MANIFEST
+RUFFNECK EXCHANGE v0.6.0 — FULL REPLACEMENT MANIFEST
 
-Complete cumulative Next.js application.
-Includes all public marketplace routes, supplier/catalogue pages, APIs, components, libraries, CSS, configuration, documentation and SQL migrations 001–004.
+Complete cumulative Next.js application retaining the existing v0.5.0 marketplace, catalogue moderation, admin operations and introduction workflow.
 
-New v0.5.0 additions:
-- app/api/admin/offers/route.ts
-- app/api/admin/offers/[id]/route.ts
-- app/api/customer/introduction/route.ts
-- app/introduction/approval/page.tsx
-- components/introduction-approval.tsx
-- supabase/migrations/004_rnx_introduction_workflow.sql
-- RNX_INTRODUCTION_WORKFLOW.md
+New v0.6.0 additions:
+- lib/supplier-auth.ts and lib/supplier-session.ts
+- app/supplier/login, /supplier/claim and /supplier/dashboard
+- components/supplier-login-form.tsx, supplier-claim-form.tsx, supplier-dashboard.tsx
+- app/api/supplier/login, logout, claim, dashboard, listings, membership and membership/payment
+- app/plans/page.tsx
+- app/admin/memberships/page.tsx and components/admin-membership-console.tsx
+- app/api/admin/memberships and app/api/admin/suppliers/[id]/invite
+- Independent membership payment evidence: operations must enter actual received amount, currency and receiving-account reference before the database activates paid access
+- Single-use, expiry-checked supplier activation links consumed atomically
+- supabase/migrations/005_rnx_supplier_memberships_portal.sql
+- RNX_SUPPLIER_PORTAL.md
 
-Replace source files in the existing GitHub repo. Do not upload this folder as a nested root directory. Vercel Root Directory remains ./.
+All prior RNX v0.5.0 source files and migrations 001–004 are included. Replace the existing GitHub repository contents with this entire extracted project. Do not upload the outer folder as a nested root. Vercel Root Directory remains `./`.

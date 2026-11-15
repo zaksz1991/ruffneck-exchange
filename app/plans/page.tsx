@@ -1,0 +1,11 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+export const metadata: Metadata = { title: 'Supplier Membership Plans', description: 'Compare RuffNeck Exchange supplier membership capacities and request commercial terms.', alternates: { canonical: '/plans' } };
+const plans = [
+  { code: 'starter', name: 'Starter', price: 'Free', audience: 'New and smaller suppliers', limit: 'Up to 3 catalogue listings', points: ['Business profile after review', 'Submit product and service listings', 'Receive relevant anonymised opportunities', 'Standard catalogue review'] },
+  { code: 'growth', name: 'Growth', price: 'Request a quotation', audience: 'Businesses with broader catalogues', limit: 'Up to 25 catalogue listings', points: ['Everything in Starter', 'Supplier opportunity dashboard', 'Membership and catalogue status overview', 'Commercial terms agreed before payment'] },
+  { code: 'enterprise', name: 'Enterprise', price: 'Custom quotation', audience: 'Large suppliers and distributors', limit: 'Up to 500 catalogue listings', points: ['Everything in Growth', 'Higher catalogue capacity', 'Expanded catalogue capacity for larger suppliers', 'Commercial terms agreed directly with RNX'] },
+];
+export default function PlansPage() {
+  return <main className="page-shell container"><div className="page-intro"><p className="eyebrow">SUPPLIER MEMBERSHIP</p><h1>Choose the operating capacity your business needs.</h1><p>Customers can browse and submit requests for free. Supplier membership supports catalogue and business participation. Prices for paid plans are quoted after RNX reviews the requirement; no unverified rates are published.</p></div><div className="public-plan-grid">{plans.map((plan) => <article className="public-plan-card" key={plan.code}><span className="eyebrow">{plan.audience}</span><h2>{plan.name}</h2><strong>{plan.price}</strong><p>{plan.limit}</p><ul>{plan.points.map((point) => <li key={point}>{point}</li>)}</ul><Link className="button" href="/business/register">Apply as a supplier</Link></article>)}</div><p className="admin-footnote public-plan-note">Membership does not guarantee customer enquiries, sales, leads, supplier ranking or featured placement. Qualified lead charges, where applicable, are separate from membership and must be disclosed and accepted before payment.</p></main>;
+}

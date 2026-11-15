@@ -15,7 +15,7 @@ Set in Vercel Project Settings → Environment Variables:
 Do not paste secret values into source files, GitHub, browser code or variables prefixed with `NEXT_PUBLIC_`.
 
 ## Supabase caution
-RNX uses only the `rnx_*` tables. Confirm the target project and existing RNX schema before applying anything. If `001_rnx_core.sql` has not been applied, review and apply it first; if the four core RNX tables already exist, apply only `002_rnx_catalogue.sql`. Do not rerun migration 001 blindly. Do not alter RuffNeck Entertainment LMS, Social Hub, billing, product or profile tables. The catalogue migration adds `public_slug` to `rnx_supplier_applications` and creates `rnx_listings` only. The migration is additive but still requires review against the actual target project.
+RNX uses only `rnx_*` tables. Confirm the target project and migration history before applying anything. Apply only missing migrations in numerical order: 001 core, 002 catalogue, 003 admin operations, 004 consent-based introductions, and 005 supplier memberships and portal. Do not rerun a migration that has already been applied successfully. These migrations are additive to RNX objects and do not modify RuffNeck Entertainment LMS, Social Hub, billing, product, profile or Prospector tables.
 
 ## Deployment check
 1. Confirm a new deployment was created from the latest `main` commit.
@@ -26,3 +26,9 @@ RNX uses only the `rnx_*` tables. Confirm the target project and existing RNX sc
 6. Confirm no contact details are exposed on public pages.
 
 A successful Git connection is not proof of a successful build. The message `A repository ID is required for GitHub deployments` is a Vercel Git integration issue, not a Next.js source compilation message.
+
+## v0.6.0 supplier portal variables
+Keep the Supabase URL and server secret server-only. Add `RNX_SUPPLIER_SESSION_SECRET` (32+ random characters; a dedicated value is recommended) and optionally `RNX_PAYMENT_INSTRUCTIONS` for the instructions displayed after a supplier receives a membership quotation. Do not put actual bank details in GitHub or in a `NEXT_PUBLIC_` variable. The supplier portal uses the existing `RNX_ADMIN_SESSION_SECRET` as a fallback if a separate supplier session secret is not configured.
+
+## v0.6.0 database
+Apply `005_rnx_supplier_memberships_portal.sql` only after confirming migrations 001–004 are applied. It adds RNX-prefixed portal, membership and independently verified payment-evidence structures. It does not change unrelated RuffNeck Entertainment tables. The membership payment verifier requires the actual amount, currency and receiving-account reference entered by operations; the supplier's submitted reference alone cannot activate membership.

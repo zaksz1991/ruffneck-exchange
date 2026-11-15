@@ -24,7 +24,7 @@ export function SupplierForm() {
         ? 'Your business application was received. The first listing needs to be resubmitted because it could not be saved.'
         : result.listingSubmitted
           ? 'Business application and first listing received. Both remain under review and will not appear publicly until approved.'
-          : 'Application received. It will be reviewed before your business is represented as approved.');
+          : 'Application received. It will be reviewed before your business is represented as approved. You can sign in to the supplier portal after approval.');
     } catch {
       setStatus('A network error prevented submission. Check your connection and try again.');
     } finally {
@@ -36,7 +36,8 @@ export function SupplierForm() {
     <form className="form-card form-grid" onSubmit={submit}>
       <label>Business name<input name="business_name" required minLength={2} maxLength={180} /></label>
       <label>Contact person<input name="contact_name" required minLength={2} maxLength={120} /></label>
-      <label>Business email<input name="email" type="email" required maxLength={254} /></label>
+      <label>Business email<input name="email" type="email" required maxLength={254} autoComplete="email" /></label>
+      <label>Supplier portal password<input name="portal_password" type="password" required minLength={10} maxLength={100} autoComplete="new-password" placeholder="At least 10 characters" /><span className="optional">This is stored as a secure password hash. Portal access opens after business approval.</span></label>
       <label>Phone / WhatsApp<input name="phone" required minLength={7} maxLength={30} /></label>
       <label>Business type<select name="business_type" required defaultValue=""><option value="" disabled>Select one</option><option>Manufacturer</option><option>Wholesaler</option><option>Distributor</option><option>Retailer</option><option>Service provider</option><option>Importer / exporter</option><option>Other</option></select></label>
       <label>Main category<input name="category" required minLength={2} maxLength={120} placeholder="e.g. agricultural machinery" /></label>

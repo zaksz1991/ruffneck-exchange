@@ -31,12 +31,12 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   try {
     const db = supabaseAdmin();
     const { data: offer, error: lookupError } = await db.from('rnx_lead_offers')
-      .select('id,lead_id,payment_status,payment_verified_at,supplier_accepted_at,customer_approved_at,customer_declined_at,contact_released_at')
+      .select('id,lead_id,payment_status,payment_verified_at,supplier_accepted_at,supplier_declined_at,customer_approved_at,customer_declined_at,contact_released_at')
       .eq('id', id).maybeSingle();
     if (lookupError || !offer) return NextResponse.json({ error: 'Offer not found.' }, { status: 404 });
 
     if (parsed.data.action === 'regenerate_consent_link') {
-      if (offer.customer_approved_at || offer.customer_declined_at || offer.contact_released_at) {
+      if (offer.supplier_declined_at || offer.customer_approved_at || offer.customer_declined_at || offer.contact_released_at) {
         return NextResponse.json({ error: 'A new consent link cannot be issued after the customer has made a decision or contact was released.' }, { status: 409 });
       }
       const rawToken = randomBytes(32).toString('hex');

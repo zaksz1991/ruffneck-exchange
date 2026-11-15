@@ -1,25 +1,34 @@
-# RuffNeck Exchange (RNX) — v0.5.0
+# RuffNeck Exchange (RNX) — v0.6.0
 
 A multi-industry, multi-location customer-acquisition marketplace connecting customers with products, services, suppliers, businesses, wholesale providers and procurement opportunities. Refrigeration, cold rooms and solar remain categories only; they do not define the brand.
 
 ## Core model
-RNX receives a customer's sourcing request, verifies the requirement and permission, shares an anonymised opportunity with suitable approved suppliers, records supplier acceptance and payment, then obtains the customer's authorisation before contact details are released. Customer browsing and requests are free. Suppliers may pay for memberships, promoted placement and qualified opportunities under clearly stated terms.
+RNX receives a customer's sourcing request, verifies the requirement and permission, shares an anonymised opportunity with suitable approved suppliers, records supplier acceptance and payment, then obtains the customer's authorisation before contact details are released. Customer browsing and requests are free. This release implements supplier memberships and manually qualified opportunity fees. Promoted placement is a possible future revenue stream, not a feature currently offered by this release.
 
 Never sell or release customer contact information without disclosure and permission. Membership does not guarantee leads or ranking. Supplier approval is not a guarantee of stock, licence, product condition, delivery or transaction performance.
 
-## v0.5.0 features
+## v0.6.0 features
 - Responsive multi-industry marketplace, supplier directory and approved catalogue.
 - Customer sourcing request and supplier application forms.
 - Individual approved supplier and listing pages.
 - Private operations console at `/admin/login`.
 - Supplier and listing moderation, plus lead qualification.
 - Supplier opportunity offers with anonymised summaries and agreed fees.
-- Manual recording of supplier acceptance.
-- Manual payment verification using the actual transaction reference and exact agreed amount.
+- Supplier portal acceptance or decline of assigned anonymised opportunities.
+- Manual payment verification using the independently confirmed receiving-account amount, currency and transaction reference against the exact agreed quotation.
 - Expiring, unguessable customer consent links; only a hash is stored in Supabase.
 - Customer approve/decline page that does not expose the customer's personal information.
 - Atomic database checks preventing contact release unless supplier payment is verified and the customer has approved.
 - Offer event history and operator audit records.
+- Supplier portal sign-in with scrypt password hashes, signed HTTP-only sessions and persistent login throttling.
+- Existing approved suppliers can receive one-time portal activation links from operations; links are hashed in the database and expire after seven days.
+- Private supplier dashboard for catalogue status, memberships and assigned anonymised opportunities.
+- Suppliers can submit additional product/service listings within their active plan's listing limit.
+- Three plan tiers: Starter (free), Growth (quotation) and Enterprise (custom quotation). No unverified paid prices are published.
+- Manual membership quotation, supplier transaction-reference submission and operations payment verification.
+- Paid membership activates only after operations independently records the actual received amount, currency and receiving-account reference and the database confirms they match the quotation; supplier-submitted references do not activate access.
+- Private operations membership console at `/admin/memberships`.
+- Public plan comparison at `/plans`.
 
 ## Requirements
 - Node.js 22 LTS or newer.
@@ -34,6 +43,8 @@ Copy `.env.example` to `.env.local` for local development, then configure values
 - `SUPABASE_SECRET_KEY`
 - `RNX_ADMIN_PASSWORD`
 - `RNX_ADMIN_SESSION_SECRET` (at least 32 characters)
+- `RNX_SUPPLIER_SESSION_SECRET` (recommended separate random value, at least 32 characters; falls back to the admin secret if omitted)
+- `RNX_PAYMENT_INSTRUCTIONS` (optional server-only instructions, shown only to signed-in suppliers after a quote)
 
 Never commit actual secrets or expose them through `NEXT_PUBLIC_` variables.
 
@@ -44,19 +55,20 @@ The RNX schema is additive and uses `rnx_*` tables. Review target project conten
 2. `002_rnx_catalogue.sql`
 3. `003_rnx_admin_operations.sql`
 4. `004_rnx_introduction_workflow.sql`
+5. `005_rnx_supplier_memberships_portal.sql`
 
-For an installation where 001–003 are already applied, apply only migration 004. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
+For an installation where 001–004 are already applied, apply only migration 005. The v0.6.0 release requires all five RNX migrations; check the actual migration history and apply only missing files in numerical order. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
 
 ## Supplier introduction operating sequence
 1. Qualify the customer request in the operations console.
 2. Create a supplier offer using an anonymised brief. Do not include the customer's name, email, phone number or other identifying information.
-3. Send the anonymised opportunity and fee/terms to the approved supplier outside RNX. Record the supplier's explicit acceptance in the console.
+3. Assign the anonymised opportunity and proposed fee to the approved supplier. The supplier sees it in the private portal and explicitly accepts or declines. Staff may separately confirm the commercial terms through the agreed business channel; no automated message delivery is connected.
 4. Verify the exact fee against the bank or payment-provider transaction record. Record the transaction reference and exact amount. A transfer screenshot or verbal claim is not proof.
 5. Send the customer approval link privately through the customer's preferred channel. The link expires after seven days and can be regenerated before the customer decides.
 6. Customer can approve or decline the specific supplier introduction. Declining does not incur a customer fee.
 7. Only after supplier acceptance, verified payment and customer approval may staff share the customer's contact information with that supplier. Record the release after it actually happens.
 
-The database functions enforce supplier acceptance before payment verification, exact fee matching, and both paid status plus customer approval before contact release. The application does not send WhatsApp, SMS or email automatically. Staff must send the anonymised supplier brief and customer consent link manually using approved channels.
+The database functions enforce supplier acceptance before lead-fee payment verification, exact fee matching, and both paid status plus customer approval before contact release. Membership payments also require an independently recorded receipt amount, currency and receiving-account reference to match the quotation before paid access is activated. The application does not send WhatsApp, SMS or email automatically. Staff must send the anonymised supplier brief and customer consent link manually using approved channels.
 
 ## Vercel
 - Framework: Next.js
@@ -66,11 +78,18 @@ The database functions enforce supplier acceptance before payment verification, 
 
 A connected Git repository does not prove that a deployment build succeeds. Inspect the Vercel deployment build log after committing.
 
+## Supplier membership workflow
+1. A new supplier sets a portal password during business application. The password is stored as a scrypt hash, not plain text.
+2. RNX reviews and approves the supplier. Approved applications with a password hash are automatically enabled for portal sign-in and receive the free Starter plan.
+3. Older approved suppliers who predate portal passwords can be issued a one-time activation link from `/admin/memberships`. The operator sends the link privately to the approved business email; it expires after seven days.
+4. Signed-in suppliers can see their approved business record, catalogue submissions, membership status and assigned anonymised opportunities. Customer name, phone, email and original request details are withheld until the contact-release timestamp has been recorded.
+5. Starter is free and supports up to 3 catalogue submissions. Growth supports up to 25; Enterprise up to 500. These are configured product limits, not verified market benchmarks. Paid prices are quotation-based and are not invented or prefilled.
+6. A supplier requests a paid plan; RNX issues the amount, interval and expiry; the supplier submits a transaction reference; operations checks the real bank/payment-provider record and verifies it. Only then is the paid membership activated.
+
 ## Not included
-- Supplier self-service accounts/dashboard.
 - Payment gateway or automatic bank reconciliation.
 - Automatic WhatsApp, SMS or email delivery.
 - Public customer account or request tracking.
-- Subscription billing, inventory sync, automated supplier matching or multi-user staff roles.
+- Inventory synchronisation, automated supplier matching, multi-user staff roles, supplier password reset, independent supplier identity/KYB checks, and promoted-placement controls.
 
 The operations console is a single-password operator gate. Use a strong unique password, restrict Vercel project access and keep all secrets server-side. Vercel Hobby is not assumed to grant a commercial-use entitlement; check the plan terms before monetised production.

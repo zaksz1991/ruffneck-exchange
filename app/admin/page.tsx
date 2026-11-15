@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { hasAdminSession } from '@/lib/admin-auth';
 import { AdminConsole } from '@/components/admin-console';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +13,6 @@ export default async function AdminPage() {
       <h1>Marketplace operations.</h1>
       <p>Review suppliers and listings, qualify customer requests, prepare anonymised supplier offers, verify payments and record customer-authorised introductions.</p>
     </div>
-    <AdminConsole />
+    <p className="admin-page-links"><Link className="button button-small" href="/admin/memberships">Membership and supplier portal operations</Link></p><AdminConsole />
   </main>;
 }

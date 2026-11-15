@@ -1,27 +1,32 @@
-# Build and release status — v0.5.0
+# Build and release status — v0.6.0
 
 ## Included
-- Complete cumulative application from v0.4.0.
-- Supplier opportunity offers with anonymised summaries.
-- Supplier acceptance recording.
-- Exact-fee payment verification and references.
-- Private one-time customer consent page with approve/decline decisions.
-- Hashed, expiring customer authorisation tokens.
-- Atomic database functions for supplier acceptance, payment verification, payment adjustment and contact release.
-- Per-offer event history and operator audit logging.
+- Complete cumulative application from v0.5.0.
+- Supplier portal login, signed HTTP-only session, salted scrypt password hashes and persistent sign-in throttling.
+- One-time claim links for approved legacy suppliers without portal credentials.
+- Supplier dashboard for memberships, listings, assigned offers, supplier accept/decline decisions and privacy-gated customer contact release.
+- Supplier catalogue submission subject to the active plan listing limit.
+- Starter, Growth and Enterprise membership plan catalogue.
+- Membership payment verification requires operations to enter the actual received amount, currency and bank/provider reference after checking the receiving account. The database compares the independently recorded receipt with the quote before activation. No card processor or payment gateway is connected.
+- Private membership operations console and audit events.
+- Public supplier plan comparison page.
 
 ## Required setup
-- Keep Vercel Root Directory at `./` and framework at Next.js.
+- Vercel Root Directory remains `./`; framework remains Next.js.
 - Keep `NEXT_PUBLIC_SITE_URL=https://ruffneck-exchange.vercel.app`.
-- Confirm `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `RNX_ADMIN_PASSWORD` and `RNX_ADMIN_SESSION_SECRET` are configured in Vercel Environment Variables. Never commit secret values.
-- If migrations 001–003 are already present, apply only `004_rnx_introduction_workflow.sql`.
-- If the earlier RNX migrations have not all been applied, review the migration history and apply missing migrations in order. Do not rerun successful migrations unnecessarily.
+- Configure `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `RNX_ADMIN_PASSWORD`, `RNX_ADMIN_SESSION_SECRET`.
+- Recommended: configure a separate `RNX_SUPPLIER_SESSION_SECRET` of at least 32 characters. It falls back to `RNX_ADMIN_SESSION_SECRET` if omitted.
+- Optional: configure `RNX_PAYMENT_INSTRUCTIONS` with verified payment instructions. Keep it server-only. Do not put real bank details in the repository.
+- Apply migration `005_rnx_supplier_memberships_portal.sql` only after confirming migrations 001–004 are applied.
 
 ## Verification status
-- Source files and SQL migration are included in this archive.
-- A full dependency install and production build must be run against the final source before production release.
-- Supabase migration execution has not been performed by this package.
-- Live payment, WhatsApp, email, supplier identity and customer contact-release tests have not been performed.
-- Payment checks are manual. The code does not connect to a payment gateway or independently confirm transfers.
-- The customer approval link must be sent manually. No messaging provider is configured.
-- Contact release must be performed manually after the console confirms payment and customer authorisation; record the release after details have actually been shared.
+- Project files were extended from the existing v0.5.0 source and bundled as a complete replacement.
+- Static TypeScript validation passed using temporary lightweight module declarations because project dependencies could not be installed; this is not a full dependency-backed typecheck.
+- No production database migration has been executed.
+- No dependency installation or full Next.js production build has been verified in this environment.
+- No live login, supplier invite, payment, or contact-release workflow has been tested against the production Supabase project.
+- Payment recording is manual only. A supplier-submitted transaction reference is not proof of payment. RNX operations must verify actual funds received.
+- No payment gateway, email, SMS or WhatsApp provider is connected. Activation and customer consent links must be delivered manually through verified channels.
+- Contact information is returned to the supplier dashboard only when `contact_released_at` has been set by the RNX contact-release workflow.
+
+Do not describe this release as production-tested until dependency installation, production build, migration execution and controlled end-to-end tests have passed.

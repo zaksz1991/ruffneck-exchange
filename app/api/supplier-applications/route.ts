@@ -2,12 +2,14 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { slugify } from '@/lib/site';
+import { hashSupplierPassword } from '@/lib/supplier-auth';
 
 export const runtime = 'nodejs';
 const schema = z.object({
   business_name: z.string().trim().min(2).max(180),
   contact_name: z.string().trim().min(2).max(120),
   email: z.string().trim().email().max(254),
+  portal_password: z.string().min(10, 'Use at least 10 characters for your supplier portal password.').max(100),
   phone: z.string().trim().min(7).max(30),
   business_type: z.string().trim().min(2).max(80),
   category: z.string().trim().min(2).max(120),
@@ -45,12 +47,17 @@ export async function POST(request: Request) {
   const values = parsed.data;
   try {
     const db = supabaseAdmin();
+    const normalizedEmail = values.email.toLowerCase();
+    const { data: existing } = await db.from('rnx_supplier_applications').select('id,status').eq('email', normalizedEmail).in('status', ['pending','approved']).limit(1).maybeSingle();
+    if (existing) return NextResponse.json({ error: 'An application already exists for this business email. Contact RNX operations for account assistance.' }, { status: 409 });
     const publicSlug = `${slugify(values.business_name) || 'business'}-${Math.random().toString(36).slice(2, 7)}`;
     const { data: application, error } = await db.from('rnx_supplier_applications').insert({
       business_name: values.business_name,
       contact_name: values.contact_name,
-      email: values.email,
+      email: values.email.toLowerCase(),
       phone: values.phone,
+      portal_password_hash: hashSupplierPassword(values.portal_password),
+      portal_enabled: false,
       business_type: values.business_type,
       category: values.category,
       state: values.state,

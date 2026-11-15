@@ -49,3 +49,14 @@ The source package includes route-level checks by inspection and static file val
 ## v0.5.0 — supplier introduction workflow
 
 The supplier offer, supplier acceptance, payment verification, private customer approval link and contact-release process is documented in `RNX_INTRODUCTION_WORKFLOW.md`. Migration `004_rnx_introduction_workflow.sql` adds the per-offer event record and database functions used by this workflow. Do not record a contact release until the handoff has actually happened.
+
+## v0.6.0 — supplier membership and portal operations
+
+Membership requests, quotations, supplier payment references and paid-plan verification are handled at `/admin/memberships`. Only verify a payment after checking the actual account statement or provider record. The database activates a paid subscription only when the amount and currency match the current quote. Membership does not guarantee enquiries or ranking.
+
+New applicants set a password on the application form; approval enables the portal and assigns the no-cost Starter plan. For older approved records, generate a one-time supplier portal invite from the membership operations screen and send it privately to the approved business email. The link expires after seven days. The portal reads supplier-owned listings and offers only; customer contact information remains redacted until the authorised release workflow is complete.
+
+
+## v0.6.0 supplier portal operations
+
+Supplier offer accept/decline decisions are now recorded by the supplier in `/supplier/dashboard`; staff should not record acceptance on a supplier's behalf without explicit agreement. Membership quotations and supplier activation links are managed at `/admin/memberships`. For membership payment verification, enter the actual amount, currency and transaction reference independently confirmed in the receiving account. The database compares those values with the quote before activating the paid plan.
