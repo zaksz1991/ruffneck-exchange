@@ -34,15 +34,17 @@ export async function POST(request: Request) {
     const trackingToken = createTrackingToken();
     const customerId = await currentCustomerId();
     const analyticsAllowed = await hasAnalyticsConsent();
-    const attribution = analyticsAllowed ? {
-      attribution_source: parsed.data.attribution_source || null,
-      attribution_medium: parsed.data.attribution_medium || null,
-      attribution_campaign: parsed.data.attribution_campaign || null,
-      attribution_referrer_host: parsed.data.attribution_referrer_host || null,
-      attribution_landing_path: parsed.data.attribution_landing_path || null,
-      attribution_captured_at: new Date().toISOString(),
-    } : {};
-    const { attribution_source, attribution_medium, attribution_campaign, attribution_referrer_host, attribution_landing_path, attribution_captured_at, ...leadFields } = parsed.data;
+    // Keep one stable, fully typed shape whether consent is granted or not.
+    // The capture timestamp is generated server-side and is not part of the form schema.
+    const attribution = {
+      attribution_source: analyticsAllowed ? parsed.data.attribution_source || null : null,
+      attribution_medium: analyticsAllowed ? parsed.data.attribution_medium || null : null,
+      attribution_campaign: analyticsAllowed ? parsed.data.attribution_campaign || null : null,
+      attribution_referrer_host: analyticsAllowed ? parsed.data.attribution_referrer_host || null : null,
+      attribution_landing_path: analyticsAllowed ? parsed.data.attribution_landing_path || null : null,
+      attribution_captured_at: analyticsAllowed ? new Date().toISOString() : null,
+    };
+    const { attribution_source, attribution_medium, attribution_campaign, attribution_referrer_host, attribution_landing_path, ...leadFields } = parsed.data;
     const { data: lead, error } = await db.from('rnx_leads').insert({
       ...leadFields, ...attribution, email: parsed.data.email || null, city: parsed.data.city || null,
       customer_id: customerId, tracking_token_hash: hashTrackingToken(trackingToken),

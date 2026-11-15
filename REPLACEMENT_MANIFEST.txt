@@ -1,4 +1,4 @@
-RuffNeck Exchange v1.0.0 full replacement contents
+RuffNeck Exchange v1.0.1 full replacement contents
 
 .env.example
 .gitattributes
@@ -7,7 +7,6 @@ BUILD_STATUS.md
 LEAD_OPERATIONS_PLAYBOOK.md
 README-REPLACEMENT.txt
 README.md
-REPLACEMENT_MANIFEST.txt
 RNX_ADMIN_OPERATIONS.md
 RNX_ANALYTICS_AND_ATTRIBUTION.md
 RNX_CATALOGUE_MODERATION.md

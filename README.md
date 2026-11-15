@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v1.0.0
+# RuffNeck Exchange (RNX) — v1.0.1
 
 A multi-industry, multi-location customer-acquisition marketplace connecting customers with products, services, suppliers, businesses, wholesale providers and procurement opportunities. Refrigeration, cold rooms and solar remain categories only; they do not define the brand.
 
@@ -6,6 +6,11 @@ A multi-industry, multi-location customer-acquisition marketplace connecting cus
 RNX receives a customer's sourcing request, verifies the requirement and permission, shares an anonymised opportunity with suitable approved suppliers, records supplier acceptance and payment, then obtains the customer's authorisation before contact details are released. Customer browsing and requests are free. This release implements supplier memberships and manually qualified opportunity fees. Promoted placement is a possible future revenue stream, not a feature currently offered by this release.
 
 Never sell or release customer contact information without disclosure and permission. Membership does not guarantee leads or ranking. Supplier approval is not a guarantee of stock, licence, product condition, delivery or transaction performance.
+
+
+## v1.0.1 deployment repair
+
+This release fixes the TypeScript build failure reported by Vercel in `app/api/leads/route.ts`. The server-generated `attribution_captured_at` value is no longer incorrectly destructured from the validated request payload. Attribution objects now retain one consistent typed shape with explicit `null` values when analytics consent is absent. The supplier application endpoint received the same type-safety correction. Legacy CSS `align-items: end` values were changed to `align-items: flex-end` to remove the Autoprefixer compatibility warnings. No new Supabase migration is introduced; migration 008 remains the latest migration.
 
 ## v1.0.0 features
 - Optional, consent-first first-touch attribution for customer requests and supplier applications.

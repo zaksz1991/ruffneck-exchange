@@ -54,14 +54,15 @@ export async function POST(request: Request) {
   try {
     const db = supabaseAdmin();
     const analyticsAllowed = await hasAnalyticsConsent();
-    const attribution = analyticsAllowed ? {
-      attribution_source: values.attribution_source || null,
-      attribution_medium: values.attribution_medium || null,
-      attribution_campaign: values.attribution_campaign || null,
-      attribution_referrer_host: values.attribution_referrer_host || null,
-      attribution_landing_path: values.attribution_landing_path || null,
-      attribution_captured_at: new Date().toISOString(),
-    } : {};
+    // Keep one stable, fully typed shape when analytics consent is absent or present.
+    const attribution = {
+      attribution_source: analyticsAllowed ? values.attribution_source || null : null,
+      attribution_medium: analyticsAllowed ? values.attribution_medium || null : null,
+      attribution_campaign: analyticsAllowed ? values.attribution_campaign || null : null,
+      attribution_referrer_host: analyticsAllowed ? values.attribution_referrer_host || null : null,
+      attribution_landing_path: analyticsAllowed ? values.attribution_landing_path || null : null,
+      attribution_captured_at: analyticsAllowed ? new Date().toISOString() : null,
+    };
     const normalizedEmail = values.email.toLowerCase();
     const { data: existing } = await db.from('rnx_supplier_applications').select('id,status').eq('email', normalizedEmail).in('status', ['pending','approved']).limit(1).maybeSingle();
     if (existing) return NextResponse.json({ error: 'An application already exists for this business email. Contact RNX operations for account assistance.' }, { status: 409 });
