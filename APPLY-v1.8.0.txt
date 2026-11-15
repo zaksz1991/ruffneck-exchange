@@ -1,8 +1,9 @@
-RUFFNECK EXCHANGE v1.8.0 — OPERATIONS AND CONVERSION UPGRADE
+RUFFNECK EXCHANGE v1.8.0 — OPERATIONS UPGRADE + VERCEL TYPE REPAIR
 
 This is an incremental source overlay, NOT a full repository archive. It must be merged into the existing ruffneck-exchange main branch. It is intentionally limited to the files listed below and does not replace the repository's app, assets, credentials, or database history.
 
 REPLACE
+- app/request/page.tsx (includes the TypeScript build repair for URL-prefilled state validation)
 - package.json
 - README.md
 - BUILD_STATUS.md
@@ -23,4 +24,4 @@ VERCEL
 No environment variable changes. No payment provider is connected by this release.
 
 VALIDATION
-The focused test is `npm run test:rnx-v180`. Before treating this as production-ready, run the existing full `npm run check` against the complete repository and confirm the Vercel production build. These checks have not been run in the complete repository in this preparation environment.
+The focused test is `npm run test:rnx-v180` (20 assertions). The state-query fix addresses the exact TypeScript error reported by Vercel at `app/request/page.tsx:18`. Re-run the Vercel deployment to verify the full repository build. Before treating this as production-ready, run the existing full `npm run check` against the complete repository and confirm the Vercel production build. These checks have not been run in the complete repository in this preparation environment.

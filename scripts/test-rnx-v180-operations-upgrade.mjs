@@ -23,9 +23,10 @@ assert.match(marketplace, /name="category"/);
 assert.match(how, /automated payment-gateway checkout is not active/i);
 assert.match(how, /explicit permission/i);
 assert.match(requestPage, /initialCategory/);
-assert.match(requestPage, /site\.states\.includes/);
+assert.match(requestPage, /new Set<string>\(site\.states\)\.has\(requestedState\)/);
+assert.doesNotMatch(requestPage, /site\.states\.includes\(requestedState\)/);
 assert.match(requestForm, /defaultValue=\{initialCategory\}/);
 assert.match(requestForm, /defaultValue=\{initialState\}/);
 assert.doesNotMatch(how, /dashboards and automated notifications remain manual or not yet implemented/i);
 
-console.log('RNX v1.8.0 focused operations tests: 19 assertions passed.');
+console.log('RNX v1.8.0 focused operations tests: 20 assertions passed.');

@@ -16,6 +16,10 @@
 - No change to contact-release safeguards.
 - No changes to shared non-RNX Supabase tables.
 
+## Deployment build repair
+
+The first v1.8.0 Vercel build compiled the Next.js bundle but failed TypeScript in `app/request/page.tsx` because `site.states.includes(requestedState)` passed an untrusted `string` to a literal-union array. The membership check now uses a `Set<string>` constructed from the existing configured state list. It does not expand the accepted states or trust arbitrary URL values.
+
 ## Validation boundary
 
 The included focused static test checks the v1.8.0 source contracts. It is not a substitute for the complete repository test suite, TypeScript typecheck, Next.js production build, production Supabase checks or Vercel deployment validation.

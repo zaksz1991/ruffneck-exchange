@@ -15,7 +15,9 @@ export default async function RequestPage({ searchParams }: { searchParams: Prom
   const params = await searchParams;
   const initialCategory = (first(params.category) || first(params.requirement)).trim().slice(0, 100);
   const requestedState = first(params.state).trim();
-  const initialState = site.states.includes(requestedState) ? requestedState : '';
+  // site.states is a literal tuple, while URL search parameters are untrusted strings.
+  // Set<string> keeps the membership test type-safe without weakening the state list.
+  const initialState = new Set<string>(site.states).has(requestedState) ? requestedState : '';
 
   return <main className="page-shell container narrow-shell">
     <div className="page-intro"><p className="eyebrow">CUSTOMER REQUEST</p><h1>Tell us what you need.</h1><p>Submitting a request is free. Give us enough detail to understand your requirement, location and timing. Your contact details are not released to a supplier without an authorised introduction.</p></div>

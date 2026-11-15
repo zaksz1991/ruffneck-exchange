@@ -1,4 +1,4 @@
-# Build status — RuffNeck Exchange v1.8.0
+# Build status — RuffNeck Exchange v1.8.0 build repair
 
 ## Release scope
 Marketplace operations clarity, supplier approval diagnostics and sourcing-request conversion.
@@ -16,7 +16,11 @@ Marketplace operations clarity, supplier approval diagnostics and sourcing-reque
 - No payment gateway changes.
 - No changes to shared non-RNX tables.
 
+## Build repair from deployment log
+- Vercel compiled the Next.js application successfully, then TypeScript failed at `app/request/page.tsx:18` because `site.states.includes()` expects a literal-union value while URL query parameters are plain strings.
+- The state allow-list check now uses `new Set<string>(site.states).has(requestedState)`. This preserves the configured state allow-list, rejects arbitrary query values and resolves the specific argument-type mismatch without casting untrusted input.
+
 ## Validation scope
-- Focused v1.8.0 static contract test included.
-- Full repository typecheck and production build have not been run in this update environment because the complete source repository and installed dependencies were not available.
-- Production database behaviour, email verification delivery, GitHub commit and Vercel deployment have not been tested or performed here.
+- Focused v1.8.0 static contract test now includes the state-query type-safety contract.
+- The complete project typecheck and Vercel production build must be rerun against the connected repository; they have not been executed in this repair workspace because the full repository and installed dependencies are not present here.
+- Production database behaviour, email verification delivery, GitHub commit and Vercel deployment have not been performed here.
