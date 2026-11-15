@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { slugify } from '@/lib/site';
 import { hashSupplierPassword } from '@/lib/supplier-auth';
+import { isSameOriginRequest } from '@/lib/admin-auth';
+import { issueRnxEmailVerificationLink } from '@/lib/email-verification';
 
 export const runtime = 'nodejs';
 const schema = z.object({
@@ -46,15 +48,14 @@ const schema = z.object({
 });
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Request rejected.' }, { status: 403 });
   const payload: unknown = await request.json().catch(() => null);
   const parsed = schema.safeParse(payload);
   if (!parsed.success) return NextResponse.json({ error: 'Some business or listing details are missing or invalid. Review the form and try again.', issues: parsed.error.issues.map(i => ({ field: i.path.join('.'), message: i.message })) }, { status: 400 });
-
   const values = parsed.data;
   try {
     const db = supabaseAdmin();
     const analyticsAllowed = await hasAnalyticsConsent();
-    // Keep one stable, fully typed shape when analytics consent is absent or present.
     const attribution = {
       attribution_source: analyticsAllowed ? values.attribution_source || null : null,
       attribution_medium: analyticsAllowed ? values.attribution_medium || null : null,
@@ -64,14 +65,18 @@ export async function POST(request: Request) {
       attribution_captured_at: analyticsAllowed ? new Date().toISOString() : null,
     };
     const normalizedEmail = values.email.toLowerCase();
-    const { data: existing } = await db.from('rnx_supplier_applications').select('id,status').eq('email', normalizedEmail).in('status', ['pending','approved']).limit(1).maybeSingle();
-    if (existing) return NextResponse.json({ error: 'An application already exists for this business email. Contact RNX operations for account assistance.' }, { status: 409 });
+    const { data: existing, error: existingError } = await db.from('rnx_supplier_applications')
+      .select('id,status').eq('email', normalizedEmail).in('status', ['pending','approved']).limit(1).maybeSingle();
+    if (existingError) throw new Error('Existing application lookup failed.');
+    if (existing) return NextResponse.json({ error: 'An application already exists for this business email. Sign in after approval or request email confirmation if needed.' }, { status: 409 });
+
     const publicSlug = `${slugify(values.business_name) || 'business'}-${Math.random().toString(36).slice(2, 7)}`;
     const { data: application, error } = await db.from('rnx_supplier_applications').insert({
       ...attribution,
       business_name: values.business_name,
       contact_name: values.contact_name,
-      email: values.email.toLowerCase(),
+      email: normalizedEmail,
+      email_verified_at: null,
       phone: values.phone,
       portal_password_hash: hashSupplierPassword(values.portal_password),
       portal_enabled: false,
@@ -84,7 +89,6 @@ export async function POST(request: Request) {
       public_slug: publicSlug,
       status: 'pending'
     }).select('id').single();
-
     if (error || !application) {
       console.error('[RNX] Supplier application insert failed:', { code: error?.code, message: error?.message });
       return NextResponse.json({ error: 'We could not save the application right now. Please try again later.' }, { status: 503 });
@@ -114,16 +118,27 @@ export async function POST(request: Request) {
       }
     }
 
+    let emailVerificationSent = false;
+    try {
+      const result = await issueRnxEmailVerificationLink({ accountType: 'supplier', accountId: application.id, email: normalizedEmail, request });
+      emailVerificationSent = result.sent;
+    } catch (mailError) {
+      console.error('[RNX] Supplier email verification could not be issued:', mailError instanceof Error ? mailError.message : 'unknown error');
+    }
+
     if (analyticsAllowed) {
       const { error: eventError } = await db.from('rnx_events').insert({
-        event_type: 'supplier_application_submitted', path: '/supplier', state: values.state, category: values.category,
+        event_type: 'supplier_application_submitted', path: '/business/register', state: values.state, category: values.category,
         consented: true, source: attribution.attribution_source || null, medium: attribution.attribution_medium || null,
         campaign: attribution.attribution_campaign || null, referrer_host: attribution.attribution_referrer_host || null,
-        event_data: { listing_submitted: listingSubmitted === true },
+        event_data: { listing_submitted: listingSubmitted === true, email_verification_sent: emailVerificationSent },
       });
       if (eventError) console.error('[RNX analytics] Consented supplier event could not be recorded:', eventError.message);
     }
-    return NextResponse.json({ ok: true, listingSubmitted, message: 'Application received for review.' }, { status: 201 });
+    const message = emailVerificationSent
+      ? 'Application received. Confirm your business email using the link we sent. RNX will review the application after email confirmation.'
+      : 'Application received. Email confirmation was not sent; use the resend option below or contact RNX Operations. The application cannot be approved until the email is confirmed.';
+    return NextResponse.json({ ok: true, listingSubmitted, emailVerificationSent, message }, { status: 201 });
   } catch (error) {
     console.error('[RNX] Supplier endpoint unavailable:', error instanceof Error ? error.message : 'Unknown server error');
     return NextResponse.json({ error: 'Business application submission is temporarily unavailable. Please try again later.' }, { status: 503 });
