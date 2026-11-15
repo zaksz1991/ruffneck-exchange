@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v0.7.0
+# RuffNeck Exchange (RNX) — v0.8.0
 
 A multi-industry, multi-location customer-acquisition marketplace connecting customers with products, services, suppliers, businesses, wholesale providers and procurement opportunities. Refrigeration, cold rooms and solar remain categories only; they do not define the brand.
 
@@ -6,6 +6,13 @@ A multi-industry, multi-location customer-acquisition marketplace connecting cus
 RNX receives a customer's sourcing request, verifies the requirement and permission, shares an anonymised opportunity with suitable approved suppliers, records supplier acceptance and payment, then obtains the customer's authorisation before contact details are released. Customer browsing and requests are free. This release implements supplier memberships and manually qualified opportunity fees. Promoted placement is a possible future revenue stream, not a feature currently offered by this release.
 
 Never sell or release customer contact information without disclosure and permission. Membership does not guarantee leads or ranking. Supplier approval is not a guarantee of stock, licence, product condition, delivery or transaction performance.
+
+## v0.8.0 features
+- Explainable supplier matching recommendations in the private operations offer workflow.
+- Ranks approved suppliers and approved catalogue listings by category, location, request type and keywords.
+- Displays match reasons and catalogue evidence; excludes suppliers already offered the same request.
+- Manual review and supplier selection remain mandatory; recommendations do not create offers or contact suppliers.
+- No additional database migration required; uses existing RNX migrations 001–006.
 
 ## v0.7.0 features
 - Customer accounts with scrypt password hashes and signed HttpOnly sessions.
@@ -67,7 +74,7 @@ The RNX schema is additive and uses `rnx_*` tables. Review target project conten
 5. `005_rnx_supplier_memberships_portal.sql`
 6. `006_rnx_customer_accounts_tracking_messaging.sql`
 
-For an installation where 001–005 are already applied, apply only migration 006. The v0.7.0 release requires migrations 001–006; check the actual migration history and apply only missing files in numerical order. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
+For an installation where 001–005 are already applied, apply only migration 006. The v0.8.0 release requires migrations 001–006; check the actual migration history and apply only missing files in numerical order. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
 
 ## Supplier introduction operating sequence
 1. Qualify the customer request in the operations console.
@@ -100,9 +107,9 @@ A connected Git repository does not prove that a deployment build succeeds. Insp
 - Payment gateway or automatic bank reconciliation.
 - WhatsApp or SMS delivery.
 - Customer email verification, password reset and account recovery.
-- Inventory synchronisation, automated supplier matching, multi-user staff roles, supplier password reset, independent supplier identity/KYB checks, and promoted-placement controls.
+- Inventory synchronisation, automated supplier outreach and external inventory synchronisation, multi-user staff roles, supplier password reset, independent supplier identity/KYB checks, and promoted-placement controls.
 
 The operations console is a single-password operator gate. Use a strong unique password, restrict Vercel project access and keep all secrets server-side. Vercel Hobby is not assumed to grant a commercial-use entitlement; check the plan terms before monetised production.
 
 
-See `RNX_CUSTOMER_ACCOUNTS_AND_TRACKING.md` for migration 006, privacy boundaries and optional Resend configuration.
+See `RNX_CUSTOMER_ACCOUNTS_AND_TRACKING.md` for migration 006, privacy boundaries and optional Resend configuration. See `RNX_SUPPLIER_MATCHING_ENGINE.md` for the v0.8.0 recommendation rules and limitations.

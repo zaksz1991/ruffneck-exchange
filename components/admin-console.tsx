@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { AdminMatchAssistant } from '@/components/admin-match-assistant';
 
 type Supplier = {
   id: string; business_name: string; contact_name: string; email: string; phone: string;
@@ -168,7 +169,8 @@ export function AdminConsole() {
       <section className="admin-panel">
         <div className="admin-panel-heading"><div><p className="eyebrow">SUPPLIER MATCHING</p><h2>Prepare an opportunity offer</h2></div><span>Customer remains anonymous</span></div>
         {eligibleLeads.length && data.approvedSuppliers.length ? <form className="admin-offer-form" onSubmit={(event) => void createOffer(event)}>
-          <label>Qualified customer request<select value={offerLeadId} onChange={(event) => setOfferLeadId(event.target.value)} required><option value="">Choose a qualified request</option>{eligibleLeads.map((lead) => <option key={lead.id} value={lead.id}>{lead.category} · {[lead.city, lead.state].filter(Boolean).join(', ')} · {lead.name} ({lead.status})</option>)}</select></label>
+          <label>Qualified customer request<select value={offerLeadId} onChange={(event) => { setOfferLeadId(event.target.value); setOfferSupplierId(''); }} required><option value="">Choose a qualified request</option>{eligibleLeads.map((lead) => <option key={lead.id} value={lead.id}>{lead.category} · {[lead.city, lead.state].filter(Boolean).join(', ')} · {lead.name} ({lead.status})</option>)}</select></label>
+          <AdminMatchAssistant leadId={offerLeadId} selectedSupplierId={offerSupplierId} onSelectSupplier={setOfferSupplierId} />
           <label>Approved supplier<select value={offerSupplierId} onChange={(event) => setOfferSupplierId(event.target.value)} required><option value="">Choose an approved supplier</option>{data.approvedSuppliers.map((supplier) => <option key={supplier.id} value={supplier.id}>{supplier.business_name} · {supplier.category} · {supplier.state}</option>)}</select></label>
           <label>Proposed supplier lead fee (NGN)<input type="number" min="0" max="100000000" step="0.01" value={offerFee} onChange={(event) => setOfferFee(event.target.value)} placeholder="e.g. 5000" required /></label>
           <label className="admin-offer-summary">Anonymised opportunity brief<textarea rows={4} minLength={30} maxLength={1200} value={offerSummary} onChange={(event) => setOfferSummary(event.target.value)} placeholder="Describe the requirement without the customer's name, phone number, email or other identifying details." required /></label>

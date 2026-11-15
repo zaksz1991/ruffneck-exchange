@@ -1,9 +1,7 @@
-RuffNeck Exchange v0.7.0 complete replacement
-Base: v0.6.0 cumulative source tree
-New migration: supabase/migrations/006_rnx_customer_accounts_tracking_messaging.sql
-New public routes: /customer/login, /customer/register, /customer/dashboard, /track/[token]
-New admin route: /admin/communications
-New APIs: /api/customer/*, /api/track/[token], /api/admin/communications
-No non-RNX database tables are changed.
-Deployment target: https://ruffneck-exchange.vercel.app/
-Vercel root directory: ./
+RuffNeck Exchange v0.8.0 — complete repository replacement
+
+This archive contains the full project source, not a patch.
+Upload the contents of the ruffneck-exchange folder to the root of the existing GitHub repository.
+Keep Vercel Root Directory at ./ .
+No new Supabase migration is included or required for v0.8.0. Existing migrations 001–006 must already be applied.
+Do not modify unrelated RuffNeck Entertainment database tables.
