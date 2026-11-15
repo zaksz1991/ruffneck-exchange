@@ -1,26 +1,17 @@
-RUFFNECK EXCHANGE v0.3.0 — COMPLETE PROJECT REPLACEMENT
+RUFFNECK EXCHANGE v0.5.0 — COMPLETE PROJECT REPLACEMENT
 
-This archive contains the complete project source plus the catalogue and approved-supplier release. It is not a patch.
+This ZIP is the full cumulative project, not a patch. It retains the existing marketplace, supplier directory, catalogue, request forms and operator console, and adds the supplier introduction workflow.
 
-1. Extract the ZIP.
-2. Open the extracted `ruffneck-exchange-full` folder.
-3. In the existing GitHub repository, replace the application source and configuration files with this full folder structure. Do not create a new GitHub repository or Vercel project.
-4. Commit the replacement to the existing `main` branch.
-5. Keep Vercel Root Directory set to `./`.
-6. Confirm Vercel detects the commit and inspect the build log.
+GitHub: zaksz1991/ruffneck-exchange
+Branch: main
+Vercel Root Directory: ./
+Framework: Next.js
+Production domain: https://ruffneck-exchange.vercel.app/
 
-DATABASE:
-- If RNX migration 001 has not been applied, apply 001 first and then 002.
-- If migration 001 and the four RNX core tables already exist, apply only `002_rnx_catalogue.sql`.
-- Do not rerun migrations blindly and do not change non-RNX RuffNeck tables.
-- Set SUPABASE_URL and SUPABASE_SECRET_KEY as server-only Vercel environment variables.
+Replace the repository source files with the contents of this project folder. Keep repository settings, Git history and the existing Vercel project. Do not create a second Vercel project.
 
-PUBLIC VISIBILITY:
-- New business applications and listings default to pending.
-- A business profile appears only after its application is approved.
-- A listing appears only after both the supplier application and listing are approved.
-- Use `RNX_CATALOGUE_MODERATION.md` for manual review steps.
+Database: if migrations 001, 002 and 003 are already applied, apply only 004_rnx_introduction_workflow.sql. Check migration history first. The migration creates only RNX-prefixed columns, tables and functions. Do not change other RuffNeck Entertainment tables.
 
-LIMITATIONS:
-- No supplier login/dashboard, admin UI, payment gateway, image uploads, stock sync or automated matching.
-- Full dependency installation, production build, database migration and live form submissions have not been verified in this packaging environment.
+Set SUPABASE_URL, SUPABASE_SECRET_KEY, RNX_ADMIN_PASSWORD, RNX_ADMIN_SESSION_SECRET and NEXT_PUBLIC_SITE_URL privately in Vercel. Never put secrets in GitHub.
+
+The archive does not commit to GitHub, deploy to Vercel, execute SQL or connect a payment/messaging provider. See BUILD_STATUS.md and RNX_INTRODUCTION_WORKFLOW.md for verification status and operating rules.

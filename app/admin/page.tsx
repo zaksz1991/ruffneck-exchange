@@ -10,7 +10,7 @@ export default async function AdminPage() {
     <div className="page-intro admin-page-intro">
       <p className="eyebrow">PRIVATE OPERATIONS</p>
       <h1>Marketplace operations.</h1>
-      <p>Review supplier applications, approve catalogue offers and manage the lead qualification queue. Public visibility and customer contact release remain separate controls.</p>
+      <p>Review suppliers and listings, qualify customer requests, prepare anonymised supplier offers, verify payments and record customer-authorised introductions.</p>
     </div>
     <AdminConsole />
   </main>;

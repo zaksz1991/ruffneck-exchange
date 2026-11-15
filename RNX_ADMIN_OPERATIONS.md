@@ -44,3 +44,8 @@ Do not rerun migrations 001 or 002 if their RNX tables already exist. The migrat
 
 ## Verification boundary
 The source package includes route-level checks by inspection and static file validation only. It has not been connected to your production Supabase project, the migration has not been executed, and a live Vercel production deployment has not been tested by this package generation.
+
+
+## v0.5.0 — supplier introduction workflow
+
+The supplier offer, supplier acceptance, payment verification, private customer approval link and contact-release process is documented in `RNX_INTRODUCTION_WORKFLOW.md`. Migration `004_rnx_introduction_workflow.sql` adds the per-offer event record and database functions used by this workflow. Do not record a contact release until the handoff has actually happened.

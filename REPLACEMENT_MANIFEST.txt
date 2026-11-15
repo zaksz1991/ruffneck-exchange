@@ -1,16 +1,15 @@
-RUFFNECK EXCHANGE v0.4.0 — COMPLETE PROJECT REPLACEMENT
+RUFFNECK EXCHANGE v0.5.0 — FULL REPLACEMENT MANIFEST
 
-This archive contains the complete project folder, including all existing v0.3.0 marketplace routes plus the new private operations console, API routes, admin security helper, SQL migration 003, environment template and documentation.
+Complete cumulative Next.js application.
+Includes all public marketplace routes, supplier/catalogue pages, APIs, components, libraries, CSS, configuration, documentation and SQL migrations 001–004.
 
-Deployment settings:
-- Existing GitHub repository: zaksz1991/ruffneck-exchange
-- Branch: main
-- Vercel Root Directory: ./
-- Framework: Next.js
-- Production domain: https://ruffneck-exchange.vercel.app/
+New v0.5.0 additions:
+- app/api/admin/offers/route.ts
+- app/api/admin/offers/[id]/route.ts
+- app/api/customer/introduction/route.ts
+- app/introduction/approval/page.tsx
+- components/introduction-approval.tsx
+- supabase/migrations/004_rnx_introduction_workflow.sql
+- RNX_INTRODUCTION_WORKFLOW.md
 
-Apply the new v0.4.0 files as a full replacement of the repository source contents. Do not create another Vercel project. Do not delete GitHub repository settings/history. Before running SQL, check migration history and apply only migration 003 if 001 and 002 are already present.
-
-Set RNX_ADMIN_PASSWORD and RNX_ADMIN_SESSION_SECRET privately in Vercel before using /admin/login. Do not put real secrets in GitHub.
-
-This package generation does not make a commit, run a production deployment, or execute a Supabase migration. Consult BUILD_STATUS.md for verification limits.
+Replace source files in the existing GitHub repo. Do not upload this folder as a nested root directory. Vercel Root Directory remains ./.
