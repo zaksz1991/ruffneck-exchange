@@ -1,5 +1,6 @@
 'use client';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { SupplierVerificationPanel } from '@/components/supplier-verification-panel';
 
 type Plan = { id: string; code: string; name: string; description: string; listing_limit: number; display_price: string; features: string[] };
 type Payment = { id: string; amount: number; currency: string; payment_method: string; transaction_reference: string; status: string; supplier_note?: string | null; verified_at?: string | null; created_at: string };
@@ -115,6 +116,8 @@ export function SupplierDashboard() {
       <article><span>Opportunity offers</span><strong>{data.offers.length}</strong></article>
       <article><span>Current membership</span><strong>{plan?.name || 'Starter'}</strong></article>
     </div>
+
+    <SupplierVerificationPanel />
 
     <section className="supplier-panel">
       <div className="supplier-section-heading"><div><p className="eyebrow">ACCOUNT AND BILLING</p><h2>Membership</h2></div><span className={`admin-state-${currentMembership?.status === 'active' ? 'good' : 'wait'}`}>{currentMembership?.status || 'No active plan'}</span></div>

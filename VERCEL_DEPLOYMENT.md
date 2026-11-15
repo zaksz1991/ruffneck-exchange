@@ -15,7 +15,7 @@ Set in Vercel Project Settings → Environment Variables:
 Do not paste secret values into source files, GitHub, browser code or variables prefixed with `NEXT_PUBLIC_`.
 
 ## Supabase caution
-RNX uses only `rnx_*` tables. Confirm the target project and migration history before applying anything. The current cumulative release contains migrations 001–010: core, catalogue, operations, introductions, supplier memberships/portal, customer accounts/tracking/messaging, notification delivery, consent-first attribution, staff access control, and trust cases. Apply only missing migrations in numerical order; never rerun a migration that has already succeeded. These migrations are additive to RNX objects and do not modify RuffNeck Entertainment LMS, Social Hub, billing, product, profile or Prospector tables.
+RNX uses only `rnx_*` tables. Confirm the target project and migration history before applying anything. The current cumulative release contains migrations 001–011: core, catalogue, operations, introductions, supplier memberships/portal, customer accounts/tracking/messaging, notification delivery, consent-first attribution, staff access control, trust cases, and supplier verification/private evidence storage. Apply only missing migrations in numerical order; never rerun a migration that has already succeeded. These migrations are additive to RNX objects and do not modify RuffNeck Entertainment LMS, Social Hub, billing, product, profile or Prospector tables.
 
 ## Deployment check
 1. Confirm a new deployment was created from the latest `main` commit.
@@ -58,3 +58,9 @@ After confirming migrations 001–008 exist, apply `supabase/migrations/009_rnx_
 ## v1.2.0 trust and resolution workflow
 
 Confirm migrations 001–009 are already applied, then apply only `supabase/migrations/010_rnx_trust_cases.sql`. It creates only `rnx_trust_cases`, `rnx_trust_case_messages`, `rnx_trust_case_events` and the RNX case-reference sequence. No new Vercel environment variables are required. Customer case intake is available only from an existing private `/track/<token>` link. After deployment, test case submission, customer-visible replies, staff-only notes, status transition rules, role denial for finance/analyst and customer API filtering of internal notes. Do not use a customer case as proof of supplier fraud or legal liability.
+
+
+## v1.3.0 supplier verification
+Confirm migrations 001–010 are present, then apply only `supabase/migrations/011_rnx_supplier_verification.sql`. This migration creates a private Storage bucket named `rnx-supplier-verification`; it must remain non-public. Do not add any Storage policy granting `anon` or `authenticated` access. Application server routes use the existing `SUPABASE_SECRET_KEY` and verify supplier ownership or the owner/operations-admin verification permission before generating 5-minute signed URLs. No new environment variables are required.
+
+After deployment, test with a non-production supplier account: save a draft, upload a harmless sample PDF/image under 4 MB, confirm it is private and only accessible through the signed supplier session route, submit it, review as owner/operations administrator, accept the required document types, approve with an expiry date, and check the public supplier profile badge. Confirm finance, customer support and analyst roles cannot load `/admin/verification` or its APIs. Never use live personal identity documents for smoke tests. Delete test evidence after validation.

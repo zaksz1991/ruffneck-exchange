@@ -1,12 +1,12 @@
-RUFFNECK EXCHANGE v1.2.0 — FULL REPLACEMENT
+RUFFNECK EXCHANGE v1.3.0 — COMPLETE REPLACEMENT
 
 1. Download and extract the ZIP.
 2. Open the extracted ruffneck-exchange folder.
-3. Replace the contents of the existing GitHub repository zaksz1991/ruffneck-exchange with the contents of that folder. Preserve all folders and dotfiles. Do not upload the outer ZIP folder as an extra nested directory.
+3. In the existing GitHub repository zaksz1991/ruffneck-exchange, replace the repository contents with the contents of this folder. Preserve all folders and dotfiles. Do not upload the outer ZIP folder as an extra nested directory.
 4. Commit the replacement to the existing main branch.
-5. Keep the existing Vercel project, production domain and Root Directory ./ .
-6. Confirm migrations 001–009 are already applied, then apply only supabase/migrations/010_rnx_trust_cases.sql. Do not rerun completed migrations.
-7. Keep existing server-side Supabase credentials, staff session secrets, supplier/customer session secrets, optional Resend credentials and CRON_SECRET. No new environment variables are required.
-8. After Vercel reports Ready, test a request tracking link: submit a test complaint, sign in to RNX Operations, open /admin/trust, assign and triage the case, post an internal note and a customer-visible reply, then confirm the customer tracking page shows only the customer-visible reply.
+5. Keep the existing Vercel project, production domain https://ruffneck-exchange.vercel.app/ and Root Directory ./ .
+6. Confirm migrations 001–010 have succeeded in the intended RuffNeck Entertainment Supabase project, then apply only supabase/migrations/011_rnx_supplier_verification.sql. If 011 was already applied, do not rerun it.
+7. Keep existing server-side Supabase credentials and all current session, staff, notification and cron environment variables. No new Vercel environment variables are required.
+8. After Vercel reports Ready, sign into an approved supplier portal, save a verification draft, upload synthetic PDF/image evidence and submit it. Then sign in as Owner or Operations Administrator, open /admin/verification, review the evidence and verify the public badge appears only after approval with a future expiry.
 
-This is a complete cumulative repository replacement, not a patch. The new v1.2.0 feature is customer complaint/dispute intake and staff resolution handling. Migration 010 creates only RNX trust-case tables and sequence. The assistant did not commit to GitHub, execute Supabase migrations or deploy to Vercel. Full dependency-backed typecheck and production build remain unverified because dependency installation did not complete in the build environment.
+This is a complete cumulative repository replacement, not a patch. The new v1.3.0 capability is manual supplier documentary verification with private evidence storage and expiry-controlled public status. It does not automatically contact CAC, FIRS or professional regulators and is not a legal certification. The assistant has not committed to GitHub, applied Supabase migration 011 or deployed to Vercel. Syntax and temporary-shim TypeScript checks passed; a real dependency-backed production build remains unverified because dependency installation timed out.

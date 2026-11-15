@@ -1,5 +1,5 @@
-RuffNeck Exchange v1.2.0 complete replacement contents
+RuffNeck Exchange v1.3.0 complete replacement contents
 
-Includes the cumulative application source, public assets, RNX Supabase migrations 001–010, build and deployment configuration, and operational documentation. Excludes node_modules, .env.local, real credentials, and build caches.
+Includes the cumulative application source, public assets, RNX Supabase migrations 001–011, build and deployment configuration, and operational documentation. Excludes node_modules, .env.local, real credentials and build caches.
 
-New in v1.2.0: customer complaint/dispute submission through private request tracking links, case references, case status handling, assignment, severity, customer-visible replies, staff-only internal notes and audit events. New database migration: 010_rnx_trust_cases.sql.
+New in v1.3.0: supplier verification submission, private evidence storage, owner/operations-admin document review, expiry-controlled public document-reviewed badge. New migration: 011_rnx_supplier_verification.sql.

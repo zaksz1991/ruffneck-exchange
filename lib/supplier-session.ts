@@ -12,6 +12,7 @@ export type PortalSupplier = {
   state: string;
   status: string;
   portal_enabled: boolean;
+  verification_status?: string;
 };
 
 export async function getAuthenticatedSupplier(): Promise<PortalSupplier | null> {
@@ -23,7 +24,7 @@ export async function getAuthenticatedSupplier(): Promise<PortalSupplier | null>
     if (membershipRefreshError) return null;
     const { data, error } = await db
       .from('rnx_supplier_applications')
-      .select('id,business_name,contact_name,email,phone,category,state,status,portal_enabled')
+      .select('id,business_name,contact_name,email,phone,category,state,status,portal_enabled,verification_status')
       .eq('id', id)
       .eq('status', 'approved')
       .eq('portal_enabled', true)

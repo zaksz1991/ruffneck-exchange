@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v1.2.0
+# RuffNeck Exchange (RNX) — v1.3.0
 
 A multi-industry, multi-location customer-acquisition marketplace connecting customers with products, services, suppliers, businesses, wholesale providers and procurement opportunities. Refrigeration, cold rooms and solar remain categories only; they do not define the brand.
 
@@ -8,6 +8,17 @@ RNX receives a customer's sourcing request, verifies the requirement and permiss
 Never sell or release customer contact information without disclosure and permission. Membership does not guarantee leads or ranking. Supplier approval is not a guarantee of stock, licence, product condition, delivery or transaction performance.
 
 
+
+
+## v1.3.0 supplier verification and private evidence vault
+- Approved suppliers can prepare a separate verification submission from their private supplier dashboard.
+- Business structures include registered business, sole trader/unincorporated business and licensed provider.
+- Evidence categories include business registration, proof of address, operating licence, operating evidence, authority letter, tax registration and other supporting documents.
+- PDF, JPEG, PNG and WebP uploads are checked against file signatures; maximum 4 MB per file and 10 files per submission.
+- Evidence is stored in a private Supabase Storage bucket. Direct anonymous/authenticated Storage access is not granted; server routes verify the supplier session or verification-staff permission and create 5-minute signed viewing URLs.
+- Owner and operations administrator roles can review submissions, accept/reject individual documents, add private notes, send supplier-visible feedback, approve verification with an expiry date or reject the submission.
+- A public “RNX document reviewed” badge appears only while the recorded verification is approved and unexpired. It does not certify goods, licensing, stock, solvency, quality or legal compliance.
+- Migration 011 creates only RNX verification objects, adds verification-status fields to the RNX supplier application table and adds a bucket-specific restrictive Storage policy. The private evidence bucket is created/normalised through the server-only Supabase Storage API on first use. It does not modify unrelated RuffNeck tables.
 
 ## v1.2.0 customer trust and resolution workflow
 - Customers with a private request-tracking link can submit a complaint or dispute associated with that request.
@@ -123,8 +134,9 @@ The RNX schema is additive and uses `rnx_*` tables. Review target project conten
 8. `008_rnx_consent_first_attribution.sql`
 9. `009_rnx_staff_access_control.sql`
 10. `010_rnx_trust_cases.sql`
+11. `011_rnx_supplier_verification.sql`
 
-For an installation where migrations 001–009 are already applied, apply only migration 010. For an installation where migrations 001–008 are applied, apply missing migrations 009 and 010 in order. For a fresh RNX installation, apply 001–010 in order. Check the actual migration history and apply only missing files in numerical order. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
+Apply only missing migrations in numerical order. A fresh RNX installation requires 001–011. Do not rerun completed migrations or alter unrelated RuffNeck tables. Check the actual migration history and apply only missing files in numerical order. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
 
 ## Supplier introduction operating sequence
 1. Qualify the customer request in the operations console.
@@ -155,7 +167,7 @@ A connected Git repository does not prove that a deployment build succeeds. Insp
 
 ## Not included
 - Payment gateway or automatic bank reconciliation.
-- Supplier KYB/licence verification, uploaded evidence vault, public trust scores or automated fraud determinations. Those require independent review and are not implied by case handling.
+- Automated KYB/licence verification, public trust scores or automated fraud determinations. RNX v1.3.0 provides a manual evidence submission and documentary review workflow only.
 - WhatsApp or SMS delivery.
 - Customer email verification, password reset and account recovery.
 - General website traffic, page-view, ad-impression or clickstream analytics; v1.0.0 measures only consented form conversions.
@@ -170,3 +182,6 @@ See `RNX_CUSTOMER_ACCOUNTS_AND_TRACKING.md` for migration 006, privacy boundarie
 See `RNX_NOTIFICATION_DELIVERY.md` for migration 007, retry policy, Vercel schedule and Resend setup. See `RNX_ANALYTICS_AND_ATTRIBUTION.md` for migration 008, consent controls and analytics reporting.
 
 See `RNX_STAFF_ACCESS_CONTROL.md` for role permissions, invitation setup, migration 009, password requirements and recovery limitations. See `RNX_TRUST_AND_RESOLUTION.md` for complaint intake, status handling, customer-visible replies and internal-note privacy.
+
+
+See `RNX_SUPPLIER_VERIFICATION.md` for migration 011, private evidence storage, reviewer controls, expiry rules and limitations.

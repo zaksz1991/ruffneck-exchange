@@ -10,6 +10,8 @@ export type PublicSupplier = {
   state: string;
   website: string | null;
   description: string;
+  is_verified: boolean;
+  verification_expires_at: string | null;
 };
 
 export type PublicListing = {
@@ -101,7 +103,7 @@ export async function getApprovedSuppliers(q = ''): Promise<PublicSupplier[]> {
     const db = supabaseAdmin();
     const { data, error } = await db
       .from('rnx_supplier_applications')
-      .select('id,public_slug,business_name,business_type,category,state,website,description')
+      .select('id,public_slug,business_name,business_type,category,state,website,description,verification_status,verification_expires_at')
       .eq('status', 'approved')
       .not('public_slug', 'is', null)
       .order('business_name', { ascending: true })
@@ -110,7 +112,8 @@ export async function getApprovedSuppliers(q = ''): Promise<PublicSupplier[]> {
       console.error('[RNX] Approved suppliers query failed:', { code: error.code, message: error.message });
       return [];
     }
-    const rows = (data ?? []) as PublicSupplier[];
+    const now = Date.now();
+    const rows = (data ?? []).map((row: any) => ({ ...row, is_verified: row.verification_status === 'verified' && Boolean(row.verification_expires_at && new Date(row.verification_expires_at).getTime() > now), verification_expires_at: row.verification_expires_at || null })) as PublicSupplier[];
     const query = cleanSearch(q);
     return query ? rows.filter((supplier) => containsTerms([supplier.business_name, supplier.business_type, supplier.category, supplier.state, supplier.description].join(' '), query)) : rows;
   } catch (error) {
@@ -124,7 +127,7 @@ export async function getApprovedSupplierBySlug(slug: string): Promise<PublicSup
     const db = supabaseAdmin();
     const { data, error } = await db
       .from('rnx_supplier_applications')
-      .select('id,public_slug,business_name,business_type,category,state,website,description')
+      .select('id,public_slug,business_name,business_type,category,state,website,description,verification_status,verification_expires_at')
       .eq('public_slug', slug)
       .eq('status', 'approved')
       .maybeSingle();
@@ -132,7 +135,9 @@ export async function getApprovedSupplierBySlug(slug: string): Promise<PublicSup
       console.error('[RNX] Supplier profile query failed:', { code: error.code, message: error.message });
       return null;
     }
-    return data as PublicSupplier | null;
+    if (!data) return null;
+    const row = data as any;
+    return { ...row, is_verified: row.verification_status === 'verified' && Boolean(row.verification_expires_at && new Date(row.verification_expires_at).getTime() > Date.now()), verification_expires_at: row.verification_expires_at || null } as PublicSupplier;
   } catch (error) {
     console.error('[RNX] Supplier profile unavailable:', error instanceof Error ? error.message : 'Unknown error');
     return null;

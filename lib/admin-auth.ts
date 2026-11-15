@@ -12,7 +12,8 @@ export type AdminPermission =
   | 'communications:read' | 'communications:write'
   | 'memberships:read' | 'memberships:write' | 'payments:verify'
   | 'analytics:read' | 'notifications:process' | 'staff:manage'
-  | 'trust:read' | 'trust:write';
+  | 'trust:read' | 'trust:write'
+  | 'verification:read' | 'verification:write';
 
 export type AdminSession = {
   id: string | null;
@@ -25,8 +26,8 @@ export type AdminSession = {
 type SessionPayload = { v: 1; sub: string | null; exp: number };
 
 const permissions: Record<StaffRole, readonly AdminPermission[]> = {
-  owner: ['operations:read','operations:write','communications:read','communications:write','memberships:read','memberships:write','payments:verify','analytics:read','notifications:process','staff:manage','trust:read','trust:write'],
-  operations_admin: ['operations:read','operations:write','communications:read','communications:write','memberships:read','memberships:write','payments:verify','analytics:read','notifications:process','trust:read','trust:write'],
+  owner: ['operations:read','operations:write','communications:read','communications:write','memberships:read','memberships:write','payments:verify','analytics:read','notifications:process','staff:manage','trust:read','trust:write','verification:read','verification:write'],
+  operations_admin: ['operations:read','operations:write','communications:read','communications:write','memberships:read','memberships:write','payments:verify','analytics:read','notifications:process','trust:read','trust:write','verification:read','verification:write'],
   finance: ['memberships:read','memberships:write','payments:verify','analytics:read'],
   support: ['communications:read','communications:write','trust:read','trust:write'],
   analyst: ['analytics:read'],
