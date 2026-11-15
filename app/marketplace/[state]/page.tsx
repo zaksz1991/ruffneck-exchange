@@ -1,62 +1,19 @@
 import Link from 'next/link';
-import { site } from '@/lib/site';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+import { site, stateFromSlug } from '@/lib/site';
 
-export async function generateStaticParams() {
-  return site.states.map((state) => ({
-    state: state.toLowerCase().replaceAll(' ', '-'),
-  }));
+type Props = { params: Promise<{ state: string }> };
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { state: slug } = await params;
+  const state = stateFromSlug(slug);
+  if (!state) return { title: 'Location not found', robots: { index: false, follow: true } };
+  return { title: `Sourcing Requests in ${state}`, description: `Submit a product, service or procurement request for ${state}. Supplier coverage is confirmed individually.`, alternates: { canonical: `/marketplace/${slug}` }, robots: { index: false, follow: true } };
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ state: string }>;
-}) {
-  const { state } = await params;
-  const stateName = site.states.find(
-    (item) => item.toLowerCase().replaceAll(' ', '-') === state,
-  );
-
-  if (!stateName) return { title: 'Marketplace location not found' };
-
-  return {
-    title: `Businesses, Products and Services in ${stateName}`,
-    description: `Explore marketplace categories and submit product or service requests for ${stateName}. Supplier coverage is confirmed individually.`,
-    robots: { index: false, follow: true },
-  };
-}
-
-export default async function StatePage({
-  params,
-}: {
-  params: Promise<{ state: string }>;
-}) {
-  const { state } = await params;
-  const stateName = site.states.find(
-    (item) => item.toLowerCase().replaceAll(' ', '-') === state,
-  );
-
-  if (!stateName) notFound();
-
-  return (
-    <main className="page">
-      <p className="eyebrow">MARKETPLACE LOCATION</p>
-      <h1>Products, services and supplier requests in {stateName}</h1>
-      <p>
-        Tell RuffNeck Exchange what you need in {stateName}. The team can review
-        the requirement and identify relevant businesses where suitable
-        supplier coverage exists.
-      </p>
-      <div className="notice">
-        This location page is a starting point, not a claim that suppliers,
-        inventory or verified businesses are already available in this state.
-        Search engines are asked not to index this page until unique local
-        research and genuine supplier coverage have been added.
-      </div>
-      <Link className="button" href="/request">
-        Request a product or service
-      </Link>
-    </main>
-  );
+export default async function StateMarketplace({ params }: Props) {
+  const { state: slug } = await params;
+  const state = stateFromSlug(slug);
+  if (!state) notFound();
+  return <main className="page-shell container"><div className="breadcrumbs"><Link href="/marketplace">Marketplace</Link><span>/</span><span>{state}</span></div><div className="page-intro"><p className="eyebrow">LOCATION REQUESTS</p><h1>Source products and services in {state}.</h1><p>Tell us what you need and where it is required. The team will review the request and assess relevant supplier coverage; this page does not claim that a supplier or product is currently available.</p><Link className="button" href={`/request?state=${encodeURIComponent(state)}`}>Submit a request for {state}</Link></div><div className="notice"><strong>Location page under development.</strong><p>This page is not indexed until it has unique local market information and verified supplier coverage. It is available as a request entry point.</p></div><div className="state-grid">{site.states.filter(s => s !== state).slice(0, 12).map(s => <Link key={s} href={`/marketplace/${s.toLowerCase().replace(/\s+/g, '-')}`}>{s}</Link>)}</div></main>;
 }

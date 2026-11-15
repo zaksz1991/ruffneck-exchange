@@ -1,14 +1,28 @@
-# Vercel deployment (GUI workflow)
+# Vercel deployment guide
 
-1. Create a GitHub repository named `ruffneck-exchange`.
-2. Upload the contents of this project to the repository root using GitHub's web interface.
-3. In Vercel, select **Add New → Project**, import `ruffneck-exchange`, keep framework preset **Next.js**.
-4. Add environment variables from `.env.example` in Project Settings → Environment Variables. Keep `SUPABASE_SERVICE_ROLE_KEY` server-only; never use a `NEXT_PUBLIC_` prefix.
-5. In Supabase SQL Editor, review and run `supabase/migrations/001_rnx_core.sql` in the correct project.
-6. Deploy a Preview first. Test customer and supplier forms, confirm rows are stored and check that public/anon roles cannot read private leads.
-7. Set `NEXT_PUBLIC_SITE_URL` to the actual production domain, redeploy, then test metadata, sitemap and robots.
-8. Add the production domain to Google Search Console and submit `/sitemap.xml`.
+## Project settings
+- Framework: Next.js.
+- Root Directory: `./`.
+- Build Command: `npm run build` (default Next.js build is also valid).
+- Node.js: 22.x LTS is the conservative baseline for this project.
 
-Commercial-use restriction: Vercel Hobby is restricted to personal, non-commercial use. Since RNX is intended to earn revenue, do not treat Hobby as an eligible free production tier. Review current Vercel plan terms before monetised launch. Development previews are not a workaround for commercial production.
+## Environment variables
+Set in Vercel Project Settings → Environment Variables:
+- `NEXT_PUBLIC_SITE_URL` = `https://ruffneck-exchange.vercel.app`
+- `SUPABASE_URL` = existing approved Supabase project URL
+- `SUPABASE_SECRET_KEY` = server-only Supabase secret key
 
-No paid subscription is assumed in this project. This is source code and setup guidance; no live Supabase, email, payments, domain, or Vercel deployment has been connected by this ZIP.
+Do not paste secret values into source files, GitHub, browser code or variables prefixed with `NEXT_PUBLIC_`.
+
+## Supabase caution
+RNX uses only the `rnx_*` tables. Confirm that the core tables exist before applying the migration. Do not alter RuffNeck Entertainment LMS, Social Hub, billing, product or profile tables. The migration is additive but still requires review against the actual target project.
+
+## Deployment check
+1. Confirm a new deployment was created from the latest `main` commit.
+2. Wait for `npm run build` to complete and inspect the complete log if it fails.
+3. Check homepage, marketplace, request page and business registration page.
+4. Submit a test request and confirm the row is stored in `rnx_leads`.
+5. Submit a test business application and confirm the row is stored in `rnx_supplier_applications`.
+6. Confirm no contact details are exposed on public pages.
+
+A successful Git connection is not proof of a successful build. The message `A repository ID is required for GitHub deployments` is a Vercel Git integration issue, not a Next.js source compilation message.

@@ -1,141 +1,31 @@
 import Link from 'next/link';
-import { departmentKeywords, departments, site } from '@/lib/site';
+import { departments, site } from '@/lib/site';
 
-export const metadata = {
-  title: 'Products, Suppliers and Services Marketplace',
-  description:
-    'Find products, compare suppliers and request quotations from businesses across Nigeria.',
-  alternates: { canonical: '/marketplace' },
-};
+export const metadata = { title: 'Marketplace — Products, Services and Business Categories', description: 'Explore business categories and submit product, service and procurement requests across Nigeria.', alternates: { canonical: '/marketplace' } };
 
-type MarketplaceSearchParams = {
-  q?: string | string[];
-  state?: string | string[];
-  category?: string | string[];
-};
+type Params = { q?: string | string[]; state?: string | string[]; category?: string | string[] };
+const first = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] || '' : value || '';
+const norm = (value: string) => value.toLowerCase().trim().replace(/\s+/g, ' ');
 
-function firstValue(value: string | string[] | undefined): string {
-  return Array.isArray(value) ? (value[0] ?? '') : (value ?? '');
-}
-
-function normalize(value: string): string {
-  return value.trim().toLocaleLowerCase().replace(/\s+/g, ' ');
-}
-
-export default async function Marketplace({
-  searchParams,
-}: {
-  searchParams: Promise<MarketplaceSearchParams>;
-}) {
+export default async function Marketplace({ searchParams }: { searchParams: Promise<Params> }) {
   const params = await searchParams;
-  const query = firstValue(params.q).trim();
-  const category = firstValue(params.category).trim();
-  const state = firstValue(params.state).trim();
-  const searchText = normalize([query, category].filter(Boolean).join(' '));
-  const searchTerms = searchText.split(' ').filter((term) => term.length > 1);
+  const q = first(params.q).trim();
+  const category = first(params.category).trim();
+  const state = first(params.state).trim();
+  const phrase = norm([q, category].filter(Boolean).join(' '));
+  const terms = phrase.split(/[^a-z0-9]+/).filter(t => t.length > 1);
+  const matches = terms.length ? departments.filter(d => {
+    const haystack = norm([d.name, d.description, ...d.keywords].join(' '));
+    return terms.every(term => haystack.includes(term)) || terms.some(term => haystack.includes(term));
+  }) : departments;
 
-  const matchingDepartments = searchTerms.length
-    ? departments.filter((department) => {
-        const searchableText = normalize(
-          [department, ...departmentKeywords[department]].join(' '),
-        );
-        return searchTerms.some((term) => searchableText.includes(term));
-      })
-    : departments;
-
-  return (
-    <main className="page">
-      <p className="eyebrow">MARKETPLACE</p>
-      <h1>Browse products, services and businesses</h1>
-      <p>
-        Search by product, service, supplier category or location. Listings are
-        published only after moderation and the relevant verification checks.
-      </p>
-
-      <form action="/marketplace" className="search" role="search">
-        <label className="sr-only" htmlFor="marketplace-query">
-          Product, service or supplier
-        </label>
-        <input
-          id="marketplace-query"
-          name="q"
-          placeholder="What do you need? e.g. cold room, cement, logistics"
-          defaultValue={query}
-        />
-        <label className="sr-only" htmlFor="marketplace-state">
-          State
-        </label>
-        <select id="marketplace-state" name="state" defaultValue={state}>
-          <option value="">All Nigeria</option>
-          {site.states.map((stateName) => (
-            <option key={stateName} value={stateName}>
-              {stateName}
-            </option>
-          ))}
-        </select>
-        {category ? <input type="hidden" name="category" value={category} /> : null}
-        <button type="submit">Search marketplace</button>
-      </form>
-
-      {state ? (
-        <p className="notice">
-          Location selected: <strong>{state}</strong>. Supplier coverage and
-          availability are confirmed individually; this filter does not imply
-          that listings currently exist in that state.
-        </p>
-      ) : null}
-
-      {searchText ? (
-        <p>
-          Departments matching <strong>{[query, category].filter(Boolean).join(' · ')}</strong>
-        </p>
-      ) : (
-        <h2>Explore business departments</h2>
-      )}
-
-      {matchingDepartments.length > 0 ? (
-        <div className="grid">
-          {matchingDepartments.map((department) => (
-            <Link
-              className="tile"
-              key={department}
-              href={`/marketplace?category=${encodeURIComponent(department)}${state ? `&state=${encodeURIComponent(state)}` : ''}`}
-            >
-              <h3>{department}</h3>
-              <p>Explore this category and request relevant products or services.</p>
-            </Link>
-          ))}
-        </div>
-      ) : (
-        <div className="notice" role="status">
-          <strong>No matching department was found.</strong>
-          <p>
-            Your requirement may still be handled even when it does not match a
-            listed department. Submit a free request and describe what you need.
-          </p>
-          <Link className="button" href="/request">
-            Submit a customer request
-          </Link>
-        </div>
-      )}
-
-      <h2>Browse by state</h2>
-      <div className="stategrid">
-        {site.states.map((stateName) => (
-          <Link
-            key={stateName}
-            href={`/marketplace/${encodeURIComponent(stateName.toLowerCase().replaceAll(' ', '-'))}/`}
-          >
-            {stateName}
-          </Link>
-        ))}
-      </div>
-
-      <p className="notice">
-        Supplier and product inventory will appear as approved businesses
-        publish listings. Department matches are taxonomy suggestions, not
-        confirmation of stock, supplier availability or completed verification.
-      </p>
-    </main>
-  );
+  return <main className="page-shell container">
+    <div className="page-intro"><p className="eyebrow">RNX MARKETPLACE</p><h1>Explore products, services and business categories.</h1><p>Search the marketplace taxonomy or submit a requirement for sourcing support. Category matches are not live-stock or supplier-availability claims.</p></div>
+    <form action="/marketplace" className="market-search" role="search"><label className="sr-only" htmlFor="market-q">Search categories</label><input id="market-q" name="q" defaultValue={q} placeholder="Search products, services or categories" /><label className="sr-only" htmlFor="market-state">State</label><select id="market-state" name="state" defaultValue={state}><option value="">All Nigeria</option>{site.states.map(s => <option key={s}>{s}</option>)}</select><button className="button" type="submit">Search</button></form>
+    {state && <p className="notice">Location filter: <strong>{state}</strong>. Supplier coverage and availability are confirmed individually. This filter does not imply approved suppliers currently operate in that location.</p>}
+    <div className="section-heading compact-heading"><div><p className="eyebrow">{phrase ? 'SEARCH RESULTS' : 'ALL DEPARTMENTS'}</p><h2>{phrase ? `${matches.length} relevant ${matches.length === 1 ? 'category' : 'categories'}` : 'Browse by department'}</h2></div><span className="muted">{departments.length} departments</span></div>
+    {matches.length ? <div className="category-grid">{matches.map((d, i) => <Link key={d.slug} className="category-card" href={`/marketplace?category=${encodeURIComponent(d.name)}${state ? `&state=${encodeURIComponent(state)}` : ''}`}><span className="category-index">{String(i + 1).padStart(2, '0')}</span><h3>{d.name}</h3><p>{d.description}</p><span className="card-arrow">View sourcing category ↗</span></Link>)}</div> : <div className="empty-state"><h3>No exact category match</h3><p>Your requirement may still be handled. Describe what you need and the team can review it.</p><Link className="button" href="/request">Submit a sourcing request</Link></div>}
+    <section className="state-section"><div className="section-heading compact-heading"><div><p className="eyebrow">LOCATION EXPLORER</p><h2>Browse by state</h2></div></div><div className="state-grid">{site.states.map(s => <Link key={s} href={`/marketplace/${s.toLowerCase().replace(/\s+/g, '-')}`}>{s}</Link>)}</div></section>
+    <p className="fine-print">Listings are not yet published as a verified live inventory. Businesses are reviewed before being represented as approved. Never pay a supplier solely on the basis of an unverified marketplace claim.</p>
+  </main>;
 }

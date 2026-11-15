@@ -1,34 +1,30 @@
-# RNX lead operations: intermediary model
+# RNX lead operations playbook
 
-## Roles
-RNX acquires demand, qualifies customer requests, matches the requirement to suitable businesses, negotiates/collects the lead fee, obtains customer permission and manages the introduction. Suppliers fulfil products/services and contract directly with customers unless a separate RNX transaction flow is introduced.
+## Customer request intake
+Review each enquiry for:
+- Clear product/service specification and intended use.
+- Quantity, volume or project size where relevant.
+- City, state and delivery/service location.
+- Timing and budget range where appropriate.
+- Reachable contact details and the stated preferred contact method.
+- Consent to be contacted about the request.
 
-## Qualification checklist
-- Customer identity/contact route confirmed.
-- Need, specifications, quantity and location understood.
-- Budget or budget range requested only where appropriate.
-- Purchase/decision timeframe captured.
-- Delivery/installation/service requirements captured.
-- Customer understands RNX is an intermediary.
-- Customer agrees to be introduced to a supplier.
-- Duplicate/fraud/low-intent checks completed.
+Do not classify an enquiry as qualified solely because a form was submitted.
 
-## Supplier offer
-Share an anonymised brief only: category, location at suitable granularity, requirement, quantity/specifications, timeframe and any relevant constraints. Do not reveal name, phone, email, exact address or other identifying details.
+## Supplier matching
+- Match only against businesses with adequate evidence of the requested capability and coverage.
+- Send an anonymised brief first. Remove customer name, email, phone, exact street address and any unnecessary personal information.
+- Explain the applicable fee and acceptance conditions to the supplier before releasing any opportunity beyond the anonymised brief.
+- Record offer, acceptance, payment confirmation and the staff member responsible.
 
-## Payment and release gate
-1. Supplier accepts the lead fee and terms.
-2. Payment is confirmed from the payment provider or bank record; never trust a screenshot alone.
-3. RNX confirms the customer still wants an introduction and records permission for the named supplier.
-4. Release only the minimum contact details needed.
-5. Record who accessed the lead and when.
-6. Follow up and record outcome.
+## Contact release
+Contact details remain locked until the customer has been informed of the intended supplier introduction and has authorised that introduction. Supplier payment alone is not customer consent.
 
-## Commercial safeguards
-- Publish clear lead definitions and invalid-lead policy.
-- Define duplicate window, refund/credit conditions and dispute process.
-- No guarantee of sale or supplier exclusivity unless explicitly contracted.
-- Do not sell the same exclusive lead twice.
-- Keep audit trail for consent, payment and release.
-- Separate membership fee from pay-per-lead fee.
-- Never imply that paid membership guarantees enquiries or ranking.
+## Payment and dispute control
+- Confirm payment through the payment provider or bank account record. A screenshot is not proof of settlement.
+- Record duplicate, invalid, unreachable and out-of-scope enquiries.
+- Apply a published credit/refund policy consistently.
+- Keep an audit trail of every status and contact-release change.
+
+## Supplier claims
+Do not label a business verified, certified, authorised or approved without completing and recording the checks that support the claim. Membership, advertising or a featured placement does not guarantee enquiries, ranking or sales.

@@ -1,27 +1,27 @@
-# Build status — v0.1.0
+# Build and release status — v0.2.0
 
-Implemented in source:
-- Next.js application shell and responsive landing page.
-- Multi-industry department taxonomy and all Nigerian states.
-- Marketplace category and state/category page template.
-- Customer request and supplier application UI/API.
-- Server-side schema validation.
-- Supabase migration for supplier applications, leads, anonymised lead offers and event table.
-- Lead contact-release lock default.
-- RuffNeck services and platform showcase.
-- SEO metadata, sitemap and robots route.
-- SEO, research, intermediary operations and Vercel GUI deployment documents.
+## Included
+- Full Next.js source tree, routing, layout and responsive styling.
+- Multi-industry category taxonomy and search-term matching.
+- State request entry pages marked `noindex` until local content and supplier coverage are verified.
+- Customer and business application forms.
+- Server-side Zod validation and Supabase persistence.
+- Server-only database key handling.
+- SEO metadata, canonical host, robots and sitemap.
+- Additive RNX SQL schema with row-level security enabled and browser-role privileges revoked.
 
-Not implemented:
-- Admin dashboard, authentication, business owner portal, listing CRUD, membership billing, payment gateway, automated lead matching, notifications, analytics consent UI, product sync and automated contact release.
-- Live integrations are not configured.
-- No production deployment or live database test has been performed.
-- Location/category pages are templates and should not be indexed until populated with unique research and real supplier coverage.
+## Not included
+- Authentication, supplier/member dashboards, inventory listings, payment gateway, subscription billing, moderation console, automated supplier matching or notifications.
+- Live supplier stock or price data.
+- A verified supplier directory.
 
-This is a working starter foundation, not a finished commercial marketplace. No claim of live functionality beyond the source-level implementation is made.
+## Validation status
+- JSON configuration files authored and syntax-checked while packaging.
+- ZIP archive integrity checked after creation.
+- Full dependency installation and production compilation: NOT RUN.
+- Supabase migration execution: NOT RUN.
+- Live customer and supplier form submissions: NOT RUN.
+- Vercel production deployment: NOT RUN by this packaging process.
 
-
-## v0.1.1 update
-- Updated server-side Supabase configuration to prefer the current `SUPABASE_SECRET_KEY` and `SUPABASE_URL` variables.
-- Retained `SUPABASE_SERVICE_ROLE_KEY` as a temporary backwards-compatible fallback.
-- This is a configuration compatibility update; it does not mean the application has been deployed or end-to-end tested.
+## Important deployment distinction
+The Vercel error `A repository ID is required for GitHub deployments` is a Git deployment integration error that occurs before application compilation. Replacing application source does not, by itself, repair a missing repository identifier in Vercel's Git integration.
