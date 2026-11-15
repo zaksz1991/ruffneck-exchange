@@ -77,6 +77,25 @@ export function SupplierDashboard() {
     finally { setBusy(false); }
   }
 
+  async function changeListingStatus(listingId: string, action: 'pause' | 'reactivate') {
+    const prompt = action === 'pause'
+      ? 'Pause this approved listing? It will disappear from public marketplace results.'
+      : 'Submit this paused listing for review again? It will remain hidden until RNX approves it.';
+    if (!window.confirm(prompt)) return;
+    setBusy(true); setError(''); setNotice('');
+    try {
+      const response = await fetch(`/api/supplier/listings/${listingId}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (response.status === 401) { window.location.assign('/supplier/login'); return; }
+      if (!response.ok) throw new Error(result.error || 'Listing status could not be changed.');
+      setNotice(result.message || 'Listing status updated.');
+      await refresh();
+    } catch (err) { setError(err instanceof Error ? err.message : 'Listing status could not be changed.'); }
+    finally { setBusy(false); }
+  }
+
   async function respondToOffer(offerId: string, action: 'accept' | 'decline') {
     if (action === 'decline' && !window.confirm('Decline this anonymised opportunity? This response will be recorded and the customer will not be introduced through this offer.')) return;
     setBusy(true); setError(''); setNotice('');
@@ -158,7 +177,7 @@ export function SupplierDashboard() {
         <label className="full-field">Description<textarea name="description" rows={4} required minLength={30} maxLength={3000} placeholder="Specifications, coverage, availability, terms and important limitations." /></label>
         <div className="full-field"><button className="button" type="submit" disabled={busy}>{busy ? 'Submitting…' : 'Submit new listing for review'}</button></div>
       </form>
-      {data.listings.length ? <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Offer</th><th>Category / location</th><th>Price</th><th>Status</th><th>Submitted</th></tr></thead><tbody>{data.listings.map((listing) => <tr key={listing.id}><td><strong>{listing.title}</strong><small>{listing.listing_type}</small></td><td>{listing.category}<small>{[listing.city, listing.state].filter(Boolean).join(', ')}</small></td><td>{listing.price_type === 'enquiry' ? 'Enquiry' : money(listing.price, listing.currency)}</td><td><span className={`admin-state-${listing.status === 'approved' ? 'good' : listing.status === 'rejected' ? 'bad' : 'wait'}`}>{listing.status}</span></td><td>{dateText(listing.created_at)}</td></tr>)}</tbody></table></div> : <div className="admin-empty">No catalogue listings submitted yet.</div>}
+      {data.listings.length ? <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Offer</th><th>Category / location</th><th>Price</th><th>Status</th><th>Submitted</th></tr></thead><tbody>{data.listings.map((listing) => <tr key={listing.id}><td><strong>{listing.title}</strong><small>{listing.listing_type}</small></td><td>{listing.category}<small>{[listing.city, listing.state].filter(Boolean).join(', ')}</small></td><td>{listing.price_type === 'enquiry' ? 'Enquiry' : money(listing.price, listing.currency)}</td><td><span className={`admin-state-${listing.status === 'approved' ? 'good' : listing.status === 'rejected' ? 'bad' : 'wait'}`}>{listing.status}</span>{listing.status === 'approved' && <button className="button button-small button-dark" type="button" disabled={busy} onClick={() => void changeListingStatus(listing.id, 'pause')}>Pause</button>}{listing.status === 'paused' && <button className="button button-small" type="button" disabled={busy} onClick={() => void changeListingStatus(listing.id, 'reactivate')}>Submit for review</button>}</td><td>{dateText(listing.created_at)}</td></tr>)}</tbody></table></div> : <div className="admin-empty">No catalogue listings submitted yet.</div>}
     </section>
 
     <section className="supplier-panel">

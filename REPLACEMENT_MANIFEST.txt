@@ -1,5 +1,10 @@
-RuffNeck Exchange v1.3.0 complete replacement contents
-
-Includes the cumulative application source, public assets, RNX Supabase migrations 001–011, build and deployment configuration, and operational documentation. Excludes node_modules, .env.local, real credentials and build caches.
-
-New in v1.3.0: supplier verification submission, private evidence storage, owner/operations-admin document review, expiry-controlled public document-reviewed badge. New migration: 011_rnx_supplier_verification.sql.
+RUFFNECK EXCHANGE v1.7.0 COMPLETE REPLACEMENT
+Source baseline: user-uploaded complete repository archive (v1.6.1).
+Release additions:
+- app/api/supplier/listings/[id]/route.ts
+- supplier dashboard pause/resubmit controls
+- scripts/test-supplier-listing-controls.mjs
+- v1.7.0 release and build status documentation
+- package version and check script updated to 1.7.0
+Retained: complete existing app, public assets, brand pack, API routes, components, docs, scripts, and Supabase migrations 001–013.
+No new migration or environment variable.

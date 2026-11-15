@@ -1,6 +1,6 @@
 {
   "name": "ruffneck-exchange",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "private": true,
   "engines": {
     "node": ">=20.9.0"
@@ -12,8 +12,9 @@
     "typecheck": "tsc --noEmit",
     "test:account-recovery": "node scripts/test-account-recovery.mjs",
     "test:email-verification": "node scripts/test-email-verification.mjs",
-    "check": "npm run test:account-recovery && npm run test:email-verification && npm run test:supplier-form-build-fix && npm run typecheck && npm run build",
-    "test:supplier-form-build-fix": "node scripts/test-supplier-form-build-fix.mjs"
+    "check": "npm run test:account-recovery && npm run test:email-verification && npm run test:supplier-form-build-fix && npm run test:supplier-listing-controls && npm run typecheck && npm run build",
+    "test:supplier-form-build-fix": "node scripts/test-supplier-form-build-fix.mjs",
+    "test:supplier-listing-controls": "node scripts/test-supplier-listing-controls.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",

@@ -1,13 +1,15 @@
-RUFFNECK EXCHANGE v1.4.0 — COMPLETE REPLACEMENT
+RUFFNECK EXCHANGE v1.7.0 — COMPLETE CUMULATIVE REPLACEMENT
 
-This release contains the complete cumulative project plus a visual identity and marketing asset pack.
+This ZIP contains the complete project source and all existing application routes, components, assets, documentation, scripts and Supabase migrations 001–013.
 
-1. Extract the ZIP.
+GUI deployment:
+1. Extract this ZIP.
 2. Open the ruffneck-exchange folder.
-3. Replace the contents of the existing GitHub repository with the contents of this folder.
-4. Commit to main.
+3. Replace the existing GitHub repository contents with the contents of this folder, preserving paths.
+4. Commit to the main branch.
 5. Keep the existing Vercel project and Root Directory ./ .
 
-No Supabase migration is required. No new environment variables are required. Do not rerun migrations 001–011.
+No new Supabase migration or environment variable is required for v1.7.0. Do not rerun migrations 001–013 if already applied.
 
-New assets: RNX_BRAND_ASSETS.md, public/brand, public/marketing, public/placeholders and public/icon.svg.
+New feature: suppliers can pause an approved listing or resubmit a paused listing for RNX review. Resubmitted listings stay private until staff approval.
+See RNX-v1.7.0-RELEASE-NOTES.md and BUILD_STATUS.md.
