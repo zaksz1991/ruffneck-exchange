@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v1.1.0
+# RuffNeck Exchange (RNX) — v1.2.0
 
 A multi-industry, multi-location customer-acquisition marketplace connecting customers with products, services, suppliers, businesses, wholesale providers and procurement opportunities. Refrigeration, cold rooms and solar remain categories only; they do not define the brand.
 
@@ -8,6 +8,16 @@ RNX receives a customer's sourcing request, verifies the requirement and permiss
 Never sell or release customer contact information without disclosure and permission. Membership does not guarantee leads or ranking. Supplier approval is not a guarantee of stock, licence, product condition, delivery or transaction performance.
 
 
+
+## v1.2.0 customer trust and resolution workflow
+- Customers with a private request-tracking link can submit a complaint or dispute associated with that request.
+- Case types cover general complaints, delivery, product or service quality, payment disputes, supplier conduct and suspected fraud.
+- Each case receives a sequential RNX case reference and an auditable case history. A customer can select a supplier only when that business was already introduced through a verified-payment, customer-approved and contact-released offer for the same request.
+- Customers can follow case progress and send case-specific messages using the same private tracking link.
+- Authorised staff can assign a case, set severity, progress it through controlled statuses, add staff-only notes and send customer-visible updates.
+- Customer-visible resolution summaries are separate from internal notes; internal notes are never returned by the tracking API.
+- Owner, operations administrator and customer support roles can work trust cases; finance and analyst roles cannot access case-level personal information.
+- Case records do not establish legal liability or guarantee refunds, replacements, supplier action or any other commercial result.
 
 ## v1.1.0 staff access control
 - Individual staff accounts with email/password sign-in and signed, eight-hour HttpOnly sessions.
@@ -112,8 +122,9 @@ The RNX schema is additive and uses `rnx_*` tables. Review target project conten
 7. `007_rnx_notification_delivery_worker.sql`
 8. `008_rnx_consent_first_attribution.sql`
 9. `009_rnx_staff_access_control.sql`
+10. `010_rnx_trust_cases.sql`
 
-For an installation where migrations 001–008 are already applied, apply only migration 009. For an installation where migrations 001–007 are applied, apply missing migrations 008 and 009 in order. For a fresh RNX installation, apply 001–009 in order. Check the actual migration history and apply only missing files in numerical order. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
+For an installation where migrations 001–009 are already applied, apply only migration 010. For an installation where migrations 001–008 are applied, apply missing migrations 009 and 010 in order. For a fresh RNX installation, apply 001–010 in order. Check the actual migration history and apply only missing files in numerical order. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
 
 ## Supplier introduction operating sequence
 1. Qualify the customer request in the operations console.
@@ -144,6 +155,7 @@ A connected Git repository does not prove that a deployment build succeeds. Insp
 
 ## Not included
 - Payment gateway or automatic bank reconciliation.
+- Supplier KYB/licence verification, uploaded evidence vault, public trust scores or automated fraud determinations. Those require independent review and are not implied by case handling.
 - WhatsApp or SMS delivery.
 - Customer email verification, password reset and account recovery.
 - General website traffic, page-view, ad-impression or clickstream analytics; v1.0.0 measures only consented form conversions.
@@ -157,4 +169,4 @@ See `RNX_CUSTOMER_ACCOUNTS_AND_TRACKING.md` for migration 006, privacy boundarie
 
 See `RNX_NOTIFICATION_DELIVERY.md` for migration 007, retry policy, Vercel schedule and Resend setup. See `RNX_ANALYTICS_AND_ATTRIBUTION.md` for migration 008, consent controls and analytics reporting.
 
-See `RNX_STAFF_ACCESS_CONTROL.md` for role permissions, invitation setup, migration 009, password requirements and recovery limitations.
+See `RNX_STAFF_ACCESS_CONTROL.md` for role permissions, invitation setup, migration 009, password requirements and recovery limitations. See `RNX_TRUST_AND_RESOLUTION.md` for complaint intake, status handling, customer-visible replies and internal-note privacy.

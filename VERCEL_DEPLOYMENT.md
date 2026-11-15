@@ -15,7 +15,7 @@ Set in Vercel Project Settings → Environment Variables:
 Do not paste secret values into source files, GitHub, browser code or variables prefixed with `NEXT_PUBLIC_`.
 
 ## Supabase caution
-RNX uses only `rnx_*` tables. Confirm the target project and migration history before applying anything. The current cumulative release contains migrations 001–009: core, catalogue, operations, introductions, supplier memberships/portal, customer accounts/tracking/messaging, notification delivery, consent-first attribution, and staff access control. Apply only missing migrations in numerical order; never rerun a migration that has already succeeded. These migrations are additive to RNX objects and do not modify RuffNeck Entertainment LMS, Social Hub, billing, product, profile or Prospector tables.
+RNX uses only `rnx_*` tables. Confirm the target project and migration history before applying anything. The current cumulative release contains migrations 001–010: core, catalogue, operations, introductions, supplier memberships/portal, customer accounts/tracking/messaging, notification delivery, consent-first attribution, staff access control, and trust cases. Apply only missing migrations in numerical order; never rerun a migration that has already succeeded. These migrations are additive to RNX objects and do not modify RuffNeck Entertainment LMS, Social Hub, billing, product, profile or Prospector tables.
 
 ## Deployment check
 1. Confirm a new deployment was created from the latest `main` commit.
@@ -54,3 +54,7 @@ See `RNX_NOTIFICATION_DELIVERY.md` for worker semantics, attempt limits, backoff
 ## v1.1.0 staff access deployment
 
 After confirming migrations 001–008 exist, apply `supabase/migrations/009_rnx_staff_access_control.sql`. No new Vercel secret is required. Retain `RNX_ADMIN_PASSWORD` and `RNX_ADMIN_SESSION_SECRET` as server-only owner recovery credentials. `RNX_ADMIN_EMAIL` is optional. Redeploy the project with Root Directory `./`. Test the owner login, create a staff invitation at `/admin/staff`, accept it in a private browser session, and verify that each role can reach only its permitted page and API. Suspend the account and confirm its next protected request is rejected.
+
+## v1.2.0 trust and resolution workflow
+
+Confirm migrations 001–009 are already applied, then apply only `supabase/migrations/010_rnx_trust_cases.sql`. It creates only `rnx_trust_cases`, `rnx_trust_case_messages`, `rnx_trust_case_events` and the RNX case-reference sequence. No new Vercel environment variables are required. Customer case intake is available only from an existing private `/track/<token>` link. After deployment, test case submission, customer-visible replies, staff-only notes, status transition rules, role denial for finance/analyst and customer API filtering of internal notes. Do not use a customer case as proof of supplier fraud or legal liability.

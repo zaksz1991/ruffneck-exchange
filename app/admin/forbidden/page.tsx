@@ -12,5 +12,6 @@ export default async function AdminForbiddenPage() {
   if (hasPermission(session.role, 'communications:read')) links.push({ href: '/admin/communications', label: 'Customer communications' });
   if (hasPermission(session.role, 'memberships:read')) links.push({ href: '/admin/memberships', label: 'Membership operations' });
   if (hasPermission(session.role, 'analytics:read')) links.push({ href: '/admin/analytics', label: 'Acquisition analytics' });
+  if (hasPermission(session.role, 'trust:read')) links.push({ href: '/admin/trust', label: 'Trust and resolution' });
   return <main className="page-shell container admin-login-shell"><section className="admin-login-card"><p className="eyebrow">ROLE-RESTRICTED AREA</p><h1>Access not permitted.</h1><p className="muted">Your current role ({session.role.replaceAll('_',' ')}) does not grant access to this page. Contact the RNX owner if your responsibilities have changed.</p><div className="admin-page-links">{links.map((item) => <Link className="button button-small" key={item.href} href={item.href}>{item.label}</Link>)}</div></section></main>;
 }

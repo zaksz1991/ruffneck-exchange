@@ -29,3 +29,7 @@ Contact details remain locked until the customer has been informed of the intend
 
 ## Supplier claims
 Do not label a business verified, certified, authorised or approved without completing and recording the checks that support the claim. Membership does not guarantee enquiries, ranking or sales. Promoted placement is not currently implemented in this release.
+
+## Customer complaints and disputes (v1.2.0)
+
+Customers can use their private request-tracking link to raise a case, follow status and message the assigned RNX team. A supplier-specific report may be tied only to an already completed and customer-approved introduction. Case handling remains an RNX operations process; it does not automatically refund money or determine legal liability. Keep internal notes separate from customer-visible updates and distinguish claims from verified facts.

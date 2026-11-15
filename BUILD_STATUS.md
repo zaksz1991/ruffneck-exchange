@@ -1,39 +1,51 @@
-# Build status — RuffNeck Exchange v1.1.0
+# Build status — RuffNeck Exchange v1.2.0
 
 ## New capability
 
-This release adds multi-user staff accounts, owner-managed invitations, five operational roles, API/page permission checks, session revocation on suspension, an owner-only staff management screen and a staff activity stream.
+This release adds a customer complaint and dispute workflow linked to the private request-tracking token. Customers can raise cases, optionally link the report to a supplier they were already introduced to through a completed, customer-approved offer, see customer-safe status and resolution updates, and send case-specific messages. Authorised staff can triage, set severity, assign case ownership, record internal notes, send customer-visible replies and retain an event history.
 
 ## Changes
 
-- Replaced the old administrator session payload with a versioned HMAC-signed staff session. Staff sessions resolve the current active database role for every protected request.
-- Retained `RNX_ADMIN_PASSWORD` as an owner-only recovery login. It is not removed by this release.
-- Added scrypt password hashing for invited staff credentials.
-- Added single-use invitation tokens; only SHA-256 hashes are persisted. Invitations expire after 48 hours.
-- Added an atomic PostgreSQL invitation-acceptance function and a trigger that prevents demotion/suspension of the last active staff owner.
-- Enforced permissions on administrator pages and operations, analytics, membership, communication, matching, offers, notification-processing and supplier-portal APIs.
-- Added owner-only `/admin/staff` interface with account state, invitation history and recent activity views.
-- Added `/admin/finance` lead-fee reconciliation view. Its API response deliberately excludes customer name, phone and email fields.
-- Added migration 009 and `RNX_STAFF_ACCESS_CONTROL.md`.
+- Added migration `010_rnx_trust_cases.sql` with RNX-only case, message and event tables and restricted service-role access.
+- Added case references in the form `RNX-CASE-00000001` using an RNX sequence.
+- Added customer case submission, case messaging and customer-safe case reads through the existing 256-bit request tracking token.
+- Added an operations trust queue at `/admin/trust` with role-gated access, case assignment, severity, constrained status transitions, internal notes and public resolution summaries.
+- Extended staff permissions: owner and operations administrator can read/write cases; customer support can read/write cases; finance and analyst cannot access case-level records.
+- Added case event history and staff activity entries for administrative changes.
+- Customer notifications are queued only when `RNX_OPERATIONS_NOTIFICATION_EMAIL` or the customer's email is available and the existing notification subsystem is configured; delivery remains dependent on Resend setup.
+- Customer reads return only messages marked `visibility=customer`. Internal notes are not selected by the tracking endpoint.
+- Existing request tracking remains available during deployment if migration 010 has not yet reached the Supabase schema cache; the case panel is temporarily disabled and directs the customer to the existing general message thread.
 
 ## Database impact
 
-Migration `009_rnx_staff_access_control.sql` creates only RNX staff tables/functions/trigger. It does not edit non-RNX tables. Apply it only after verifying migrations 001–008 are present. No new environment variable is required; `RNX_ADMIN_EMAIL` is optional.
+Migration 010 depends on migrations 001–009 and creates only:
+- `rnx_trust_cases`
+- `rnx_trust_case_messages`
+- `rnx_trust_case_events`
+- `rnx_trust_case_reference_seq`
+
+It references existing RNX leads and staff users. No non-RNX tables are modified. Apply only migration 010 if migrations 001–009 are already present.
 
 ## Validation performed
 
-- TypeScript/TSX syntax transpilation: 109 files, zero syntax errors.
-- Static TypeScript check with temporary declarations for Next.js, React, Supabase and Node types: passed with zero diagnostics. This is not a replacement for the real dependency-backed TypeScript check.
-- Local staff-auth smoke tests: scrypt password round-trip, rejection of an incorrect password, role-permission boundaries, signed session decoding and suspended-account rejection passed.
-- Package, Vercel and TypeScript configuration JSON: parsed successfully.
-- Migration scope: confirmed migration 009 creates/alters only `rnx_staff_*` tables and RNX functions/triggers.
-- Final replacement archive: 144 files; ZIP integrity passed.
+- TypeScript/TSX syntax transpilation: 117 `.ts`/`.tsx` source files, zero syntax diagnostics.
+- Temporary-declaration TypeScript validation: passed with strict checking enabled except `noImplicitAny` (the minimal Zod/framework declarations do not provide the real library type inference). This is not a dependency-backed application typecheck.
+- Full dependency installation timed out; therefore a real `npm run typecheck` and Next.js production build were not completed.
+- SQL migration reviewed for RNX-only object scope, existing RNX foreign keys, RLS enablement, public/anon/authenticated revocation and service-role grants.
+- Static migration/visibility checks passed.
+- ZIP integrity: passed; 153 files in the archive.
 
 ## Not verified
 
-- A dependency-backed `npm run typecheck` and Next.js production build have not been completed in this environment.
-- Migration 009 has not been executed against the production Supabase project.
-- Staff invitation, login, suspension and role-denial workflows have not been exercised against live Supabase.
-- No production deployment has been performed by this package build.
+- A dependency-backed `npm run typecheck` and Next.js production build.
+- Migration 010 against the production Supabase project.
+- Live complaint submission, supplier linkage, staff assignment, customer reply and internal-note privacy workflows.
+- Production deployment.
 
-Do not treat this release as production-build verified until Vercel completes the full build and the staff invitation flow is tested against the target Supabase project.
+## Important limitations
+
+- Cases can only be raised against an existing customer request and require its private tracking link.
+- File uploads, evidence vault, automatic supplier suspension, supplier KYB/licence verification, legal adjudication, refunds and chargebacks are not included.
+- A case status or label such as suspected fraud is a customer report, not a factual or legal finding.
+- Customer-visible resolution text is written and approved by RNX staff; internal notes remain restricted.
+- Existing release requirements remain: migrations 001–009 must be present before migration 010, and the Vercel production build must pass before release is considered deployed.

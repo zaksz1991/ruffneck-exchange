@@ -65,3 +65,13 @@ Supplier offer accept/decline decisions are now recorded by the supplier in `/su
 ## v1.1.0 staff accounts and role controls
 
 The owner can manage individual staff accounts at `/admin/staff`. Staff use invited email/password sign-in. Available roles are Owner, Operations administrator, Finance, Customer support and Analyst. The server enforces the role at API and page boundaries. Account suspension is checked against Supabase on each protected request and takes effect on the next request. Owner-only management includes invitations, role changes, suspensions and recent staff activity. Invitation links are single-use, expire after 48 hours and must be shared privately. See `RNX_STAFF_ACCESS_CONTROL.md` for full access matrix and migration 009. The environment-password admin login remains the owner recovery path.
+
+## v1.2.0 trust cases
+
+Open `/admin/trust` to handle complaints and disputes raised through private request tracking links. Owner, operations administrator and customer support roles may access this workspace. Finance and analyst roles are denied access to case-level customer records.
+
+Triage each case, assign an active staff member, choose an internal severity and move the status through the allowed lifecycle. Add investigative notes using **Internal note — staff only**. Use **Customer-visible reply** only for information approved for the customer's tracking page. The tracking API selects only messages with `visibility=customer`; internal notes and case-event history are not returned.
+
+A supplier can be linked only when the case was raised against a completed introduction for that same customer request: payment verified, customer consent recorded and contact release recorded. A case without a supplier link may still concern the overall sourcing request.
+
+Do not treat a customer allegation as proof of wrongdoing. Record evidence and supplier responses using approved internal procedures. A case marked `resolved` requires a customer-visible outcome summary; `closed` is an operational state and does not automatically issue a refund or determine legal liability.
