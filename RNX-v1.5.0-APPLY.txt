@@ -1,0 +1,35 @@
+RUFFNECK EXCHANGE v1.5.0 — ACCOUNT RECOVERY
+
+THIS IS AN ADDITIVE PATCH FOR THE EXISTING v1.4.0 PROJECT.
+It is not a replacement project. Preserve every other repository folder and file.
+
+1. Extract this ZIP.
+2. In GitHub, open zaksz1991/ruffneck-exchange on branch main.
+3. Add the included new files at the same paths from the repository root.
+4. Replace the included existing files at these exact paths:
+   - app/customer/login/page.tsx
+   - app/supplier/login/page.tsx
+   - package.json
+   - BUILD_STATUS.md
+5. Commit the changes to main.
+6. In the existing Supabase project used by RNX, review and run:
+   supabase/migrations/012_rnx_account_recovery.sql
+   Run it once only, after confirming migrations 001–011 are already applied. Do not rerun completed migrations.
+7. Keep the Vercel Root Directory set to ./ and the existing project framework set to Next.js.
+8. Confirm these existing Vercel Production variables are present:
+   - RESEND_API_KEY
+   - RNX_NOTIFICATION_FROM_EMAIL (must be a verified Resend sender)
+   - NEXT_PUBLIC_SITE_URL=https://ruffneck-exchange.vercel.app
+   - RNX_ADMIN_SESSION_SECRET (at least 32 characters)
+   Optional: set RNX_ACCOUNT_RECOVERY_SECRET to a separate random value of at least 32 characters.
+9. Deploy. Review the full Vercel build log before treating the release as deployed.
+10. Test with controlled customer and approved supplier accounts. Request a reset, confirm the email link expires after 60 minutes, set a new password, confirm the old password fails and the new password works, then attempt to reuse the same link and confirm it is rejected.
+
+SECURITY
+- Reset tokens are random one-time values. Supabase stores only the SHA-256 hash.
+- Reset email bodies are sent directly through Resend and are not placed in the general RNX staff notification outbox.
+- Do not paste reset links, account passwords or API keys into GitHub issues or chat.
+- This release does not add initial email verification or cross-device session revocation.
+
+DATABASE
+Migration 012 creates only RNX-prefixed objects. It does not modify other RuffNeck Entertainment applications or tables.
