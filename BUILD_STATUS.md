@@ -1,35 +1,22 @@
-# Build and release status — v0.3.0
+# Build and release status — v0.4.0
 
 ## Included
-- Complete Next.js application source, responsive styling and route structure.
-- Multi-industry taxonomy and state navigation.
-- Customer sourcing request form and supplier application form.
-- Optional first product/service listing submitted with a supplier application.
-- Approved supplier directory and public supplier profile pages.
-- Approved catalogue with product/service/wholesale/rental categories, search and state/category filtering.
-- Individual listing detail pages.
-- Separate approval requirements for supplier applications and each listing.
-- Server-side catalogue reads; public pages never select supplier contact-person, private email or phone fields.
-- Additive SQL migration `002_rnx_catalogue.sql` for the catalogue.
-- Dynamic sitemap entries for approved supplier profiles and approved listings.
-- RuffNeck Entertainment product showcase, SEO and Vercel setup files.
+- All v0.3.0 marketplace, supplier directory, listing and lead intake functionality.
+- Private operator sign-in and operations console.
+- Supplier application approval/rejection.
+- Independent listing approval/rejection, gated on supplier approval.
+- Customer lead workflow status management.
+- Private server-side queries for contact information.
+- Additive audit log migration `003_rnx_admin_operations.sql`.
+- No direct customer contact release and no payment approval controls.
 
-## Manual work required before inventory appears
-- Apply migration 002 after the existing RNX core migration 001.
-- Configure `SUPABASE_URL` and `SUPABASE_SECRET_KEY` in Vercel as server-only environment variables.
-- Review supplier applications and individual listings in Supabase Table Editor.
-- Set supplier status to `approved` and listing status to `approved` only after separate reviews.
+## Required setup
+- Apply migration 003 after 001 and 002, after checking which migrations have already been run.
+- Add `RNX_ADMIN_PASSWORD` and `RNX_ADMIN_SESSION_SECRET` in Vercel Environment Variables.
+- Confirm `SUPABASE_URL` and `SUPABASE_SECRET_KEY` are configured server-side.
 
-## Not included
-- Login, supplier/member dashboard, self-service listing management, image storage, payments, subscriptions, admin moderation interface, automated supplier matching, notifications, live inventory sync or stock reservation.
-- No live supplier inventory or market prices are fabricated.
-
-## Validation status
-- Source files and JSON configuration created.
-- SQL migration reviewed for additive `rnx_*` scope.
-- ZIP archive will be integrity-checked.
-- Dependency installation and `next build`: not verified in this environment because package installation did not complete before timeout.
-- Supabase migration execution, live database queries, form submissions and Vercel deployment: not performed.
-
-## Deployment integration distinction
-The Vercel message `A repository ID is required for GitHub deployments` is a Git integration error that occurs outside the Next.js application build. Replacing source files does not independently fix a missing repository identifier in Vercel's deployment integration.
+## Verification status
+- Files generated and JSON/ZIP structure will be checked.
+- Full dependency installation, TypeScript typecheck and Next.js production build have not been confirmed yet.
+- Supabase migration execution and live data tests have not been performed.
+- No production deploy has been performed by this package generator.

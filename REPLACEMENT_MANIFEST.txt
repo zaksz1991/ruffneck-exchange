@@ -1,50 +1,16 @@
-RuffNeck Exchange v0.3.0
-Complete replacement project file manifest
+RUFFNECK EXCHANGE v0.4.0 — COMPLETE PROJECT REPLACEMENT
 
-.env.example
-.gitattributes
-.gitignore
-BUILD_STATUS.md
-LEAD_OPERATIONS_PLAYBOOK.md
-README-REPLACEMENT.txt
-README.md
-RNX_CATALOGUE_MODERATION.md
-SEO_AND_MARKETING_PLAYBOOK.md
-STATE_MARKET_RESEARCH.md
-VERCEL_DEPLOYMENT.md
-app/about/page.tsx
-app/api/leads/route.ts
-app/api/supplier-applications/route.ts
-app/business/register/page.tsx
-app/error.tsx
-app/globals.css
-app/how-it-works/page.tsx
-app/layout.tsx
-app/marketplace/[state]/page.tsx
-app/marketplace/listing/[slug]/page.tsx
-app/marketplace/page.tsx
-app/not-found.tsx
-app/page.tsx
-app/privacy/page.tsx
-app/request/page.tsx
-app/robots.ts
-app/ruffneck/page.tsx
-app/sitemap.ts
-app/suppliers/[slug]/page.tsx
-app/suppliers/page.tsx
-app/terms/page.tsx
-components/listing-card.tsx
-components/request-form.tsx
-components/site-footer.tsx
-components/site-header.tsx
-components/supplier-form.tsx
-lib/catalog.ts
-lib/site.ts
-lib/supabase-server.ts
-next-env.d.ts
-next.config.ts
-package.json
-supabase/migrations/001_rnx_core.sql
-supabase/migrations/002_rnx_catalogue.sql
-tsconfig.json
-vercel.json
+This archive contains the complete project folder, including all existing v0.3.0 marketplace routes plus the new private operations console, API routes, admin security helper, SQL migration 003, environment template and documentation.
+
+Deployment settings:
+- Existing GitHub repository: zaksz1991/ruffneck-exchange
+- Branch: main
+- Vercel Root Directory: ./
+- Framework: Next.js
+- Production domain: https://ruffneck-exchange.vercel.app/
+
+Apply the new v0.4.0 files as a full replacement of the repository source contents. Do not create another Vercel project. Do not delete GitHub repository settings/history. Before running SQL, check migration history and apply only migration 003 if 001 and 002 are already present.
+
+Set RNX_ADMIN_PASSWORD and RNX_ADMIN_SESSION_SECRET privately in Vercel before using /admin/login. Do not put real secrets in GitHub.
+
+This package generation does not make a commit, run a production deployment, or execute a Supabase migration. Consult BUILD_STATUS.md for verification limits.

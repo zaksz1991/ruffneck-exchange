@@ -1,66 +1,53 @@
-# RuffNeck Exchange (RNX) — v0.3.0
+# RuffNeck Exchange (RNX) — v0.4.0
 
-RuffNeck Exchange is a multi-industry, multi-location customer-acquisition marketplace. It is not a directory and is not limited to refrigeration, solar or any single vertical.
+A multi-industry, multi-location customer-acquisition marketplace connecting customers with products, services, suppliers, businesses, wholesale providers and procurement opportunities. Refrigeration, cold rooms and solar remain categories only; they do not define the brand.
 
-**Brand:** RuffNeck Exchange (RNX)  
-**Production domain:** https://ruffneck-exchange.vercel.app/  
-**Positioning:** Products. Services. Businesses. Opportunities.
+## Core model
+RNX receives a customer's sourcing request, verifies the need and permission, shares an anonymised opportunity with suitable suppliers, records the supplier's acceptance/payment under the approved process, and obtains customer authorisation before releasing contact details. Customer browsing and requests are free. Suppliers may pay for memberships, promoted placement and qualified opportunities under clearly stated terms.
 
-## Business model
+Never sell or release customer contact information without disclosure and permission. Membership does not guarantee leads or ranking. Supplier approval is not a guarantee of stock, licence, product condition, delivery or transaction performance.
 
-1. A customer discovers RNX and submits a free product, service, wholesale or procurement request.
-2. RNX reviews the request for clarity, location, contactability and permission.
-3. Where relevant, suppliers may receive an anonymised opportunity brief.
-4. Supplier participation and any applicable lead fee are governed by separate terms.
-5. Customer permission is obtained before contact details are released or an introduction is made.
-6. Outcomes, duplicate requests and disputes are reviewed and recorded.
+## v0.4.0 features
+- Responsive multi-industry marketplace, supplier directory and approved catalogue.
+- Customer sourcing request and supplier application forms.
+- Individual approved supplier and listing pages.
+- Private operations console at `/admin/login`.
+- Separate supplier and listing moderation.
+- Customer lead qualification queue.
+- Server-side audit log for operator status changes.
 
-Never sell customer contact details without clear disclosure and permission. Never claim a supplier is verified until the required checks have actually been completed. A membership or payment does not guarantee leads, ranking or sales.
+## Requirements
+- Node.js 22 LTS or newer.
+- Supabase JS client configured with server-only environment variables.
+- Vercel deployment with Root Directory `./`.
 
-## Included in this complete project
+## Environment setup
+Copy `.env.example` to `.env.local` for local development, then configure values privately. Set in Vercel:
 
-- Responsive Next.js application and global styling.
-- RNX home page and 14 industry departments.
-- Category search and state selector (taxonomy matching, not live stock search).
-- Customer sourcing request form with server-side validation.
-- Supplier application form with server-side validation and optional first product/service listing.
-- Approved supplier directory and public supplier profile pages.
-- Approved product/service catalogue with search, state/category filtering and individual offer pages.
-- Independent moderation states: businesses and individual listings must both be approved before public display.
-- Server-only Supabase persistence routes.
-- Additive `rnx_*` database migrations with RLS and revoked browser-role access.
-- RuffNeck Entertainment product showcase.
-- About, how-it-works, privacy and terms draft pages.
-- Metadata, canonical URL, robots and sitemap.
-- Vercel configuration and environment-variable example.
+- `NEXT_PUBLIC_SITE_URL=https://ruffneck-exchange.vercel.app`
+- `SUPABASE_URL`
+- `SUPABASE_SECRET_KEY`
+- `RNX_ADMIN_PASSWORD`
+- `RNX_ADMIN_SESSION_SECRET` (at least 32 characters)
 
-## Not yet implemented
+Never commit actual secrets or expose them through `NEXT_PUBLIC_` variables.
 
-This release does **not** include self-service authentication, member dashboards, supplier self-service listing CRUD, image upload, live product inventory or stock syncing, subscriptions, payment gateway, admin moderation console, automated matching, email/WhatsApp/Telegram notifications or a complete dispute/refund workflow. Catalogue moderation remains manual; see `RNX_CATALOGUE_MODERATION.md`. Supplier review and lead allocation remain manual. The policy pages are launch drafts and require professional legal review before commercial operation.
+## Database migrations
+The RNX schema is additive and uses `rnx_*` tables. Review target project contents before applying migrations. Existing deployments may already have run 001 and 002. Apply only migrations that are still outstanding, in order:
 
-## Requirements and setup
+1. `001_rnx_core.sql`
+2. `002_rnx_catalogue.sql`
+3. `003_rnx_admin_operations.sql`
 
-- Node.js 20.9 or newer.
-- Supabase project with the RNX core migration applied.
-- Vercel project connected to `zaksz1991/ruffneck-exchange`.
+Do not alter existing non-RNX RuffNeck Entertainment tables. See `RNX_ADMIN_OPERATIONS.md` for the operations workflow and security boundaries.
 
-1. Copy `.env.example` to `.env.local` for local development.
-2. Set `NEXT_PUBLIC_SITE_URL=https://ruffneck-exchange.vercel.app`.
-3. Set `SUPABASE_URL` and `SUPABASE_SECRET_KEY` as server-only environment variables. The legacy `SUPABASE_SERVICE_ROLE_KEY` is supported as fallback. Never use a `NEXT_PUBLIC_` prefix for a secret key.
-4. Apply `supabase/migrations/001_rnx_core.sql` only if the four RNX tables have not already been created in the approved Supabase project. Do not rerun database changes blindly or modify unrelated RuffNeck tables.
-5. Install dependencies with your package manager.
-6. Run `npm run build` to verify the production build.
+## Vercel
+- Framework: Next.js
+- Root Directory: `./`
+- Build: `npm run build`
+- Production URL: `https://ruffneck-exchange.vercel.app/`
 
-## Vercel settings
+A connected Git repository does not prove that a deployment build succeeds. Inspect the Vercel deployment build log after committing.
 
-- Framework preset: Next.js.
-- Root Directory: `./`.
-- Build command: `next build` (the package script is `npm run build`).
-- Production URL: `https://ruffneck-exchange.vercel.app`.
-- Add `SUPABASE_URL` and `SUPABASE_SECRET_KEY` in Vercel Environment Variables as server-only values.
-
-This project does not require a Supabase Vercel marketplace integration when reusing an existing Supabase project. Do not add a new Supabase project just to deploy RNX.
-
-## Verification status
-
-Source files and archive structure are included in this package. A full dependency installation, `next build`, live form submission and live Supabase write have not been run in this environment. Do not interpret a page loading as proof that database submissions work.
+## Limitations
+No member login, supplier self-service dashboard, payment gateway, subscription billing, customer contact-release workflow, automated supplier matching, SMS/WhatsApp/email notifications, live inventory sync or multi-user role system is included yet. The admin console is a single-password operator gate and must be protected with strong secrets and restricted platform access.

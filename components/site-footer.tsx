@@ -13,7 +13,7 @@ export function SiteFooter() {
         <div><h3>Participate</h3><Link href="/request">Submit a request</Link><Link href="/business/register">Register a business</Link><Link href="/about">About RNX</Link></div>
         <div><h3>Policies</h3><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link><a href="mailto:support@ruffneck-entertainment.com">Contact</a></div>
       </div>
-      <div className="container footer-bottom"><span>© {new Date().getFullYear()} RuffNeck Exchange</span><span>Built for Nigeria, designed to scale globally.</span></div>
+      <div className="container footer-bottom"><span>© {new Date().getFullYear()} RuffNeck Exchange</span><span>Built for Nigeria, designed to scale globally.</span><Link href="/admin/login" rel="nofollow">Operator access</Link></div>
     </footer>
   );
 }
