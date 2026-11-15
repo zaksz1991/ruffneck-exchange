@@ -16,7 +16,7 @@ const verifyForm = await read('components/email-verification-form.tsx');
 const migration = await read('supabase/migrations/013_rnx_email_verification.sql');
 const pkg = JSON.parse(await read('package.json'));
 
-assert.equal(pkg.version, '1.6.0');
+assert.equal(pkg.version, '1.6.1');
 assert.match(helper, /randomBytes\(32\)/, 'Verification tokens must be cryptographically random.');
 assert.match(helper, /createHash\('sha256'\)/, 'Only SHA-256 token hashes may be stored.');
 assert.match(helper, /createHmac\('sha256'/, 'Rate-limit bucket identifiers must be keyed.');
@@ -40,6 +40,9 @@ assert.match(supplierApply, /email_verified_at:\s*null/, 'Supplier applications 
 assert.match(supplierApply, /issueRnxEmailVerificationLink/, 'Supplier application must send a confirmation email.');
 assert.match(customerForm, /Resend email confirmation/, 'Customer form must include a resend action.');
 assert.match(supplierForm, /Request email confirmation/, 'Supplier application form must include a resend action.');
+assert.match(supplierForm, /const formData = new FormData\(form\)/, 'Supplier form values must be captured before resetting the form.');
+assert.match(supplierForm, /const submittedEmail = String\(formData\.get\('email'\)/, 'Supplier confirmation address must come directly from FormData.');
+assert.doesNotMatch(supplierForm, /data\.email/, 'Do not read email from the attribution-merged payload type.');
 assert.match(supplierLoginForm, /Resend email confirmation/, 'Supplier login must include a resend action.');
 assert.match(verifyForm, /email-verification\/confirm/, 'The verification UI must consume emailed links.');
 assert.match(verifyForm, /window\.location\.hash/, 'The verification UI must read the token from the fragment.');

@@ -1,0 +1,46 @@
+RUFFNECK EXCHANGE v1.6.1 — EMAIL OWNERSHIP VERIFICATION
+
+This is an additive upgrade for the existing RuffNeck Exchange Next.js project. It includes the full v1.5.0 account-recovery overlay plus the new v1.6.1 email-verification upgrade. It is not a replacement project.
+
+GITHUB — KEEP THE EXISTING REPOSITORY
+1. Extract this ZIP.
+2. Open `zaksz1991/ruffneck-exchange` on branch `main`.
+3. Upload/merge the included folders at the repository root, preserving each path.
+4. Upload the complete extracted bundle in one GitHub upload operation, preserving every path. Replace included existing files. Do not delete existing repository paths that are not included in this bundle.
+5. Commit the changes to `main`.
+6. Keep the Vercel Root Directory at `./` and Framework Preset at Next.js.
+
+DATABASE — CHECK BEFORE RUNNING
+Use the same Supabase project already configured for RNX. Do not use the separate Prospector/CALLORIA project.
+
+1. Confirm migrations 001–011 are already applied.
+2. Check migration 012 (`supabase/migrations/012_rnx_account_recovery.sql`). If it was applied during v1.5.0, do not run it again. If it has not been applied, run it once.
+3. Run `supabase/migrations/013_rnx_email_verification.sql` only if it has not already been applied. Do not rerun it if v1.6.0 was deployed with migration 013.
+4. Both migrations are RNX-scoped; do not alter or remove other RuffNeck application tables.
+
+VERCEL ENVIRONMENT
+Keep existing production values:
+- `SUPABASE_URL`
+- `SUPABASE_SECRET_KEY` or the existing `SUPABASE_SERVICE_ROLE_KEY` fallback
+- `RESEND_API_KEY`
+- `RNX_NOTIFICATION_FROM_EMAIL` (verified Resend sender)
+- `NEXT_PUBLIC_SITE_URL=https://ruffneck-exchange.vercel.app`
+- `RNX_ADMIN_SESSION_SECRET` (at least 32 characters)
+- Existing customer and supplier session secrets
+
+Optional: add `RNX_EMAIL_VERIFICATION_SECRET` as a separate random secret of at least 32 characters. If omitted, the code falls back to `RNX_ACCOUNT_RECOVERY_SECRET` and then `RNX_ADMIN_SESSION_SECRET`.
+
+TESTING
+Run the static contracts first, then the full typecheck and production build from the complete project:
+- `npm run test:account-recovery`
+- `npm run test:email-verification`
+- `npm run test:supplier-form-build-fix`
+- `npm run typecheck`
+- `npm run build`
+
+After deployment, test a controlled customer registration and a supplier application end-to-end. Check that unverified accounts cannot sign in, tokens expire after 60 minutes, a token can be used only once, resend limits apply, and a supplier cannot be newly approved before email confirmation.
+
+IMPORTANT
+- Existing customers and approved suppliers will have `email_verified_at = NULL` until they use the resend flow and confirm once.
+- Email confirmation proves control of an email address only. It does not grant supplier approval, a verified-business badge, or guarantee product/service quality.
+- The targeted supplier-form regression test is included. The complete Next.js typecheck/build, live database migration, real Resend delivery, GitHub commit and Vercel deployment have not been performed by this package preparation.

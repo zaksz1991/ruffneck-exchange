@@ -1,6 +1,7 @@
-# Build status — RuffNeck Exchange v1.6.0
+# Build status — RuffNeck Exchange v1.6.1
 
 ## Release scope
+Supplier application TypeScript build repair, carried with v1.6.0 email verification and v1.5.0 account recovery.
 Email ownership confirmation for customer accounts and supplier applications, carried together with the v1.5.0 password-recovery overlay.
 
 ## Included capabilities
@@ -24,9 +25,15 @@ Email ownership confirmation for customer accounts and supplier applications, ca
 ## Existing environment
 Reuses `RESEND_API_KEY`, `RNX_NOTIFICATION_FROM_EMAIL`, `NEXT_PUBLIC_SITE_URL` and the existing RNX session secret. Optional: set `RNX_EMAIL_VERIFICATION_SECRET` to a new independent random value of at least 32 characters. Fallback secret selection is documented in `RNX_EMAIL_VERIFICATION.md`.
 
+## v1.6.1 supplier-form build repair
+- The submitted supplier email is captured from `FormData` before the attribution object is merged.
+- The form no longer reads `data.email` from the merged object.
+- The captured email is retained for the confirmation resend action after the form resets.
+- A focused regression contract is included.
+
 ## Verification scope
 - Included static contract tests cover token, rate-limit, access-control, login-gate and approval-gate source contracts.
-- ZIP integrity and included text/JSON files are checked in the packaging workspace.
+- ZIP integrity and included text/JSON files are checked in the packaging workspace. The focused supplier-form regression test passed.
 - The complete repository checkout and installed Next.js dependencies were not available in this workspace; no full TypeScript project check or Next.js production build is claimed.
 - The Supabase migrations were not executed against the live project. Resend delivery and real account flows were not tested in production.
 - No GitHub commit or Vercel deployment was performed.

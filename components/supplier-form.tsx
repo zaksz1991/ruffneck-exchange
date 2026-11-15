@@ -27,12 +27,13 @@ export function SupplierForm() {
     event.preventDefault();
     const form = event.currentTarget;
     setBusy(true); setStatus('Submitting business application…'); setSavedEmail(''); setEmailSent(false);
-    const data = { ...Object.fromEntries(new FormData(form).entries()), ...readConsentedAttribution() };
+    const formData = new FormData(form);
+    const submittedEmail = String(formData.get('email') ?? '').trim().toLowerCase();
+    const data = { ...Object.fromEntries(formData.entries()), ...readConsentedAttribution() };
     try {
       const response = await fetch('/api/supplier-applications', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) { setStatus(result.error || 'The application could not be saved. Please try again.'); return; }
-      const submittedEmail = String(data.email || '').trim().toLowerCase();
       form.reset();
       setSavedEmail(submittedEmail);
       setEmailSent(result.emailVerificationSent === true);
