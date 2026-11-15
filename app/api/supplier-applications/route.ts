@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { hasAnalyticsConsent } from '@/lib/analytics-consent';
 import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { slugify } from '@/lib/site';
@@ -21,6 +22,11 @@ const schema = z.object({
   first_listing_price_type: z.enum(['enquiry', 'fixed', 'from']).optional(),
   first_listing_price: z.string().trim().max(20).optional().or(z.literal('')),
   first_listing_description: z.string().trim().max(3000).optional().or(z.literal('')),
+  attribution_source: z.string().trim().max(100).regex(/^[a-zA-Z0-9 _.:/-]+$/).refine((value) => !/[0-9]{7,}/.test(value) && !value.includes('@')).optional(),
+  attribution_medium: z.string().trim().max(100).regex(/^[a-zA-Z0-9 _.:/-]+$/).refine((value) => !/[0-9]{7,}/.test(value) && !value.includes('@')).optional(),
+  attribution_campaign: z.string().trim().max(100).regex(/^[a-zA-Z0-9 _.:/-]+$/).refine((value) => !/[0-9]{7,}/.test(value) && !value.includes('@')).optional(),
+  attribution_referrer_host: z.string().trim().max(120).regex(/^[a-zA-Z0-9 _.:/-]+$/).refine((value) => !/[0-9]{7,}/.test(value) && !value.includes('@')).optional(),
+  attribution_landing_path: z.string().trim().max(180).regex(/^[a-zA-Z0-9 _.:/-]+$/).refine((value) => !/[0-9]{7,}/.test(value) && !value.includes('@')).optional(),
   consent: z.literal('yes')
 }).superRefine((data, ctx) => {
   const hasTitle = Boolean(data.first_listing_title?.trim());
@@ -47,11 +53,21 @@ export async function POST(request: Request) {
   const values = parsed.data;
   try {
     const db = supabaseAdmin();
+    const analyticsAllowed = await hasAnalyticsConsent();
+    const attribution = analyticsAllowed ? {
+      attribution_source: values.attribution_source || null,
+      attribution_medium: values.attribution_medium || null,
+      attribution_campaign: values.attribution_campaign || null,
+      attribution_referrer_host: values.attribution_referrer_host || null,
+      attribution_landing_path: values.attribution_landing_path || null,
+      attribution_captured_at: new Date().toISOString(),
+    } : {};
     const normalizedEmail = values.email.toLowerCase();
     const { data: existing } = await db.from('rnx_supplier_applications').select('id,status').eq('email', normalizedEmail).in('status', ['pending','approved']).limit(1).maybeSingle();
     if (existing) return NextResponse.json({ error: 'An application already exists for this business email. Contact RNX operations for account assistance.' }, { status: 409 });
     const publicSlug = `${slugify(values.business_name) || 'business'}-${Math.random().toString(36).slice(2, 7)}`;
     const { data: application, error } = await db.from('rnx_supplier_applications').insert({
+      ...attribution,
       business_name: values.business_name,
       contact_name: values.contact_name,
       email: values.email.toLowerCase(),
@@ -97,6 +113,15 @@ export async function POST(request: Request) {
       }
     }
 
+    if (analyticsAllowed) {
+      const { error: eventError } = await db.from('rnx_events').insert({
+        event_type: 'supplier_application_submitted', path: '/supplier', state: values.state, category: values.category,
+        consented: true, source: attribution.attribution_source || null, medium: attribution.attribution_medium || null,
+        campaign: attribution.attribution_campaign || null, referrer_host: attribution.attribution_referrer_host || null,
+        event_data: { listing_submitted: listingSubmitted === true },
+      });
+      if (eventError) console.error('[RNX analytics] Consented supplier event could not be recorded:', eventError.message);
+    }
     return NextResponse.json({ ok: true, listingSubmitted, message: 'Application received for review.' }, { status: 201 });
   } catch (error) {
     console.error('[RNX] Supplier endpoint unavailable:', error instanceof Error ? error.message : 'Unknown server error');

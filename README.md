@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v0.9.0
+# RuffNeck Exchange (RNX) — v1.0.0
 
 A multi-industry, multi-location customer-acquisition marketplace connecting customers with products, services, suppliers, businesses, wholesale providers and procurement opportunities. Refrigeration, cold rooms and solar remain categories only; they do not define the brand.
 
@@ -6,6 +6,15 @@ A multi-industry, multi-location customer-acquisition marketplace connecting cus
 RNX receives a customer's sourcing request, verifies the requirement and permission, shares an anonymised opportunity with suitable approved suppliers, records supplier acceptance and payment, then obtains the customer's authorisation before contact details are released. Customer browsing and requests are free. This release implements supplier memberships and manually qualified opportunity fees. Promoted placement is a possible future revenue stream, not a feature currently offered by this release.
 
 Never sell or release customer contact information without disclosure and permission. Membership does not guarantee leads or ranking. Supplier approval is not a guarantee of stock, licence, product condition, delivery or transaction performance.
+
+## v1.0.0 features
+- Optional, consent-first first-touch attribution for customer requests and supplier applications.
+- Server-enforced analytics consent using an HttpOnly cookie; no attribution when the visitor declines or does not choose.
+- Campaign, source, medium, referrer-host and landing-path recording with no IP address, user-agent, full referrer URL or clickstream.
+- Private acquisition analytics dashboard at `/admin/analytics`, with 7/30/90/365-day reporting.
+- Aggregate source, campaign, category, state, daily trend, verified lead-fee and introduction reporting.
+- Aggregate CSV export without customer or supplier personal details.
+- New additive migration 008; no non-RNX database tables are modified.
 
 ## v0.9.0 features
 - Reliable notification outbox worker with atomic database claims and short processing leases.
@@ -82,8 +91,9 @@ The RNX schema is additive and uses `rnx_*` tables. Review target project conten
 5. `005_rnx_supplier_memberships_portal.sql`
 6. `006_rnx_customer_accounts_tracking_messaging.sql`
 7. `007_rnx_notification_delivery_worker.sql`
+8. `008_rnx_consent_first_attribution.sql`
 
-For an installation where migrations 001–006 are already applied, apply only migration 007. For a fresh RNX installation, apply 001–007 in order. Check the actual migration history and apply only missing files in numerical order. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
+For an installation where migrations 001–007 are already applied, apply only migration 008. For an installation where migrations 001–006 are already applied, apply missing migrations 007 and 008 in order. For a fresh RNX installation, apply 001–008 in order. Check the actual migration history and apply only missing files in numerical order. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
 
 ## Supplier introduction operating sequence
 1. Qualify the customer request in the operations console.
@@ -116,6 +126,7 @@ A connected Git repository does not prove that a deployment build succeeds. Insp
 - Payment gateway or automatic bank reconciliation.
 - WhatsApp or SMS delivery.
 - Customer email verification, password reset and account recovery.
+- General website traffic, page-view, ad-impression or clickstream analytics; v1.0.0 measures only consented form conversions.
 - Inventory synchronisation, automated supplier outreach and external inventory synchronisation, multi-user staff roles, supplier password reset, independent supplier identity/KYB checks, and promoted-placement controls.
 
 The operations console is a single-password operator gate. Use a strong unique password, restrict Vercel project access and keep all secrets server-side. Vercel Hobby is not assumed to grant a commercial-use entitlement; check the plan terms before monetised production.
@@ -124,4 +135,4 @@ The operations console is a single-password operator gate. Use a strong unique p
 See `RNX_CUSTOMER_ACCOUNTS_AND_TRACKING.md` for migration 006, privacy boundaries and optional Resend configuration. See `RNX_SUPPLIER_MATCHING_ENGINE.md` for the v0.8.0 recommendation rules and limitations.
 
 
-See `RNX_NOTIFICATION_DELIVERY.md` for migration 007, retry policy, Vercel schedule, Resend setup and testing.
+See `RNX_NOTIFICATION_DELIVERY.md` for migration 007, retry policy, Vercel schedule and Resend setup. See `RNX_ANALYTICS_AND_ATTRIBUTION.md` for migration 008, consent controls and analytics reporting.

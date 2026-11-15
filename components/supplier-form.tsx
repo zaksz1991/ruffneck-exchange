@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { readConsentedAttribution } from '@/lib/analytics-client';
 
 export function SupplierForm() {
   const [status, setStatus] = useState('');
@@ -11,7 +12,7 @@ export function SupplierForm() {
     const form = event.currentTarget;
     setBusy(true);
     setStatus('Submitting business application…');
-    const data = Object.fromEntries(new FormData(form).entries());
+    const data = { ...Object.fromEntries(new FormData(form).entries()), ...readConsentedAttribution() };
     try {
       const response = await fetch('/api/supplier-applications', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
       const result = await response.json().catch(() => ({}));

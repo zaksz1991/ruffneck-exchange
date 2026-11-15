@@ -3,6 +3,7 @@ import './globals.css';
 import { site } from '@/lib/site';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
+import { AnalyticsConsent } from '@/components/analytics-consent';
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -18,5 +19,5 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#101512' };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><SiteHeader /><div className="site-main">{children}</div><SiteFooter /></body></html>;
+  return <html lang="en"><body><SiteHeader /><div className="site-main">{children}</div><SiteFooter /><AnalyticsConsent /></body></html>;
 }

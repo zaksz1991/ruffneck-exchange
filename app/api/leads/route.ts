@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { supabaseAdmin } from '@/lib/supabase-server';
 import { currentCustomerId, createTrackingToken, hashTrackingToken } from '@/lib/customer-auth';
 import { queueNotification } from '@/lib/notifications';
+import { hasAnalyticsConsent } from '@/lib/analytics-consent';
 import { trackingUrl } from '@/lib/notifications';
 
 export const runtime = 'nodejs';
@@ -16,6 +17,11 @@ const schema = z.object({
   category: z.string().trim().min(2).max(100),
   details: z.string().trim().min(30).max(4000),
   preferred_contact: z.enum(['phone', 'whatsapp', 'email']),
+  attribution_source: z.string().trim().max(100).regex(/^[a-zA-Z0-9 _.:/-]+$/).refine((value) => !/[0-9]{7,}/.test(value) && !value.includes('@')).optional(),
+  attribution_medium: z.string().trim().max(100).regex(/^[a-zA-Z0-9 _.:/-]+$/).refine((value) => !/[0-9]{7,}/.test(value) && !value.includes('@')).optional(),
+  attribution_campaign: z.string().trim().max(100).regex(/^[a-zA-Z0-9 _.:/-]+$/).refine((value) => !/[0-9]{7,}/.test(value) && !value.includes('@')).optional(),
+  attribution_referrer_host: z.string().trim().max(120).regex(/^[a-zA-Z0-9 _.:/-]+$/).refine((value) => !/[0-9]{7,}/.test(value) && !value.includes('@')).optional(),
+  attribution_landing_path: z.string().trim().max(180).regex(/^[a-zA-Z0-9 _.:/-]+$/).refine((value) => !/[0-9]{7,}/.test(value) && !value.includes('@')).optional(),
   consent: z.literal('yes')
 });
 
@@ -27,14 +33,33 @@ export async function POST(request: Request) {
     const db = supabaseAdmin();
     const trackingToken = createTrackingToken();
     const customerId = await currentCustomerId();
+    const analyticsAllowed = await hasAnalyticsConsent();
+    const attribution = analyticsAllowed ? {
+      attribution_source: parsed.data.attribution_source || null,
+      attribution_medium: parsed.data.attribution_medium || null,
+      attribution_campaign: parsed.data.attribution_campaign || null,
+      attribution_referrer_host: parsed.data.attribution_referrer_host || null,
+      attribution_landing_path: parsed.data.attribution_landing_path || null,
+      attribution_captured_at: new Date().toISOString(),
+    } : {};
+    const { attribution_source, attribution_medium, attribution_campaign, attribution_referrer_host, attribution_landing_path, attribution_captured_at, ...leadFields } = parsed.data;
     const { data: lead, error } = await db.from('rnx_leads').insert({
-      ...parsed.data, email: parsed.data.email || null, city: parsed.data.city || null,
+      ...leadFields, ...attribution, email: parsed.data.email || null, city: parsed.data.city || null,
       customer_id: customerId, tracking_token_hash: hashTrackingToken(trackingToken),
       status: 'new', contact_release_status: 'locked', last_activity_at: new Date().toISOString()
     }).select('id').single();
     if (error || !lead) {
       console.error('[RNX] Lead insert failed:', { code: error?.code, message: error?.message });
       return NextResponse.json({ error: 'We could not save your request right now. Please try again later.' }, { status: 503 });
+    }
+    if (analyticsAllowed) {
+      const { error: eventError } = await db.from('rnx_events').insert({
+        event_type: 'lead_submitted', path: '/request', state: parsed.data.state, category: parsed.data.category,
+        consented: true, source: attribution.attribution_source || null, medium: attribution.attribution_medium || null,
+        campaign: attribution.attribution_campaign || null, referrer_host: attribution.attribution_referrer_host || null,
+        event_data: { request_type: parsed.data.request_type },
+      });
+      if (eventError) console.error('[RNX analytics] Consented lead event could not be recorded:', eventError.message);
     }
     const url = trackingUrl(trackingToken);
     if (parsed.data.email) {

@@ -1,8 +1,9 @@
  'use client';
 import { useState } from 'react';
+import { readConsentedAttribution } from '@/lib/analytics-client';
 export function RequestForm() {
   const [status,setStatus]=useState('');const [busy,setBusy]=useState(false);const [tracking,setTracking]=useState('');
-  async function submit(event:React.FormEvent<HTMLFormElement>){event.preventDefault();const form=event.currentTarget;setBusy(true);setStatus('Submitting your request…');setTracking('');const data=Object.fromEntries(new FormData(form).entries());
+  async function submit(event:React.FormEvent<HTMLFormElement>){event.preventDefault();const form=event.currentTarget;setBusy(true);setStatus('Submitting your request…');setTracking('');const data={...Object.fromEntries(new FormData(form).entries()),...readConsentedAttribution()};
     try{const response=await fetch('/api/leads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const result=await response.json().catch(()=>({}));if(!response.ok){setStatus(result.error||'The request could not be saved. Please review the details and try again.');return;}form.reset();setStatus('Request received. Save the private link below to follow updates and message RNX Operations.');setTracking(result.trackingUrl||'');}
     catch{setStatus('A network error prevented submission. Check your connection and try again.');}finally{setBusy(false);}}
   return <form className="form-card form-grid" onSubmit={submit}>
