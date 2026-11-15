@@ -18,7 +18,7 @@ Never sell customer contact details without clear disclosure and permission. Nev
 1. Install Node.js 22 LTS or newer.
 2. In the project folder, install dependencies using your package manager.
 3. Copy `.env.example` to `.env.local`.
-4. Add Supabase URL and service-role key to server-only environment variables. Never expose the service-role key with a `NEXT_PUBLIC_` prefix.
+4. Add `SUPABASE_URL` and `SUPABASE_SECRET_KEY` as server-only environment variables. Never expose the secret key with a `NEXT_PUBLIC_` prefix. The legacy `SUPABASE_SERVICE_ROLE_KEY` remains supported temporarily as a fallback.
 5. Apply `supabase/migrations/001_rnx_core.sql` to a new or approved schema in Supabase.
 6. Start the Next.js development server.
 

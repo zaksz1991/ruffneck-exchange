@@ -19,3 +19,9 @@ Not implemented:
 - Location/category pages are templates and should not be indexed until populated with unique research and real supplier coverage.
 
 This is a working starter foundation, not a finished commercial marketplace. No claim of live functionality beyond the source-level implementation is made.
+
+
+## v0.1.1 update
+- Updated server-side Supabase configuration to prefer the current `SUPABASE_SECRET_KEY` and `SUPABASE_URL` variables.
+- Retained `SUPABASE_SERVICE_ROLE_KEY` as a temporary backwards-compatible fallback.
+- This is a configuration compatibility update; it does not mean the application has been deployed or end-to-end tested.
