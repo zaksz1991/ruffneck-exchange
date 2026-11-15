@@ -5,8 +5,7 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="container header-inner">
         <Link href="/" className="brand" aria-label="RuffNeck Exchange home">
-          <span className="brand-mark">R</span>
-          <span className="brand-copy"><strong>RUFFNECK</strong><small>EXCHANGE</small></span>
+          <img className="brand-logo" src="/brand/rnx-logo.svg" alt="RuffNeck Exchange" width="186" height="42" />
         </Link>
         <nav className="main-nav" aria-label="Main navigation">
           <Link href="/marketplace">Marketplace</Link>

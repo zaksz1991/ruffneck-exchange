@@ -40,6 +40,8 @@ export default function Home() {
 
       <section className="trust-strip"><div className="container trust-inner"><span>One exchange</span><span>Multiple industries</span><span>Local and cross-border reach</span><span>Customer-first introductions</span></div></section>
 
+      <section className="brand-promo"><div className="container"><Link href="/marketplace" aria-label="Explore the RuffNeck Exchange marketplace"><img src="/brand/rnx-marketplace-banner.svg" alt="RuffNeck Exchange: Products, Services, Businesses and Opportunities. A clearer route to source, supply and grow." width="1600" height="520" /></Link></div></section>
+
       <section className="section container">
         <div className="section-heading"><div><p className="eyebrow">EXPLORE THE EXCHANGE</p><h2>Business needs do not fit into one industry.</h2></div><Link className="text-link" href="/marketplace">View all departments ↗</Link></div>
         <div className="category-grid">

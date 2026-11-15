@@ -10,9 +10,10 @@ export const metadata: Metadata = {
   title: { default: 'RuffNeck Exchange | Products, Services, Businesses and Opportunities', template: '%s | RuffNeck Exchange' },
   description: site.description,
   applicationName: site.name,
+  icons: { icon: '/icon.svg', shortcut: '/icon.svg', apple: '/brand/rnx-symbol.svg' },
   alternates: { canonical: '/' },
-  openGraph: { type: 'website', url: site.url, siteName: site.name, title: 'RuffNeck Exchange', description: site.description },
-  twitter: { card: 'summary_large_image', title: 'RuffNeck Exchange', description: site.description },
+  openGraph: { type: 'website', url: site.url, siteName: site.name, title: 'RuffNeck Exchange', description: site.description, images: [{ url: '/brand/rnx-marketplace-banner.svg', width: 1600, height: 520, alt: 'RuffNeck Exchange — Products, Services, Businesses and Opportunities' }] },
+  twitter: { card: 'summary_large_image', title: 'RuffNeck Exchange', description: site.description, images: ['/brand/rnx-marketplace-banner.svg'] },
   robots: { index: true, follow: true },
 };
 
