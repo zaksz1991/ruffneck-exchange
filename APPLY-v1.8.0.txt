@@ -1,0 +1,26 @@
+RUFFNECK EXCHANGE v1.8.0 — OPERATIONS AND CONVERSION UPGRADE
+
+This is an incremental source overlay, NOT a full repository archive. It must be merged into the existing ruffneck-exchange main branch. It is intentionally limited to the files listed below and does not replace the repository's app, assets, credentials, or database history.
+
+REPLACE
+- package.json
+- README.md
+- BUILD_STATUS.md
+- app/api/admin/actions/route.ts
+- app/marketplace/page.tsx
+- app/how-it-works/page.tsx
+- app/request/page.tsx
+- components/request-form.tsx
+
+ADD
+- scripts/test-rnx-v180-operations-upgrade.mjs
+- RELEASE-NOTES-v1.8.0.md
+
+DATABASE
+No migration required. Do not rerun any RNX or shared RuffNeck migrations.
+
+VERCEL
+No environment variable changes. No payment provider is connected by this release.
+
+VALIDATION
+The focused test is `npm run test:rnx-v180`. Before treating this as production-ready, run the existing full `npm run check` against the complete repository and confirm the Vercel production build. These checks have not been run in the complete repository in this preparation environment.

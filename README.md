@@ -1,187 +1,106 @@
-# RuffNeck Exchange (RNX) — v1.3.0
+# RuffNeck Exchange (RNX) — v1.8.0
 
-A multi-industry, multi-location customer-acquisition marketplace connecting customers with products, services, suppliers, businesses, wholesale providers and procurement opportunities. Refrigeration, cold rooms and solar remain categories only; they do not define the brand.
+**Products. Services. Businesses. Opportunities.**
 
-## Core model
-RNX receives a customer's sourcing request, verifies the requirement and permission, shares an anonymised opportunity with suitable approved suppliers, records supplier acceptance and payment, then obtains the customer's authorisation before contact details are released. Customer browsing and requests are free. This release implements supplier memberships and manually qualified opportunity fees. Promoted placement is a possible future revenue stream, not a feature currently offered by this release.
+RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business marketplace and sourcing intermediary. It helps customers describe what they need and connects suitable enquiries with reviewed suppliers, manufacturers, wholesalers, distributors, service providers and commercial partners. The platform is designed to expand across locations and markets without being tied to one industry.
 
-Never sell or release customer contact information without disclosure and permission. Membership does not guarantee leads or ranking. Supplier approval is not a guarantee of stock, licence, product condition, delivery or transaction performance.
+Production: https://ruffneck-exchange.vercel.app/  
+Repository: https://github.com/zaksz1991/ruffneck-exchange  
+Canonical domain: `https://ruffneck-exchange.vercel.app`
 
+## How RNX operates
 
+1. Customers browse categories or submit a free sourcing request.
+2. RNX reviews and qualifies the requirement.
+3. Staff use category, location and requirement evidence to identify suitable approved suppliers. Supplier participation is voluntary.
+4. The supplier receives an anonymised opportunity brief and accepts or declines the agreed terms.
+5. Any supplier introduction fee is independently verified against the receiving account record. RNX does not treat a screenshot or a supplier-submitted claim as proof of payment.
+6. The customer separately approves or declines the proposed introduction.
+7. Customer contact details are released only after the required supplier acceptance, payment verification and customer permission have been recorded.
 
+Customers can submit requests without paying RNX. Supplier memberships, promoted listings, advertising and qualified introductions are services of RuffNeck Knowledge Hub's RNX marketplace operation. Purchases of third-party goods and services are arranged and paid for directly with the relevant supplier. **Automated payment-gateway checkout is not active in this release; applicable RNX fees still use manual payment verification.**
 
-## v1.3.0 supplier verification and private evidence vault
-- Approved suppliers can prepare a separate verification submission from their private supplier dashboard.
-- Business structures include registered business, sole trader/unincorporated business and licensed provider.
-- Evidence categories include business registration, proof of address, operating licence, operating evidence, authority letter, tax registration and other supporting documents.
-- PDF, JPEG, PNG and WebP uploads are checked against file signatures; maximum 4 MB per file and 10 files per submission.
-- Evidence is stored in a private Supabase Storage bucket. Direct anonymous/authenticated Storage access is not granted; server routes verify the supplier session or verification-staff permission and create 5-minute signed viewing URLs.
-- Owner and operations administrator roles can review submissions, accept/reject individual documents, add private notes, send supplier-visible feedback, approve verification with an expiry date or reject the submission.
-- A public “RNX document reviewed” badge appears only while the recorded verification is approved and unexpired. It does not certify goods, licensing, stock, solvency, quality or legal compliance.
-- Migration 011 creates only RNX verification objects, adds verification-status fields to the RNX supplier application table and adds a bucket-specific restrictive Storage policy. The private evidence bucket is created/normalised through the server-only Supabase Storage API on first use. It does not modify unrelated RuffNeck tables.
+## Current v1.8.0 changes
 
-## v1.2.0 customer trust and resolution workflow
-- Customers with a private request-tracking link can submit a complaint or dispute associated with that request.
-- Case types cover general complaints, delivery, product or service quality, payment disputes, supplier conduct and suspected fraud.
-- Each case receives a sequential RNX case reference and an auditable case history. A customer can select a supplier only when that business was already introduced through a verified-payment, customer-approved and contact-released offer for the same request.
-- Customers can follow case progress and send case-specific messages using the same private tracking link.
-- Authorised staff can assign a case, set severity, progress it through controlled statuses, add staff-only notes and send customer-visible updates.
-- Customer-visible resolution summaries are separate from internal notes; internal notes are never returned by the tracking API.
-- Owner, operations administrator and customer support roles can work trust cases; finance and analyst roles cannot access case-level personal information.
-- Case records do not establish legal liability or guarantee refunds, replacements, supplier action or any other commercial result.
+- Classifies supplier/listing/lead update failures with actionable operational messages instead of masking all Supabase errors as one generic failure.
+- Explains the supplier email-confirmation rule when migration 013 blocks a new supplier approval. The rule is preserved; the application does not bypass email ownership checks.
+- Distinguishes database business-rule, schema, permission and duplicate-record failures without returning database internals to the browser.
+- Improves empty marketplace conversion by clearly presenting the free sourcing request route and supplier registration route when no approved inventory is available.
+- Retains a selected category and location when a visitor moves from filtered marketplace discovery into a sourcing request, pre-filling those fields without inventing customer details.
+- Updates the public process explanation to match the implemented operations model and accurately disclose manual fee verification.
 
-## v1.1.0 staff access control
-- Individual staff accounts with email/password sign-in and signed, eight-hour HttpOnly sessions.
-- One-time, 48-hour staff invitations; only SHA-256 invitation hashes are stored.
-- Owner, operations administrator, finance, customer support and analyst roles. Finance has a separate lead-fee reconciliation view that excludes customer contact details.
-- Server-side role checks on administrator pages and protected API routes.
-- Immediate suspension enforcement because active role/status is checked against Supabase for each staff request.
-- Owner-only staff directory, invitation history and recent staff activity console at `/admin/staff`.
-- Dedicated finance workspace at `/admin/finance` for lead-fee reconciliation using anonymised offer details, without exposing customer name, phone or email.
-- Scrypt password hashing, atomic invitation acceptance and database protection against suspending/demoting the last active staff owner.
-- Emergency environment-password owner recovery remains available; no existing admin password or Supabase credential is changed by the migration.
-- Adds migration 009 only; no existing non-RNX database objects are modified.
+## Platform features
 
-## v1.0.1 deployment repair
+- Multi-industry department and state discovery, approved supplier profiles and separately moderated product/service listings.
+- Customer sourcing requests, private guest tracking links, optional customer accounts and customer-to-operations messages.
+- Staff operations console with role-based access, supplier/listing moderation, lead qualification and audit records.
+- Supplier matching recommendations for staff review; recommendations do not automatically create offers or disclose customer details.
+- Supplier portal with private anonymised opportunities, accept/decline decisions, catalogue controls and membership operations.
+- Manual introduction-fee and membership-payment verification, customer consent links and database-enforced contact-release checks.
+- Supplier verification evidence vault with private storage and time-limited signed document links.
+- Customer trust cases and disputes with separate internal notes and customer-visible replies.
+- Acquisition analytics and consent-first attribution.
+- Account recovery and one-time email verification for customer and supplier accounts.
+- RuffNeck Entertainment product showcase alongside the wider marketplace.
 
-This release fixes the TypeScript build failure reported by Vercel in `app/api/leads/route.ts`. The server-generated `attribution_captured_at` value is no longer incorrectly destructured from the validated request payload. Attribution objects now retain one consistent typed shape with explicit `null` values when analytics consent is absent. The supplier application endpoint received the same type-safety correction. Legacy CSS `align-items: end` values were changed to `align-items: flex-end` to remove the Autoprefixer compatibility warnings. No new Supabase migration is introduced; migration 008 remains the latest migration.
+## Trust and privacy boundaries
 
-## v1.0.0 features
-- Optional, consent-first first-touch attribution for customer requests and supplier applications.
-- Server-enforced analytics consent using an HttpOnly cookie; no attribution when the visitor declines or does not choose.
-- Campaign, source, medium, referrer-host and landing-path recording with no IP address, user-agent, full referrer URL or clickstream.
-- Private acquisition analytics dashboard at `/admin/analytics`, with 7/30/90/365-day reporting.
-- Aggregate source, campaign, category, state, daily trend, verified lead-fee and introduction reporting.
-- Aggregate CSV export without customer or supplier personal details.
-- New additive migration 008; no non-RNX database tables are modified.
+- Do not sell or release customer contact details without disclosure and explicit permission.
+- An approved supplier or reviewed document is not a guarantee of stock, product quality, licensing, solvency, delivery or transaction performance.
+- Membership does not guarantee enquiry volume, ranking or sales.
+- Customer enquiries are not a promise to purchase.
+- Staff actions and status changes should remain auditable.
+- Payment claims must be verified against the receiving account or provider record, not screenshots.
 
-## v0.9.0 features
-- Reliable notification outbox worker with atomic database claims and short processing leases.
-- Immediate Resend attempts when configured, plus protected daily retries for due pending/failed messages.
-- Stable per-notification Resend idempotency keys, bounded retry/backoff and a five-attempt ceiling.
-- Manual queue processing in the administrator communications console.
-- No customer email is marked delivered; `sent` means the provider accepted the API request.
-- Adds migration 007, which alters only `rnx_notifications` and adds a service-role-only claim function.
+## RuffNeck Entertainment platforms
 
-## v0.8.0 features
-- Explainable supplier matching recommendations in the private operations offer workflow.
-- Ranks approved suppliers and approved catalogue listings by category, location, request type and keywords.
-- Displays match reasons and catalogue evidence; excludes suppliers already offered the same request.
-- Manual review and supplier selection remain mandatory; recommendations do not create offers or contact suppliers.
-- No additional database migration required; uses existing RNX migrations 001–006.
+- RuffNeck LMS — https://ruffneck-lms.vercel.app/
+- RuffNeck Prospector — https://ruffneck-prospector.vercel.app/
+- RuffNeck Connect — https://ruffneck-connect.vercel.app/
+- RuffNeck Social Hub — https://ruffneck-social-hub.vercel.app/
+- Kano Run — https://kano-run.vercel.app/
+- Kano Keke — https://kano-keke.vercel.app/
+- Calloria — https://calloria.vercel.app/
+- RuffNeck Entertainment — https://ruffneck-entertainment.vercel.app/
 
-## v0.7.0 features
-- Customer accounts with scrypt password hashes and signed HttpOnly sessions.
-- Guest request tracking links; customers can follow status and message RNX without creating an account.
-- Customer account dashboard for requests submitted while signed in.
-- Private customer-to-operations message threads and administrator reply console.
-- Notification outbox with optional Resend email delivery; pending/failed states are visible to operations.
+## Technology and deployment
 
-## v0.6.0 features
-- Responsive multi-industry marketplace, supplier directory and approved catalogue.
-- Customer sourcing request and supplier application forms.
-- Individual approved supplier and listing pages.
-- Private operations console at `/admin/login`.
-- Supplier and listing moderation, plus lead qualification.
-- Supplier opportunity offers with anonymised summaries and agreed fees.
-- Supplier portal acceptance or decline of assigned anonymised opportunities.
-- Manual payment verification using the independently confirmed receiving-account amount, currency and transaction reference against the exact agreed quotation.
-- Expiring, unguessable customer consent links; only a hash is stored in Supabase.
-- Customer approve/decline page that does not expose the customer's personal information.
-- Atomic database checks preventing contact release unless supplier payment is verified and the customer has approved.
-- Offer event history and operator audit records.
-- Supplier portal sign-in with scrypt password hashes, signed HTTP-only sessions and persistent login throttling.
-- Existing approved suppliers can receive one-time portal activation links from operations; links are hashed in the database and expire after seven days.
-- Private supplier dashboard for catalogue status, memberships and assigned anonymised opportunities.
-- Suppliers can submit additional product/service listings within their active plan's listing limit.
-- Three plan tiers: Starter (free), Growth (quotation) and Enterprise (custom quotation). No unverified paid prices are published.
-- Manual membership quotation, supplier transaction-reference submission and operations payment verification.
-- Paid membership activates only after operations independently records the actual received amount, currency and receiving-account reference and the database confirms they match the quotation; supplier-submitted references do not activate access.
-- Private operations membership console at `/admin/memberships`.
-- Public plan comparison at `/plans`.
+- Next.js 15, React 19 and TypeScript.
+- Supabase server-side database access; RNX objects use the `rnx_` prefix.
+- Vercel deployment, root directory `./`, Next.js framework preset.
+- Node.js 20.9+ as specified by `package.json`.
+- Use `NEXT_PUBLIC_SITE_URL=https://ruffneck-exchange.vercel.app` for production canonical URLs.
+- Keep Supabase secret/service-role keys and session secrets server-side. Never use a `NEXT_PUBLIC_` prefix for secrets.
 
-## Requirements
-- Node.js 22 LTS or newer.
-- Supabase JS client configured with server-only environment variables.
-- Vercel deployment with Root Directory `./`.
+## Environment variables
 
-## Environment setup
-Copy `.env.example` to `.env.local` for local development, then configure values privately. Set in Vercel:
+Refer to `.env.example` and `VERCEL_DEPLOYMENT.md`. The application may use:
 
-- `NEXT_PUBLIC_SITE_URL=https://ruffneck-exchange.vercel.app`
 - `SUPABASE_URL`
-- `SUPABASE_SECRET_KEY`
-- `RNX_ADMIN_PASSWORD` (owner recovery only; normal staff use individual accounts)
-- `RNX_ADMIN_EMAIL` (optional label for owner recovery activity records)
-- `RNX_ADMIN_SESSION_SECRET` (at least 32 characters)
-- `RNX_SUPPLIER_SESSION_SECRET` (recommended separate random value, at least 32 characters; falls back to the admin secret if omitted)
-- `RNX_CUSTOMER_SESSION_SECRET` (recommended separate random value, at least 32 characters; falls back to the admin secret if omitted)
-- `RESEND_API_KEY`, `RNX_NOTIFICATION_FROM_EMAIL`, and `CRON_SECRET` for transactional email delivery and the protected daily worker; `RNX_OPERATIONS_NOTIFICATION_EMAIL` is optional
-- `RNX_PAYMENT_INSTRUCTIONS` (optional server-only instructions, shown only to signed-in suppliers after a quote)
+- `SUPABASE_SECRET_KEY` (or the documented legacy service-role fallback)
+- `RNX_ADMIN_PASSWORD` (owner recovery only)
+- `RNX_ADMIN_SESSION_SECRET`
+- `RNX_SUPPLIER_SESSION_SECRET`
+- `RNX_CUSTOMER_SESSION_SECRET`
+- `NEXT_PUBLIC_SITE_URL`
+- `RESEND_API_KEY`
+- `RNX_NOTIFICATION_FROM_EMAIL`
+- `CRON_SECRET`
+- `RNX_OPERATIONS_NOTIFICATION_EMAIL` (optional)
+- `RNX_PAYMENT_INSTRUCTIONS` (optional server-only manual instructions)
 
-Never commit actual secrets or expose them through `NEXT_PUBLIC_` variables.
+Do not paste, commit or expose actual secret values.
 
-## Database migrations
-The RNX schema is additive and uses `rnx_*` tables. Review target project contents and migration history before applying. Apply only migrations not already run, in order:
+## Supabase migrations
 
-1. `001_rnx_core.sql`
-2. `002_rnx_catalogue.sql`
-3. `003_rnx_admin_operations.sql`
-4. `004_rnx_introduction_workflow.sql`
-5. `005_rnx_supplier_memberships_portal.sql`
-6. `006_rnx_customer_accounts_tracking_messaging.sql`
-7. `007_rnx_notification_delivery_worker.sql`
-8. `008_rnx_consent_first_attribution.sql`
-9. `009_rnx_staff_access_control.sql`
-10. `010_rnx_trust_cases.sql`
-11. `011_rnx_supplier_verification.sql`
+RNX migrations are additive and use only `rnx_*` application objects, except narrowly scoped RNX Storage policies. Review the target project and its migration history. Apply only missing migrations, in order: `001_rnx_core.sql` through `013_rnx_email_verification.sql`.
 
-Apply only missing migrations in numerical order. A fresh RNX installation requires 001–011. Do not rerun completed migrations or alter unrelated RuffNeck tables. Check the actual migration history and apply only missing files in numerical order. Do not rerun earlier migrations unnecessarily. Do not modify existing non-RNX RuffNeck Entertainment tables.
+Never rerun completed migrations or alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects. Refer to individual migration files and feature guides for exact scope.
 
-## Supplier introduction operating sequence
-1. Qualify the customer request in the operations console.
-2. Create a supplier offer using an anonymised brief. Do not include the customer's name, email, phone number or other identifying information.
-3. Assign the anonymised opportunity and proposed fee to the approved supplier. The supplier sees it in the private portal and explicitly accepts or declines. Staff may separately confirm supplier commercial terms through the agreed business channel; supplier-facing opportunity briefs are not automatically delivered by this release.
-4. Verify the exact fee against the bank or payment-provider transaction record. Record the transaction reference and exact amount. A transfer screenshot or verbal claim is not proof.
-5. Send the customer approval link privately through the customer's preferred channel. The link expires after seven days and can be regenerated before the customer decides.
-6. Customer can approve or decline the specific supplier introduction. Declining does not incur a customer fee.
-7. Only after supplier acceptance, verified payment and customer approval may staff share the customer's contact information with that supplier. Record the release after it actually happens.
+## Verification status for v1.8.0
 
-The database functions enforce supplier acceptance before lead-fee payment verification, exact fee matching, and both paid status plus customer approval before contact release. Membership payments also require an independently recorded receipt amount, currency and receiving-account reference to match the quotation before paid access is activated. The application can attempt transactional email through Resend when valid credentials and a verified sender are configured. Without Resend credentials and a verified sender, notifications remain queued. The worker retries transient failures up to five total attempts, and the admin console can process due notifications manually. WhatsApp and SMS delivery are not implemented. `sent` means the provider accepted the API call, not that inbox delivery was confirmed. Staff still send the anonymised supplier brief and customer consent link manually using approved channels.
+The included focused operations contract test is designed to run with `npm run test:rnx-v180`. It does not prove that production Supabase migrations, environment variables, live email delivery or Vercel deployment are correct. Run the full repository `npm run check` against the complete project and review the Vercel production build before treating this release as deployed.
 
-## Vercel
-- Framework: Next.js
-- Root Directory: `./`
-- Build: `npm run build`
-- Production URL: `https://ruffneck-exchange.vercel.app/`
+## Commercial deployment
 
-A connected Git repository does not prove that a deployment build succeeds. Inspect the Vercel deployment build log after committing.
-
-## Supplier membership workflow
-1. A new supplier sets a portal password during business application. The password is stored as a scrypt hash, not plain text.
-2. RNX reviews and approves the supplier. Approved applications with a password hash are automatically enabled for portal sign-in and receive the free Starter plan.
-3. Older approved suppliers who predate portal passwords can be issued a one-time activation link from `/admin/memberships`. The operator sends the link privately to the approved business email; it expires after seven days.
-4. Signed-in suppliers can see their approved business record, catalogue submissions, membership status and assigned anonymised opportunities. Customer name, phone, email and original request details are withheld until the contact-release timestamp has been recorded.
-5. Starter is free and supports up to 3 catalogue submissions. Growth supports up to 25; Enterprise up to 500. These are configured product limits, not verified market benchmarks. Paid prices are quotation-based and are not invented or prefilled.
-6. A supplier requests a paid plan; RNX issues the amount, interval and expiry; the supplier submits a transaction reference; operations checks the real bank/payment-provider record and verifies it. Only then is the paid membership activated.
-
-## Not included
-- Payment gateway or automatic bank reconciliation.
-- Automated KYB/licence verification, public trust scores or automated fraud determinations. RNX v1.3.0 provides a manual evidence submission and documentary review workflow only.
-- WhatsApp or SMS delivery.
-- Customer email verification, password reset and account recovery.
-- General website traffic, page-view, ad-impression or clickstream analytics; v1.0.0 measures only consented form conversions.
-- Inventory synchronisation, automated supplier outreach, supplier password reset, independent supplier identity/KYB checks, and promoted-placement controls.
-
-The emergency owner recovery path remains environment-password based. Normal staff use individual invited accounts with role-based permissions. Use a strong unique recovery password, restrict Vercel project access and keep all secrets server-side. Vercel Hobby is not assumed to grant a commercial-use entitlement; check the plan terms before monetised production.
-
-
-See `RNX_CUSTOMER_ACCOUNTS_AND_TRACKING.md` for migration 006, privacy boundaries and optional Resend configuration. See `RNX_SUPPLIER_MATCHING_ENGINE.md` for the v0.8.0 recommendation rules and limitations.
-
-
-See `RNX_NOTIFICATION_DELIVERY.md` for migration 007, retry policy, Vercel schedule and Resend setup. See `RNX_ANALYTICS_AND_ATTRIBUTION.md` for migration 008, consent controls and analytics reporting.
-
-See `RNX_STAFF_ACCESS_CONTROL.md` for role permissions, invitation setup, migration 009, password requirements and recovery limitations. See `RNX_TRUST_AND_RESOLUTION.md` for complaint intake, status handling, customer-visible replies and internal-note privacy.
-
-
-See `RNX_SUPPLIER_VERIFICATION.md` for migration 011, private evidence storage, reviewer controls, expiry rules and limitations.
+Review Vercel plan terms for commercial use before monetised production operation. Do not assume a personal-use plan permits commercial marketplace operations.
