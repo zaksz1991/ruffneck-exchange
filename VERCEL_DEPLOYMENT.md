@@ -77,3 +77,11 @@ Post-deployment checks:
 4. Open the private tracking link and confirm the original offer reference is shown.
 5. Pause or reject a test listing and verify a new enquiry submitted from an old page is rejected with a clear message.
 6. Confirm supplier-facing screens still do not expose customer contact details before the existing permission and payment gates complete.
+
+
+## v2.1.0 supplier catalogue editing
+
+- Suppliers can edit their pending, rejected and paused offers in the supplier portal.
+- Approved offers must be paused before editing; saved changes return to `pending` moderation.
+- No Supabase migration or new environment variable is needed. Keep migrations 001–014 applied.
+- Run the repository `check` script and confirm a successful Vercel production build after deployment.

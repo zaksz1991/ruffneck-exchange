@@ -5,7 +5,7 @@ import { SupplierVerificationPanel } from '@/components/supplier-verification-pa
 type Plan = { id: string; code: string; name: string; description: string; listing_limit: number; display_price: string; features: string[] };
 type Payment = { id: string; amount: number; currency: string; payment_method: string; transaction_reference: string; status: string; supplier_note?: string | null; verified_at?: string | null; created_at: string };
 type Membership = { id: string; status: string; quoted_amount: number | null; currency: string; billing_interval: string; quote_expires_at: string | null; period_start: string | null; period_end: string | null; created_at: string; plan: Plan | Plan[]; payments: Payment[] };
-type Listing = { id: string; title: string; slug: string; listing_type: string; category: string; state: string; city: string | null; price_type: string; price: number | null; currency: string; status: string; created_at: string };
+type Listing = { id: string; title: string; slug: string; listing_type: string; category: string; description: string; state: string; city: string | null; price_type: string; price: number | null; currency: string; keywords: string[]; status: string; created_at: string; updated_at: string };
 type Offer = { id: string; anonymised_summary: string; quoted_fee: number; currency: string; payment_status: string; supplier_accepted_at: string | null; supplier_declined_at: string | null; supplier_response_note: string | null; payment_verified_at: string | null; customer_approved_at: string | null; customer_declined_at: string | null; contact_released_at: string | null; created_at: string; customer: { category: string; state: string; city: string | null; contact_released: boolean; name: string | null; email: string | null; phone: string | null; preferred_contact: string | null; request_details: string | null } };
 type DashboardData = { supplier: { business_name: string; contact_name: string; email: string; phone: string; category: string; state: string }; listings: Listing[]; memberships: Membership[]; offers: Offer[]; plans: Plan[]; paymentInstructions: string };
 
@@ -20,6 +20,7 @@ export function SupplierDashboard() {
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [paymentSubscriptionId, setPaymentSubscriptionId] = useState('');
+  const [editingListing, setEditingListing] = useState<Listing | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true); setError('');
@@ -62,17 +63,22 @@ export function SupplierDashboard() {
     finally { setBusy(false); }
   }
 
-  async function submitListing(event: React.FormEvent<HTMLFormElement>) {
+  async function submitListing(event: React.FormEvent<HTMLFormElement>, listingId?: string) {
     event.preventDefault(); setBusy(true); setError(''); setNotice('');
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
     const payload = Object.fromEntries(form.entries());
     try {
-      const response = await fetch('/api/supplier/listings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const response = listingId
+        ? await fetch(`/api/supplier/listings/${listingId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'update', ...payload }) })
+        : await fetch('/api/supplier/listings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const result = await response.json().catch(() => ({}));
       if (response.status === 401) { window.location.assign('/supplier/login'); return; }
-      if (!response.ok) throw new Error(result.error || 'Listing could not be submitted.');
-      formElement.reset(); setNotice(result.message || 'Listing submitted for review.'); await refresh();
+      if (!response.ok) throw new Error(result.error || (listingId ? 'Listing changes could not be saved.' : 'Listing could not be submitted.'));
+      formElement.reset();
+      if (listingId) setEditingListing(null);
+      setNotice(result.message || (listingId ? 'Listing changes submitted for review.' : 'Listing submitted for review.'));
+      await refresh();
     } catch (err) { setError(err instanceof Error ? err.message : 'Listing could not be submitted.'); }
     finally { setBusy(false); }
   }
@@ -165,7 +171,20 @@ export function SupplierDashboard() {
 
     <section className="supplier-panel">
       <div className="supplier-section-heading"><div><p className="eyebrow">SUPPLIER CATALOGUE</p><h2>Your products and services</h2><p>New or edited offers remain private until reviewed and approved.</p></div><span>{data.listings.length} total</span></div>
-      <form className="supplier-listing-form" onSubmit={(event) => void submitListing(event)}>
+      {editingListing && <div className="supplier-editing-banner"><div><strong>Editing: {editingListing.title}</strong><p>Saving changes sends this offer back to RNX review. It stays hidden from the public marketplace until it is approved.</p></div><button className="button button-small button-secondary" type="button" disabled={busy} onClick={() => setEditingListing(null)}>Cancel edit</button></div>}
+      {editingListing && <form key={editingListing.id} className="supplier-listing-form" onSubmit={(event) => void submitListing(event, editingListing.id)}>
+        <label>Offer title<input name="title" required minLength={3} maxLength={180} defaultValue={editingListing.title} /></label>
+        <label>Listing type<select name="listing_type" defaultValue={editingListing.listing_type}><option value="product">Product</option><option value="service">Service</option><option value="wholesale">Wholesale supply</option><option value="rental">Rental</option></select></label>
+        <label>Category<input name="category" defaultValue={editingListing.category} required minLength={2} maxLength={120} /></label>
+        <label>State<input name="state" defaultValue={editingListing.state} required minLength={2} maxLength={60} /></label>
+        <label>City (optional)<input name="city" maxLength={100} defaultValue={editingListing.city || ''} /></label>
+        <label>Price display<select name="price_type" defaultValue={editingListing.price_type}><option value="enquiry">Request quotation</option><option value="fixed">Fixed price</option><option value="from">Price from</option></select></label>
+        <label>Price in NGN (for fixed/from)<input name="price" inputMode="decimal" defaultValue={editingListing.price ?? ''} /></label>
+        <label className="full-field">Search keywords, separated by commas<input name="keywords" maxLength={500} defaultValue={(editingListing.keywords || []).join(', ')} /></label>
+        <label className="full-field">Description<textarea name="description" rows={4} required minLength={30} maxLength={3000} defaultValue={editingListing.description} /></label>
+        <div className="full-field"><button className="button" type="submit" disabled={busy}>{busy ? 'Saving changes…' : 'Save changes & submit for review'}</button></div>
+      </form>}
+      <form key="new-listing-form" className="supplier-listing-form" onSubmit={(event) => void submitListing(event)}>
         <label>Offer title<input name="title" required minLength={3} maxLength={180} placeholder="Product or service name" /></label>
         <label>Listing type<select name="listing_type"><option value="product">Product</option><option value="service">Service</option><option value="wholesale">Wholesale supply</option><option value="rental">Rental</option></select></label>
         <label>Category<input name="category" defaultValue={data.supplier.category} required minLength={2} maxLength={120} /></label>
@@ -177,7 +196,7 @@ export function SupplierDashboard() {
         <label className="full-field">Description<textarea name="description" rows={4} required minLength={30} maxLength={3000} placeholder="Specifications, coverage, availability, terms and important limitations." /></label>
         <div className="full-field"><button className="button" type="submit" disabled={busy}>{busy ? 'Submitting…' : 'Submit new listing for review'}</button></div>
       </form>
-      {data.listings.length ? <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Offer</th><th>Category / location</th><th>Price</th><th>Status</th><th>Submitted</th></tr></thead><tbody>{data.listings.map((listing) => <tr key={listing.id}><td><strong>{listing.title}</strong><small>{listing.listing_type}</small></td><td>{listing.category}<small>{[listing.city, listing.state].filter(Boolean).join(', ')}</small></td><td>{listing.price_type === 'enquiry' ? 'Enquiry' : money(listing.price, listing.currency)}</td><td><span className={`admin-state-${listing.status === 'approved' ? 'good' : listing.status === 'rejected' ? 'bad' : 'wait'}`}>{listing.status}</span>{listing.status === 'approved' && <button className="button button-small button-dark" type="button" disabled={busy} onClick={() => void changeListingStatus(listing.id, 'pause')}>Pause</button>}{listing.status === 'paused' && <button className="button button-small" type="button" disabled={busy} onClick={() => void changeListingStatus(listing.id, 'reactivate')}>Submit for review</button>}</td><td>{dateText(listing.created_at)}</td></tr>)}</tbody></table></div> : <div className="admin-empty">No catalogue listings submitted yet.</div>}
+      {data.listings.length ? <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Offer</th><th>Category / location</th><th>Price</th><th>Status / actions</th><th>Submitted</th></tr></thead><tbody>{data.listings.map((listing) => <tr key={listing.id}><td><strong>{listing.title}</strong><small>{listing.listing_type}</small></td><td>{listing.category}<small>{[listing.city, listing.state].filter(Boolean).join(', ')}</small></td><td>{listing.price_type === 'enquiry' ? 'Enquiry' : money(listing.price, listing.currency)}</td><td><span className={`admin-state-${listing.status === 'approved' ? 'good' : listing.status === 'rejected' ? 'bad' : 'wait'}`}>{listing.status}</span>{listing.status === 'approved' ? <button className="button button-small button-dark" type="button" disabled={busy} onClick={() => void changeListingStatus(listing.id, 'pause')}>Pause to edit</button> : <button className="button button-small" type="button" disabled={busy} onClick={() => setEditingListing(listing)}>{listing.status === 'rejected' ? 'Correct & resubmit' : 'Edit offer'}</button>}{listing.status === 'paused' && <button className="button button-small button-secondary" type="button" disabled={busy} onClick={() => void changeListingStatus(listing.id, 'reactivate')}>Submit unchanged</button>}</td><td>{dateText(listing.created_at)}</td></tr>)}</tbody></table></div> : <div className="admin-empty">No catalogue listings submitted yet.</div>}
     </section>
 
     <section className="supplier-panel">

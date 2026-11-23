@@ -1,12 +1,12 @@
-RUFFNECK EXCHANGE v2.0.0 COMPLETE CUMULATIVE REPLACEMENT
-Source baseline: user-uploaded complete v1.9.0 source archive.
-Release additions:
-- Supabase migration 014 for listing-specific lead references and historical snapshots.
-- Listing detail to enquiry workflow with approved catalogue revalidation.
-- Request form context and prefilled editable brief.
-- Admin queue and private tracking display of referenced offer.
-- v2.0.0 static contract test and release documentation.
-- Repaired stale package-version assertions in cumulative tests.
+RUFFNECK EXCHANGE v2.1.0 — COMPLETE CUMULATIVE REPLACEMENT
 
-Retained: complete Next.js app, API routes, components, libraries, brand assets, all existing documents, test scripts and migrations 001–013.
-No new environment variable or external integration.
+Contains the full Next.js application source, all app routes and pages, components, server libraries, scripts, public brand assets, existing Supabase migrations 001–014, deployment configuration and documentation.
+
+New in v2.1.0:
+- Authenticated supplier catalogue editing for pending, rejected and paused listings.
+- Approved listings must be paused before editing.
+- All saved edits return to pending RNX moderation; no edited offer becomes public automatically.
+- Supplier ownership checks, field validation, status-guarded updates and stable listing slugs.
+
+Database: no new migration. Existing migrations 001–014 remain included and must not be rerun if already applied.
+Environment: no new variables.

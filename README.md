@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v2.0.0
+# RuffNeck Exchange (RNX) — v2.1.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,15 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v2.1.0 — Supplier catalogue editing and re-review
+
+- Suppliers can edit their own pending, rejected and paused catalogue listings from the private supplier portal.
+- Editing a listing resubmits it as `pending`; the listing stays hidden until RNX reviews and approves the updated offer.
+- An approved public listing must first be paused before it can be edited, preventing live public content from changing without moderation.
+- The API scopes every lookup and update to the authenticated supplier account, uses the existing status as a compare-and-set guard and records supplier actions in the RNX audit log.
+- Suppliers can correct rejected listings and either edit paused listings or resubmit them unchanged.
+- No database migration, new environment variable, external provider or payment integration is required.
 
 ## v2.0.0 — Listing-specific enquiry workflow
 
@@ -108,11 +117,11 @@ Do not paste, commit or expose actual secret values.
 
 ## Supabase migrations
 
-This release adds `supabase/migrations/014_rnx_listing_enquiry_context.sql`. Confirm migrations 001–013 are already applied, then apply migration 014 once. Do not rerun completed migrations. For earlier releases, apply only missing RNX migrations in numerical order. Do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects.
+The cumulative project includes RNX migrations 001–014. Migration 014 was introduced in v2.0.0; v2.1.0 adds no database migration. Confirm that all required migrations are already applied and never rerun a migration recorded as completed. For an older deployment, apply only missing RNX migrations in numerical order. Do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects.
 
 ## Verification boundary
 
-The packaged static regression suite includes account recovery, email verification, supplier form/listing controls, v1.8 operations, v1.9 marketplace search and v2.0 listing-specific enquiries. These source-contract tests passed during packaging. TypeScript syntax transpilation passed for the eight changed TS/TSX files. A full semantic TypeScript check and Next.js production build were not completed because project dependencies could not be installed: the npm registry request failed with a DNS `EAI_AGAIN` error. Static checks do not prove live Supabase migration/query behaviour or a successful Vercel build; verify both after installing dependencies and deploying the release.
+The account recovery, email verification, supplier form/listing controls, v1.8 operations, v1.9 marketplace search, v2.0 listing enquiry and v2.1 supplier catalogue edit source-contract tests all passed in this packaging run. TypeScript syntax transpilation passed for the three changed TS/TSX files. Full semantic TypeScript checking and the Next.js production build remain unverified because project dependencies are not installed in this environment (`next` is unavailable and React/Next/Supabase type declarations are missing). Static checks do not prove live Supabase or Vercel behaviour; confirm the production build after deployment.
 
 ## Commercial deployment
 

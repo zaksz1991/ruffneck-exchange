@@ -1,0 +1,13 @@
+RUFFNECK EXCHANGE v2.1.0 — COMPLETE REPLACEMENT
+
+1. Download and extract the complete ZIP.
+2. Replace the repository contents with the contents of the `ruffneck exchange` folder.
+3. Commit and push the replacement to the `main` branch of github.com/zaksz1991/ruffneck-exchange.
+4. Allow Vercel to deploy the commit.
+5. No Supabase migration is required for v2.1.0. Keep all previously applied RNX migrations 001–014; do not rerun them.
+6. No new environment variables are required. Existing server-side Supabase credentials remain in use.
+7. After deployment, sign in to the supplier portal and confirm that a pending/rejected/paused listing can be edited and resubmitted. Confirm that an approved listing must be paused before editing.
+
+This is a complete cumulative source archive, not an incremental overlay. It retains the prior RNX pages, API routes, migrations, brand assets, documentation and release features.
+
+Validation boundary: local source-contract tests do not prove the live database or production deployment. Confirm a successful Vercel production build after pushing.
