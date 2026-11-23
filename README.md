@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v1.9.0
+# RuffNeck Exchange (RNX) — v2.0.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -8,7 +8,17 @@ Production: https://ruffneck-exchange.vercel.app/
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
 
-## v1.9.0 — Marketplace discovery upgrade
+## v2.0.0 — Listing-specific enquiry workflow
+
+- Every public offer now opens a free enquiry form tied to that exact approved listing.
+- The request page verifies the listing against the live approved catalogue before showing its title and supplier context.
+- The form preselects the request type, category and supported state, and inserts an editable request summary.
+- The server rechecks that both the listing and supplier remain approved; client-submitted supplier names or IDs are never trusted.
+- The lead record stores the listing foreign key plus title, slug and supplier-name snapshots so operations retain context if the public listing later changes.
+- The private customer tracker and authorised operations queue show the original offer reference. The reference does not confirm stock, pricing, acceptance or authorise supplier contact.
+- Adds additive RNX migration 014. No new environment variable or payment integration is required.
+
+## v1.9.0 — Marketplace discovery upgrade (retained)
 
 - Adds marketplace filters for offer type: product, service, wholesale and rental.
 - Adds pricing filters: fixed price, starting price and price on request.
@@ -37,7 +47,7 @@ Customers can submit requests without paying RNX. Supplier memberships, promoted
 
 - Multi-industry department and state discovery, approved supplier profiles and separately moderated product/service listings.
 - Marketplace search by keyword and state, now extended with offer-type, pricing-type and sort controls.
-- Customer sourcing requests, private guest tracking links, optional customer accounts and customer-to-operations messages.
+- Customer sourcing requests linked to the specific published offers customers enquire about, private guest tracking links, optional customer accounts and customer-to-operations messages.
 - Staff operations console with role-based access, supplier/listing moderation, lead qualification and audit records.
 - Supplier matching recommendations for staff review; recommendations do not automatically create offers or disclose customer details.
 - Supplier portal with private anonymised opportunities, accept/decline decisions, catalogue controls and membership operations.
@@ -98,11 +108,11 @@ Do not paste, commit or expose actual secret values.
 
 ## Supabase migrations
 
-This release uses the existing RNX schema and adds no migration. Do not run SQL for v1.9.0. For earlier releases, apply only missing RNX migrations in numerical order and never rerun completed migrations. Do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects.
+This release adds `supabase/migrations/014_rnx_listing_enquiry_context.sql`. Confirm migrations 001–013 are already applied, then apply migration 014 once. Do not rerun completed migrations. For earlier releases, apply only missing RNX migrations in numerical order. Do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects.
 
 ## Verification boundary
 
-The included focused v1.8 operations test and v1.9 marketplace-search test validate the packaged source contracts. They do not prove production Supabase behaviour or a complete Next.js build. Run the full repository check against the complete project and inspect the Vercel production build before treating this release as deployed.
+The packaged static regression suite includes account recovery, email verification, supplier form/listing controls, v1.8 operations, v1.9 marketplace search and v2.0 listing-specific enquiries. These source-contract tests passed during packaging. TypeScript syntax transpilation passed for the eight changed TS/TSX files. A full semantic TypeScript check and Next.js production build were not completed because project dependencies could not be installed: the npm registry request failed with a DNS `EAI_AGAIN` error. Static checks do not prove live Supabase migration/query behaviour or a successful Vercel build; verify both after installing dependencies and deploying the release.
 
 ## Commercial deployment
 

@@ -1,34 +1,31 @@
-# RuffNeck Exchange v1.9.0 — build and validation status
+# RuffNeck Exchange v2.0.0 — build and validation status
 
-## Implemented in this overlay
-- Marketplace offers can be filtered by product, service, wholesale or rental.
-- Pricing filters distinguish fixed price, starting price and price on request.
-- Results can be sorted by newest, oldest or offer name A–Z.
-- Listing type and pricing filters are applied in the Supabase query before the bounded result set is fetched.
-- Category and state navigation preserves the active marketplace context.
-- Result count, active filter summary, clear-filter route and sourcing-request fallback are included.
-- The v1.8 operations improvements and the request-page TypeScript state-validation repair are retained in the package.
+## Implemented
+- Listing detail pages route customers into a free enquiry with the selected listing slug.
+- Request page resolves and displays only currently approved listings and approved suppliers.
+- Request form preselects product/service/wholesale request type, category and supported state, with an editable offer-specific brief.
+- Lead API revalidates listing/supplier approval and stores server-derived listing ID plus title/slug/supplier snapshots.
+- Admin lead queue, optional email notifications and private tracking display the referenced offer.
+- Migration 014 adds a nullable listing foreign key, historical snapshots and lookup index without changing earlier lead records or browser-role permissions.
+- Historical package-version assertions were updated to validate the current release rather than stale version strings.
 
-## Focused validation run in this package workspace
-- v1.8.0 operations contract test: 20 assertions passed.
-- v1.9.0 marketplace search contract test: 32 assertions passed.
-- ZIP archive integrity: passed.
-- Package JSON parsing: passed.
-- JavaScript test-script syntax: passed.
-- TypeScript/TSX transpile syntax checks: 6 changed source files passed (syntax only; not a full semantic type-check).
-- Static check confirms the TypeScript state fix uses `new Set<string>(site.states).has(requestedState)` and preserves the state allow-list.
+## Checks completed
+- `scripts/test-account-recovery.mjs` — passed.
+- `scripts/test-email-verification.mjs` — passed.
+- `scripts/test-supplier-form-build-fix.mjs` — passed.
+- `scripts/test-supplier-listing-controls.mjs` — passed.
+- `scripts/test-rnx-v180-operations-upgrade.mjs` — passed (20 assertions).
+- `scripts/test-rnx-v190-marketplace-search.mjs` — passed (32 assertions).
+- `scripts/test-rnx-v200-listing-enquiry.mjs` — passed.
+- TypeScript syntax transpilation — passed for the eight changed TS/TSX files.
 
-## Not run / not established
-- Full repository `npm run check`.
-- Full TypeScript project check against the installed full-repository dependency tree.
-- Full Next.js production build.
-- Live Supabase query execution, actual catalogue filtering or Vercel deployment.
-- No production database, account, payment or email configuration was changed by this package.
-
-The package is an incremental overlay, not a full source repository replacement. It must be merged into the existing RuffNeck Exchange repository before full-project validation.
+## Checks not completed
+- Full `tsc --noEmit` semantic typecheck — not completed.
+- `next build` production build — not completed.
+- Dependency installation was attempted but npm could not resolve `registry.npmjs.org` (`EAI_AGAIN`); the upload did not include `node_modules` or a lockfile.
+- Live Supabase migration execution, production database behaviour and deployed Vercel behaviour are not established by local static tests.
 
 ## Database and environment
-- No SQL migration required.
+- Required migration: `014_rnx_listing_enquiry_context.sql`, after migrations 001–013.
 - No new environment variable.
-- Existing `rnx_listings` fields are reused.
-- No payment gateway, external integration or non-RNX Supabase object changed.
+- No external provider, payment gateway or non-RNX table modification.

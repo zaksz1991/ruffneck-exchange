@@ -1,15 +1,14 @@
-RUFFNECK EXCHANGE v1.7.0 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v2.0.0 — COMPLETE CUMULATIVE REPLACEMENT
 
-This ZIP contains the complete project source and all existing application routes, components, assets, documentation, scripts and Supabase migrations 001–013.
+This archive contains the complete Next.js project source: application routes, APIs, components, libraries, public brand assets, documentation, test scripts and Supabase migrations 001–014.
 
 GUI deployment:
 1. Extract this ZIP.
-2. Open the ruffneck-exchange folder.
+2. Open the ruffneck exchange folder.
 3. Replace the existing GitHub repository contents with the contents of this folder, preserving paths.
-4. Commit to the main branch.
-5. Keep the existing Vercel project and Root Directory ./ .
+4. Commit the changes to the main branch.
+5. Keep the existing Vercel project and Root Directory ./.
 
-No new Supabase migration or environment variable is required for v1.7.0. Do not rerun migrations 001–013 if already applied.
+Required database step: after confirming migrations 001–013 are applied, run migration 014 once. Do not rerun completed migrations. No new Vercel environment variable is required.
 
-New feature: suppliers can pause an approved listing or resubmit a paused listing for RNX review. Resubmitted listings stay private until staff approval.
-See RNX-v1.7.0-RELEASE-NOTES.md and BUILD_STATUS.md.
+Read APPLY-v2.0.0.txt, RELEASE-NOTES-v2.0.0.md and BUILD_STATUS.md before deployment.

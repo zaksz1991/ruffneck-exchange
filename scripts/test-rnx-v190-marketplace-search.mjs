@@ -7,7 +7,7 @@ const marketplace = await readFile(new URL('app/marketplace/page.tsx', root), 'u
 const requestPage = await readFile(new URL('app/request/page.tsx', root), 'utf8');
 const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 
-assert.equal(pkg.version, '1.9.0');
+assert.equal(pkg.version, '2.0.0');
 assert.match(pkg.scripts['test:rnx-v190'], /test-rnx-v190-marketplace-search\.mjs/);
 assert.match(pkg.scripts.check, /test:rnx-v180/);
 assert.match(pkg.scripts.check, /test:rnx-v190/);
@@ -36,7 +36,8 @@ assert.match(marketplace, /\(q \|\| category \|\| state \|\| listingType \|\| pr
 assert.match(marketplace, /href="\/marketplace">Clear all filters/);
 assert.match(marketplace, /Submit a free sourcing request/);
 assert.match(marketplace, /makeQuery\(\{ state: item/);
-assert.match(requestPage, /new Set<string>\(site\.states\)\.has\(requestedState\)/);
+assert.match(requestPage, /const supportedStates = new Set<string>\(site\.states\)/);
+assert.match(requestPage, /supportedStates\.has\(requestedState\)/);
 assert.doesNotMatch(requestPage, /site\.states\.includes\(requestedState\)/);
 
 console.log('RNX v1.9.0 marketplace search tests: 32 assertions passed.');

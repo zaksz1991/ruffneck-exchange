@@ -1,0 +1,44 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+
+const root = new URL('../', import.meta.url);
+const read = (path) => readFile(new URL(path, root), 'utf8');
+const migration = await read('supabase/migrations/014_rnx_listing_enquiry_context.sql');
+const leadRoute = await read('app/api/leads/route.ts');
+const requestPage = await read('app/request/page.tsx');
+const requestForm = await read('components/request-form.tsx');
+const listingPage = await read('app/marketplace/listing/[slug]/page.tsx');
+const overview = await read('app/api/admin/overview/route.ts');
+const adminConsole = await read('components/admin-console.tsx');
+const trackingRoute = await read('app/api/track/[token]/route.ts');
+const trackingUi = await read('components/tracking-page.tsx');
+const pkg = JSON.parse(await read('package.json'));
+
+assert.equal(pkg.version, '2.0.0');
+assert.match(pkg.scripts['test:rnx-v200'], /test-rnx-v200-listing-enquiry/);
+assert.match(pkg.scripts.check, /test:rnx-v200/);
+assert.match(migration, /referenced_listing_id uuid[\s\S]*references public\.rnx_listings\(id\) on delete set null/i);
+assert.match(migration, /referenced_listing_title text/i);
+assert.match(migration, /referenced_supplier_name text/i);
+assert.match(migration, /rnx_leads_referenced_listing_idx/i);
+assert.match(leadRoute, /listing_slug: z\.string\(\)\.trim\(\)\.min\(1\)\.max\(180\)\.regex/);
+assert.match(leadRoute, /\.eq\('status', 'approved'\)/);
+assert.match(leadRoute, /\.eq\('supplier\.status', 'approved'\)/);
+assert.match(leadRoute, /referenced_listing_id: referencedListing\?\.id/);
+assert.match(leadRoute, /referenced_listing_title: referencedListing\?\.title/);
+assert.match(leadRoute, /referenced_supplier_name: referencedListing\?\.supplierName/);
+assert.match(leadRoute, /if \(!listing\) return NextResponse\.json/);
+assert.match(requestPage, /getApprovedListingBySlug/);
+assert.match(requestPage, /safeListingSlug/);
+assert.match(requestPage, /referencedListing/);
+assert.match(requestForm, /name="listing_slug"/);
+assert.match(requestForm, /defaultValue=\{initialDetails\}/);
+assert.match(listingPage, /\/request\?listing=\$\{encodeURIComponent\(listing\.slug\)\}/);
+assert.match(overview, /referenced_listing_title,referenced_supplier_name/);
+assert.match(adminConsole, /lead\.referenced_listing_title/);
+assert.match(trackingRoute, /referenced_listing_slug,referenced_listing_title,referenced_supplier_name/);
+assert.match(trackingUi, /customer-request-reference/);
+assert.match(trackingUi, /referenced_listing_title/);
+
+console.log('RNX v2.0.0 listing enquiry contract: PASS');
+console.log('Checks: approved-offer validation, server-resolved snapshots, foreign-key retention, enquiry prefill, operations context and private customer tracking.');

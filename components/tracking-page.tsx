@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useState } from 'react';
 
 type Message = { id: string; sender_role: string; sender_name: string; body: string; created_at: string };
-type RequestRow = { id: string; request_type: string; category: string; state: string; city: string | null; details: string; status: string; contact_release_status: string; created_at: string; last_activity_at: string | null };
+type RequestRow = {
+  id: string; request_type: string; category: string; state: string; city: string | null; details: string;
+  referenced_listing_slug: string | null; referenced_listing_title: string | null; referenced_supplier_name: string | null;
+  status: string; contact_release_status: string; created_at: string; last_activity_at: string | null;
+};
 type TrustCase = { id: string; case_reference: string; case_type: string; summary: string; status: string; public_resolution: string | null; created_at: string; updated_at: string; messages: Message[] };
 type IntroducedSupplier = { id: string; introduced_at: string; supplier: { business_name: string; category: string } };
 
@@ -94,6 +98,7 @@ export function TrackingPage({ token }: { token: string }) {
     {!request && !error ? <div className="admin-empty">Loading request details…</div> : request && <>
       <article className="customer-request-card">
         <div className="customer-request-heading"><div><span className="eyebrow">PRIVATE REQUEST TRACKING</span><h2>{request.category}</h2><p>{[request.city, request.state].filter(Boolean).join(', ')} · Submitted {stamp(request.created_at)}</p></div><span className={`customer-status status-${request.status}`}>{request.status}</span></div>
+        {request.referenced_listing_title && <p className="customer-request-reference">Published offer referenced: {request.referenced_listing_slug ? <a href={`/marketplace/listing/${encodeURIComponent(request.referenced_listing_slug)}`}>{request.referenced_listing_title}</a> : request.referenced_listing_title}{request.referenced_supplier_name ? ` · ${request.referenced_supplier_name}` : ''}. This records what you enquired about; it does not confirm current availability or price.</p>}
         <p className="customer-request-details">{request.details}</p>
         <div className="customer-request-meta"><span>Review status: {request.status}</span><span>Contact release: {request.contact_release_status}</span><span>Last activity: {stamp(request.last_activity_at || request.created_at)}</span></div>
       </article>

@@ -15,7 +15,7 @@ Set in Vercel Project Settings → Environment Variables:
 Do not paste secret values into source files, GitHub, browser code or variables prefixed with `NEXT_PUBLIC_`.
 
 ## Supabase caution
-RNX uses only `rnx_*` tables. Confirm the target project and migration history before applying anything. The current cumulative release contains migrations 001–011: core, catalogue, operations, introductions, supplier memberships/portal, customer accounts/tracking/messaging, notification delivery, consent-first attribution, staff access control, trust cases, and supplier verification/private evidence storage. Apply only missing migrations in numerical order; never rerun a migration that has already succeeded. These migrations are additive to RNX objects and do not modify RuffNeck Entertainment LMS, Social Hub, billing, product, profile or Prospector tables.
+RNX uses only `rnx_*` tables. Confirm the target project and migration history before applying anything. The current cumulative release contains migrations 001–014: core, catalogue, operations, introductions, supplier memberships/portal, customer accounts/tracking/messaging, notification delivery, consent-first attribution, staff access control, trust cases, supplier verification/private evidence storage, account recovery, email verification and listing-specific enquiry context. Apply only missing migrations in numerical order; never rerun a migration that has already succeeded. These migrations are additive to RNX objects and do not modify RuffNeck Entertainment LMS, Social Hub, billing, product, profile or Prospector tables.
 
 ## Deployment check
 1. Confirm a new deployment was created from the latest `main` commit.
@@ -64,3 +64,16 @@ Confirm migrations 001–009 are already applied, then apply only `supabase/migr
 Confirm migrations 001–010 are present, then apply only `supabase/migrations/011_rnx_supplier_verification.sql`. This migration creates a private Storage bucket named `rnx-supplier-verification`; it must remain non-public. Do not add any Storage policy granting `anon` or `authenticated` access. Application server routes use the existing `SUPABASE_SECRET_KEY` and verify supplier ownership or the owner/operations-admin verification permission before generating 5-minute signed URLs. No new environment variables are required.
 
 After deployment, test with a non-production supplier account: save a draft, upload a harmless sample PDF/image under 4 MB, confirm it is private and only accessible through the signed supplier session route, submit it, review as owner/operations administrator, accept the required document types, approve with an expiry date, and check the public supplier profile badge. Confirm finance, customer support and analyst roles cannot load `/admin/verification` or its APIs. Never use live personal identity documents for smoke tests. Delete test evidence after validation.
+
+
+## v2.0.0 listing-specific enquiry context
+
+Confirm migrations 001–013 are applied, then apply only `supabase/migrations/014_rnx_listing_enquiry_context.sql`. It adds a nullable reference from a customer lead to the published catalogue listing that initiated the enquiry, plus historical snapshots of the listing slug, title and supplier business name. RLS and browser-role restrictions remain unchanged. No Vercel environment variable or new provider is required.
+
+Post-deployment checks:
+1. Open a currently approved public listing and select **Enquire about this offer — free**.
+2. Confirm the request page shows the offer and prepopulates relevant details.
+3. Submit a non-production test enquiry and confirm the lead queue identifies the referenced offer.
+4. Open the private tracking link and confirm the original offer reference is shown.
+5. Pause or reject a test listing and verify a new enquiry submitted from an old page is rejected with a clear message.
+6. Confirm supplier-facing screens still do not expose customer contact details before the existing permission and payment gates complete.

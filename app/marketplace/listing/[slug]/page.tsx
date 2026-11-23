@@ -31,7 +31,7 @@ export default async function ListingDetailPage({ params }: Props) {
       {listing.condition && <p><strong>Condition:</strong> {listing.condition}</p>}
       <div className="supplier-summary"><span className="listing-type">SUPPLIER</span><h2><Link href={`/suppliers/${listing.supplier.public_slug}`}>{listing.supplier.business_name}</Link></h2><p>{listing.supplier.business_type} · {listing.supplier.state}</p><Link className="text-link" href={`/suppliers/${listing.supplier.public_slug}`}>View supplier profile ↗</Link></div>
       <div className="listing-disclaimer">Confirm current stock, exact specifications, taxes, delivery, warranty and final price before making payment. RNX does not hold supplier stock or guarantee a transaction.</div>
-      <Link className="button" href={`/request?category=${encodeURIComponent(listing.category)}`}>Ask RNX about this offer</Link>
+      <Link className="button" href={`/request?listing=${encodeURIComponent(listing.slug)}`}>Enquire about this offer — free</Link>
     </article>
   </main>;
 }

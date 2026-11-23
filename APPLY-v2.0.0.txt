@@ -1,0 +1,19 @@
+RUFFNECK EXCHANGE v2.0.0 — COMPLETE CUMULATIVE REPLACEMENT
+
+This archive is the complete project source based on the uploaded v1.9.0 repository, with the v2.0.0 listing-specific enquiry workflow added. Replace the repository contents with the contents of the ruffneck exchange folder; retain the existing Vercel project and Root Directory ./.
+
+DATABASE — REQUIRED
+1. Open the existing RNX Supabase project and inspect migration history.
+2. Confirm migrations 001–013 have already succeeded.
+3. Run supabase/migrations/014_rnx_listing_enquiry_context.sql once.
+4. Do not rerun migrations already recorded as completed.
+5. The migration creates/changes only RNX lead fields and index; it does not grant browser access or change non-RNX objects.
+
+DEPLOYMENT
+- No new Vercel environment variable is required.
+- Push the complete replacement source to the existing main branch and check the Vercel build log.
+- Test a live approved listing CTA, edit and submit the prefilled enquiry, confirm the admin lead queue shows its reference, and open the private tracking link.
+- Confirm a paused/rejected/unapproved listing cannot be attached to a new enquiry.
+
+VALIDATION LIMITS
+Static contract tests and a local production build can verify source/build integrity, but they do not prove live Supabase migration execution or production behaviour. Complete the post-deployment checks above before treating the release as operational.

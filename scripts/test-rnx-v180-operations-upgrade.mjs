@@ -8,7 +8,7 @@ const requestPage = await readFile(new URL('../app/request/page.tsx', import.met
 const requestForm = await readFile(new URL('../components/request-form.tsx', import.meta.url), 'utf8');
 const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 
-assert.match(pkg.version, /^1\.(8|9)\.0$/);
+assert.equal(pkg.version, '2.0.0');
 assert.match(action, /SUPPLIER_EMAIL_CONFIRMATION_REQUIRED/);
 assert.match(action, /Supplier email must be confirmed before approval/i);
 assert.match(action, /RNX_SCHEMA_MISMATCH/);
@@ -23,7 +23,8 @@ assert.match(marketplace, /name="category"/);
 assert.match(how, /automated payment-gateway checkout is not active/i);
 assert.match(how, /explicit permission/i);
 assert.match(requestPage, /initialCategory/);
-assert.match(requestPage, /new Set<string>\(site\.states\)\.has\(requestedState\)/);
+assert.match(requestPage, /const supportedStates = new Set<string>\(site\.states\)/);
+assert.match(requestPage, /supportedStates\.has\(requestedState\)/);
 assert.doesNotMatch(requestPage, /site\.states\.includes\(requestedState\)/);
 assert.match(requestForm, /defaultValue=\{initialCategory\}/);
 assert.match(requestForm, /defaultValue=\{initialState\}/);

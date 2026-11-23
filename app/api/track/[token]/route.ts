@@ -20,7 +20,7 @@ async function findLead(token: string) {
   if (!/^[a-f0-9]{64}$/i.test(token)) return null;
   const db = supabaseAdmin();
   const { data, error } = await db.from('rnx_leads')
-    .select('id,request_type,name,state,city,category,details,status,contact_release_status,created_at,last_activity_at')
+    .select('id,request_type,name,state,city,category,details,referenced_listing_slug,referenced_listing_title,referenced_supplier_name,status,contact_release_status,created_at,last_activity_at')
     .eq('tracking_token_hash', hashTrackingToken(token)).maybeSingle();
   if (error) throw error;
   return data;
