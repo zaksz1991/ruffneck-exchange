@@ -1,13 +1,14 @@
-RUFFNECK EXCHANGE v2.2.0 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v2.2.1 — COMPLETE CUMULATIVE REPLACEMENT
 
-Contains the full Next.js application source, all app routes and pages, components, server libraries, scripts, public brand assets, Supabase migrations 001–015, deployment configuration and documentation.
+Includes the complete RNX Next.js source project, all existing application pages and APIs, components, libraries, public assets, deployment configuration, documentation, regression tests and Supabase migrations 001–015.
 
-New in v2.2.0:
-- Supplier cover-image uploads for marketplace listings.
-- JPEG, PNG and WebP only; 4 MB maximum; server-side file-signature validation.
-- Private Supabase Storage bucket with signed public display URLs only after listing/supplier approval.
-- Ownership and moderation status checks, image replacement cleanup and audit logging.
-- Marketplace card/detail photo presentation with branded fallback placeholders.
+Retained features:
+- Marketplace discovery and listing enquiries.
+- Supplier catalogue editing and moderation re-review.
+- Supplier cover-image uploads with file-signature validation, private Supabase Storage, signed public display URLs and moderation controls.
 
-Database: confirm migrations 001–014 are applied; apply only migration 015. Never rerun completed migrations.
-Environment: no new variables.
+New in v2.2.1:
+- Fix for the Supabase PromiseLike `.catch()` TypeScript build failure in listing-image audit logging.
+- Audit logging remains best-effort and does not invalidate a completed upload.
+
+Database: no new migration. Keep RNX migrations 001–015 as already applied. No new environment variables.

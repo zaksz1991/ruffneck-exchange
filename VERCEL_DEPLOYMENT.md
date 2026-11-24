@@ -79,6 +79,10 @@ Post-deployment checks:
 6. Confirm supplier-facing screens still do not expose customer contact details before the existing permission and payment gates complete.
 
 
+## v2.2.1 production build patch
+
+The v2.2.1 release corrects a TypeScript error in the listing-image audit code. Supabase query builders return PromiseLike values, so the audit insert now uses `await` inside `try`/`catch` rather than chaining `.catch()` onto the builder's `.then()` result. This is an application-code patch only: no migration or environment-variable change is required. After replacing the repository contents and deploying, confirm that Vercel completes TypeScript checking and the production build.
+
 ## v2.2.0 supplier listing cover images
 
 Confirm migrations 001–014 are already applied, then apply only `supabase/migrations/015_rnx_listing_images.sql`. The migration adds nullable `rnx_listings.image_path` and a restrictive Storage policy preventing browser roles from reading or writing the private `rnx-listing-images` bucket. The bucket is provisioned by the server on first supplier upload. No environment variable is added.

@@ -1,19 +1,17 @@
-# RuffNeck Exchange v2.2.0 — build and validation status
+# RuffNeck Exchange v2.2.1 — build and validation status
 
-## Implemented
-- Supplier catalogue supports one cover image per listing.
-- Uploads accept JPEG, PNG and WebP, maximum 4 MB, with server-side file-signature validation.
-- Image changes require supplier authentication, same-origin requests, ownership checks and pending/rejected/paused listing status. Approved listings must first be paused.
-- Images are stored in a private Supabase Storage bucket; public marketplace pages receive short-lived signed URLs only for offers that pass the existing supplier/listing approval query.
-- Supplier portal previews images and displays listing thumbnails. RNX staff can preview submitted images in the pending catalogue review queue. Public listing cards and details display the approved cover image or a branded fallback.
-- Replaced image objects are removed after the database update succeeds; upload events enter the existing RNX audit log.
+## Included functionality
+- Retains the complete cumulative v2.2.0 application and supplier listing cover-image workflow.
+- Fixes the Vercel TypeScript error in `app/api/supplier/listings/[id]/image/route.ts`: the Supabase insert builder is PromiseLike, so the unsupported `.catch()` chained after `.then()` has been removed.
+- Audit insertion is awaited inside a local `try`/`catch`; audit failures are logged but do not turn a successful image upload into an HTTP 503 response.
 
 ## Validation
-- Static regression test `test:rnx-v220` checks migration, private storage, type/size constraints, file-signature checks, ownership, moderation guards, signed URLs and UI integration.
-- Earlier regression tests remain part of the cumulative `check` script.
-- Full TypeScript semantic checking and Next.js production build have not been completed in this packaging environment. Live Supabase Storage and Vercel behaviour are not established by static tests.
+- The user's v2.2.0 Vercel log confirms Next.js compilation succeeded, then type checking failed at `PromiseLike<void>.catch()` on line 116 of the image upload route.
+- The v2.2.1 targeted regression test checks that the audit insert is awaited, local best-effort error handling exists, and no unsupported PromiseLike `.catch()` chain remains.
+- Cumulative static regression tests are included in `npm run check`.
+- A fresh full TypeScript check and production build have not yet been run against this patch. The next Vercel build is required to confirm the complete production build.
 
-## Deployment
-- Replace the complete repository with this cumulative v2.2.0 source archive.
-- Confirm migrations 001–014 are already applied, then apply only migration 015.
-- No new environment variable is required. The private `rnx-listing-images` bucket is created and configured by the server-side upload helper on first use.
+## Database and deployment
+- No new Supabase migration. Existing migrations 001–015 remain unchanged.
+- No new or modified Vercel environment variables.
+- Deploy the complete source archive to the existing `main` branch and allow the existing Vercel project to build.

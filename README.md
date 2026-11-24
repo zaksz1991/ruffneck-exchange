@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v2.2.0
+# RuffNeck Exchange (RNX) — v2.2.1
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,12 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v2.2.1 — Vercel TypeScript build correction
+
+- Fixes the TypeScript error caused by calling `.catch()` on the Supabase query builder's `PromiseLike<void>` result in the listing-image audit path.
+- Uses awaited audit insertion with local error handling so audit failure does not misreport a successful image upload.
+- No database migration or environment-variable change.
 
 ## v2.2.0 — supplier listing cover images
 
@@ -126,11 +132,11 @@ Do not paste, commit or expose actual secret values.
 
 ## Supabase migrations
 
-The cumulative project includes RNX migrations 001–015. Migration 015 adds listing cover-image metadata and a restrictive private Storage access policy. Confirm that migrations 001–014 are already applied, then apply only migration 015. Never rerun a migration recorded as completed. For an older deployment, apply only missing RNX migrations in numerical order. Do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects.
+The cumulative project includes RNX migrations 001–015. v2.2.1 adds no migration; keep the existing migration state unchanged. For deployments upgrading from before v2.2.0, apply migration 015 only if it has not already succeeded. Never rerun a migration recorded as completed. For an older deployment, apply only missing RNX migrations in numerical order. Do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects.
 
 ## Verification boundary
 
-The account recovery, email verification, supplier form/listing controls, v1.8 operations, v1.9 marketplace search, v2.0 listing enquiry, v2.1 supplier catalogue edit and v2.2 listing-image source-contract tests passed in this packaging run. TypeScript syntax transpilation passed for the eight changed TypeScript/TSX files. Full semantic TypeScript checking and the Next.js production build remain unverified because project dependencies are not installed in this environment. Static checks do not prove live Supabase Storage or Vercel behaviour; confirm the production build and image upload flow after deployment.
+The account recovery, email verification, supplier form/listing controls, v1.8 operations, v1.9 marketplace search, v2.0 listing enquiry, v2.1 supplier catalogue edit, v2.2 listing-image and v2.2.1 PromiseLike audit-fix static regression tests passed in this packaging run. TypeScript syntax transpilation passed for the eight changed TypeScript/TSX files. The Vercel log supplied for v2.2.0 confirms compilation passed but TypeScript checking stopped at the unsupported PromiseLike `.catch()` call; v2.2.1 removes that error. Full TypeScript checking and the Next.js production build still require a fresh Vercel build after deployment. Static checks do not prove live Supabase Storage or Vercel behaviour; confirm the production build and image upload flow after deployment.
 
 ## Commercial deployment
 

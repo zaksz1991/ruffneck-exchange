@@ -107,13 +107,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       if (removeError) console.error('[RNX replaced listing image cleanup]', removeError.message);
     }
 
-    await db.from('rnx_admin_audit_log').insert({
-      action: 'supplier_listing_image_uploaded',
-      entity_type: 'listing',
-      entity_id: id,
-      details: { supplier_application_id: supplier.id, mime_type: detected.mime, file_size_bytes: file.size },
-    }).then(({ error }) => { if (error) console.error('[RNX listing image audit]', error.message); })
-      .catch((error) => console.error('[RNX listing image audit]', error instanceof Error ? error.message : 'Audit insert failed'));
+    try {
+      const { error: auditError } = await db.from('rnx_admin_audit_log').insert({
+        action: 'supplier_listing_image_uploaded',
+        entity_type: 'listing',
+        entity_id: id,
+        details: { supplier_application_id: supplier.id, mime_type: detected.mime, file_size_bytes: file.size },
+      });
+      if (auditError) console.error('[RNX listing image audit]', auditError.message);
+    } catch (auditError) {
+      // Audit logging is best-effort: a completed image upload must not be reported as failed.
+      console.error('[RNX listing image audit]', auditError instanceof Error ? auditError.message : 'Audit insert failed');
+    }
 
     return NextResponse.json({
       ok: true,

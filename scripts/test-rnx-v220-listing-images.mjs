@@ -16,7 +16,7 @@ const card = await read('components/listing-card.tsx');
 const detail = await read('app/marketplace/listing/[slug]/page.tsx');
 const css = await read('app/globals.css');
 
-assert.equal(pkg.version, '2.2.0');
+assert.equal(pkg.version, '2.2.1');
 assert.match(pkg.scripts['test:rnx-v220'], /test-rnx-v220-listing-images/);
 assert.match(pkg.scripts.check, /test:rnx-v220/);
 assert.match(migration, /add column if not exists image_path text/i);
