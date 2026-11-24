@@ -1,23 +1,27 @@
-# RuffNeck Exchange v2.7.0 — build and validation status
+# RuffNeck Exchange v2.8.0 — build and validation status
 
 ## Included functionality
-- Complete cumulative RNX project retained through v2.6.0.
-- Customers can explicitly enable/disable email change alerts on individual saved offers.
-- Database trigger queues one email for active, email-verified customers when a watched listing's published price/currency/price type or supplier-reported availability changes.
-- Baseline values are captured when alerts are enabled; paused listing price edits are detected when the listing is re-approved.
-- Alerts use the existing RNX notification outbox, retry worker and Resend integration.
+- Complete cumulative RNX source retained through v2.7.0.
+- Added a private in-app notification centre to the customer dashboard.
+- Active customers who saved a public listing receive an in-app notification when its published price/price type/currency or supplier-reported availability changes.
+- Notifications include listing and supplier context, a listing link, timestamp and read/unread state.
+- Customers can mark individual notifications or all notifications as read.
+- Existing v2.7.0 email alerts remain separately opt-in and continue to require an active customer, verified email and `alerts_enabled = true`.
 
 ## Security and database
-- Customer preference changes require a signed-in customer session and same-origin request. The database RPC scopes changes to the authenticated customer ID supplied by the server.
-- Alert email is sent only to active customers with a verified email address and an explicit per-listing opt-in.
-- New migration: `019_rnx_saved_listing_change_alerts.sql`. It adds columns to `rnx_customer_saved_listings`, a service-role-only preference function and a trigger on `rnx_listings`.
-- No new Vercel environment variable is required. Existing Resend and cron configuration is reused. Notifications remain queued if the provider credentials are not configured. The current daily cron means delivery is not immediate; Operations can process the queue manually.
+- New API: `GET/PATCH /api/customer/notifications`.
+- API access requires a valid active customer session. Read-state changes require a same-origin request and are scoped to the signed-in customer ID.
+- Notification records are private in `rnx_customer_notifications`; RLS is enabled and direct `public`, `anon` and `authenticated` access is revoked.
+- New migration: `020_rnx_customer_notification_centre.sql`.
+- Migration adds independent in-app change baselines to saved listings and updates the listing-change trigger while preserving v2.7.0's separate verified-email/opt-in email flow.
+- No new Vercel environment variable or external service is required.
 
 ## Validation
-- Added `test-rnx-v270-saved-offer-alerts.mjs` covering dashboard opt-in controls, same-origin API update, service-role RPC, verified-email filtering, trigger coverage and version integration.
-- Prior cumulative regression scripts are retained.
-- TypeScript/TSX syntax transpilation passed for the two changed application files using the installed TypeScript compiler. Full semantic TypeScript checking and Next.js production build require project dependencies; Vercel must confirm both after deployment. Live Supabase trigger and real-email tests remain required.
+- Added `test-rnx-v280-customer-notification-centre.mjs`.
+- Retained all prior cumulative regression scripts and added v2.8.0 to `npm run check`.
+- Static regression and TypeScript syntax checks are run against the delivered source; full semantic typechecking and Next.js production build require dependencies and final Vercel confirmation.
+- Live Supabase migration/trigger execution and real customer notification behaviour have not been verified in production.
 
 ## Deployment
-- Apply only migration 019 after confirming migrations 001–018 are present in RuffNeck Entertainment.
-- Keep existing Vercel environment variables and Root Directory `./`.
+- Apply only migration 020 after confirming migrations 001–019 are already applied in RuffNeck Entertainment.
+- Deploy this complete project to `github.com/zaksz1991/ruffneck-exchange`, branch `main`, using the existing Vercel project and Root Directory `./`.

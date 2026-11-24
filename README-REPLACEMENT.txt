@@ -1,11 +1,11 @@
-RUFFNECK EXCHANGE v2.7.0 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v2.8.0 — COMPLETE CUMULATIVE REPLACEMENT
 
-This archive contains the complete RNX Next.js source project, including application routes and APIs, React components, server libraries, public assets, deployment configuration, project documentation, regression tests and Supabase migrations 001–019.
+This archive contains the complete RNX Next.js source project, including application routes and APIs, React components, server libraries, public assets, deployment configuration, project documentation, regression tests and Supabase migrations 001–020.
 
-Retained features include marketplace discovery, customer enquiries and private tracking, supplier profiles and membership, supplier verification, moderation, listing editing, private cover and gallery images, supplier-reported availability, saved offers and offer comparison.
+Retained features include marketplace discovery, customer enquiries and private tracking, supplier profiles and membership, supplier verification, moderation, listing editing, private cover and gallery images, supplier-reported availability, saved offers, offer comparison and separately opted-in saved-offer email alerts.
 
-New in v2.7.0: customers can explicitly enable or disable email alerts per saved offer. When a watched offer's published price or supplier-reported availability changes, RNX queues an email for the customer's verified email address.
+New in v2.8.0: the signed-in customer dashboard includes an in-app notification centre for saved-offer price and availability changes, with unread counts and read-state controls.
 
-SUPABASE: Apply only migration 019 after confirming migrations 001–018 have succeeded in the RuffNeck Entertainment project.
+SUPABASE: Confirm migrations 001–019 have succeeded, then apply only migration 020 in the RuffNeck Entertainment project.
 
-VERCEL: No new environment variable is required. Existing Resend and CRON configuration is reused. The current notification cron processes the outbox daily; Operations can process it manually. Keep the existing environment configuration and Root Directory `./`.
+VERCEL: No new environment variable is required. Existing Resend and CRON configuration is reused only for email alerts; in-app notification display does not depend on email delivery. Keep the existing environment configuration and Root Directory `./`.

@@ -115,3 +115,12 @@ After deployment, sign in with a test customer account, save at least two curren
 Confirm migrations 001–018 are applied, then apply only `supabase/migrations/019_rnx_saved_listing_change_alerts.sql` in the existing RuffNeck Entertainment Supabase project. It adds explicit per-saved-offer customer preferences and a database trigger that queues an email when a saved listing's published price, currency/price type or supplier-reported availability changes. Customers must have a verified email address. The current listing values are captured when alerts are enabled, so changes made before opt-in are not sent as new alerts. Price edits made while paused are compared when the offer is approved again.
 
 No new environment variables are required. Email delivery reuses the existing `RESEND_API_KEY`, `RNX_NOTIFICATION_FROM_EMAIL` and `CRON_SECRET`. Without the provider configuration, alerts remain pending in `rnx_notifications`. The current Vercel cron processes the queue daily; Operations can also process the queue manually. Customers can turn off alerts at any time in the customer dashboard.
+
+
+## v2.8.0 customer notification centre
+
+Confirm migrations 001–019 are applied, then apply only `supabase/migrations/020_rnx_customer_notification_centre.sql` in the existing RuffNeck Entertainment project. The migration creates private in-app notifications for active customers who saved a listing when its published price, currency/price type or supplier-reported availability changes. It also adds independent last-seen baselines so existing saved offers do not generate historical alerts on migration.
+
+The customer dashboard displays the latest 60 notifications and the total unread count. Customers can mark one notification or all notifications as read. The API requires an active signed-in customer session; read-state updates are same-origin and customer-scoped. The notification table has RLS enabled and no direct browser-role privileges.
+
+The existing v2.7.0 email flow remains separate: only customers who enable email alerts for that saved offer and have a verified email address enter the email outbox. No new environment variables, external services or cron changes are required for in-app notifications. Test by saving a published listing with a customer account, changing its price or availability as the supplier, completing any required moderation, and checking that customer dashboard.

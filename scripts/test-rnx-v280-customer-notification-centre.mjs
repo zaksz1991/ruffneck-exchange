@@ -1,0 +1,42 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+const read = (path) => readFileSync(resolve(process.cwd(), path), 'utf8');
+const dashboard = read('components/customer-dashboard.tsx');
+const api = read('app/api/customer/notifications/route.ts');
+const migration = read('supabase/migrations/020_rnx_customer_notification_centre.sql');
+const styles = read('app/globals.css');
+const packageJson = JSON.parse(read('package.json'));
+const savedOfferApi = read('app/api/customer/saved-listings/route.ts');
+
+assert.equal(packageJson.version, '2.8.0');
+assert.match(packageJson.scripts.check, /test:rnx-v280/);
+assert.match(dashboard, /type CustomerNotification =/);
+assert.match(dashboard, /fetch\('\/api\/customer\/notifications'/);
+assert.match(dashboard, /Notifications/);
+assert.match(dashboard, /Mark all as read/);
+assert.match(dashboard, /View updated offer/);
+assert.match(dashboard, /markNotificationRead/);
+assert.match(api, /export async function GET\(\)/);
+assert.match(api, /export async function PATCH\(request: NextRequest\)/);
+assert.match(api, /isSameOriginRequest\(request\)/);
+assert.match(api, /eq\('customer_id', customerId\)/);
+assert.match(api, /eq\('status', 'active'\)/);
+assert.match(api, /read_at/);
+assert.match(migration, /create table if not exists public\.rnx_customer_notifications/);
+assert.match(migration, /alter table public\.rnx_customer_notifications enable row level security/);
+assert.match(migration, /revoke all on public\.rnx_customer_notifications from public, anon, authenticated/);
+assert.match(migration, /last_seen_price_type/);
+assert.match(migration, /before insert or update of listing_id/);
+assert.match(migration, /after update of price_type, price, currency, availability_status, status/);
+assert.match(migration, /customer\.status = 'active'/);
+assert.match(migration, /saved\.alerts_enabled/);
+assert.match(migration, /v_watch\.email_verified_at is not null/);
+assert.match(migration, /rnx_notifications/);
+assert.match(migration, /never block a supplier catalogue update/i);
+assert.match(savedOfferApi, /rnx_set_customer_listing_alert/);
+assert.match(styles, /customer-notifications-section/);
+assert.match(styles, /customer-notification-card\.is-unread/);
+
+console.log('RNX v2.8.0 customer notification-centre regression checks passed.');

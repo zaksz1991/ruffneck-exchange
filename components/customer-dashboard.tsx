@@ -26,6 +26,19 @@ type RequestRow = {
 
 type Customer = { id: string; name: string; email: string };
 
+type CustomerNotification = {
+  id: string;
+  notification_type: string;
+  title: string;
+  message: string;
+  listing_id: string | null;
+  listing_slug: string | null;
+  listing_title: string | null;
+  supplier_name: string | null;
+  read_at: string | null;
+  created_at: string;
+};
+
 type SavedListing = {
   id: string;
   slug: string;
@@ -68,11 +81,14 @@ export function CustomerDashboard() {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [requests, setRequests] = useState<RequestRow[]>([]);
   const [savedListings, setSavedListings] = useState<SavedListing[]>([]);
+  const [notifications, setNotifications] = useState<CustomerNotification[]>([]);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState('');
   const [savedBusy, setSavedBusy] = useState('');
   const [alertBusy, setAlertBusy] = useState('');
+  const [notificationBusy, setNotificationBusy] = useState('');
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
@@ -81,18 +97,22 @@ export function CustomerDashboard() {
     setLoading(true);
     setError('');
     try {
-      const [meResponse, requestResponse, savedResponse] = await Promise.all([
+      const [meResponse, requestResponse, savedResponse, notificationResponse] = await Promise.all([
         fetch('/api/customer/me', { cache: 'no-store' }),
         fetch('/api/customer/requests', { cache: 'no-store' }),
         fetch('/api/customer/saved-listings', { cache: 'no-store' }),
+        fetch('/api/customer/notifications', { cache: 'no-store' }),
       ]);
-      if (meResponse.status === 401 || requestResponse.status === 401 || savedResponse.status === 401) {
+      if (meResponse.status === 401 || requestResponse.status === 401 || savedResponse.status === 401 || notificationResponse.status === 401) {
         window.location.assign('/customer/login');
         return;
       }
       const meData = await meResponse.json();
       const requestData = await requestResponse.json();
       const savedData = await savedResponse.json();
+      const notificationData = notificationResponse.ok
+        ? await notificationResponse.json()
+        : { notifications: [], unreadCount: 0 };
       if (!requestResponse.ok) throw new Error(requestData.error || 'Could not load requests.');
       if (!savedResponse.ok) throw new Error(savedData.error || 'Could not load saved offers.');
       const nextSavedListings: SavedListing[] = savedData.savedListings || [];
@@ -100,6 +120,8 @@ export function CustomerDashboard() {
       setCustomer(meData.customer);
       setRequests(requestData.requests || []);
       setSavedListings(nextSavedListings);
+      setNotifications(notificationData.notifications || []);
+      setUnreadNotificationCount(Number(notificationData.unreadCount || 0));
       setCompareIds((current) => current.filter((id) => nextSavedIds.has(id)));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Could not load the dashboard.');
@@ -154,6 +176,33 @@ export function CustomerDashboard() {
       setError(caught instanceof Error ? caught.message : 'Could not update email alerts.');
     } finally {
       setAlertBusy('');
+    }
+  }
+
+  async function markNotificationRead(notificationId?: string) {
+    setNotificationBusy(notificationId || 'all');
+    setError('');
+    try {
+      const response = await fetch('/api/customer/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(notificationId ? { notification_id: notificationId } : { mark_all_read: true }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Could not update notifications.');
+
+      const readAt = new Date().toISOString();
+      if (notificationId) {
+        setNotifications((items) => items.map((item) => item.id === notificationId && !item.read_at ? { ...item, read_at: readAt } : item));
+        setUnreadNotificationCount((count) => Math.max(0, count - data.updatedCount));
+      } else {
+        setNotifications((items) => items.map((item) => ({ ...item, read_at: item.read_at || readAt })));
+        setUnreadNotificationCount(0);
+      }
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Could not update notifications.');
+    } finally {
+      setNotificationBusy('');
     }
   }
 
@@ -267,6 +316,59 @@ export function CustomerDashboard() {
           </div>
         </article>
       ))}
+
+      {!loading && (
+        <section className="customer-notifications-section" aria-labelledby="customer-notifications-title">
+          <div className="customer-notifications-heading">
+            <div>
+              <p className="eyebrow">ACCOUNT ACTIVITY</p>
+              <h3 id="customer-notifications-title">Notifications</h3>
+              <p>Updates about offers you have saved. Email alerts remain a separate preference on each saved offer.</p>
+            </div>
+            <div className="customer-notifications-heading-actions">
+              <span>{unreadNotificationCount} unread</span>
+              <button
+                className="customer-compare-clear"
+                type="button"
+                disabled={unreadNotificationCount === 0 || notificationBusy === 'all'}
+                onClick={() => void markNotificationRead()}
+              >
+                {notificationBusy === 'all' ? 'Updating…' : 'Mark all as read'}
+              </button>
+            </div>
+          </div>
+
+          {notifications.length === 0 ? (
+            <div className="customer-notifications-empty">No notifications yet. When a saved public offer changes its published price or supplier-reported availability, the update will appear here.</div>
+          ) : (
+            <div className="customer-notifications-list">
+              {notifications.map((item) => (
+                <article className={`customer-notification-card${item.read_at ? '' : ' is-unread'}`} key={item.id}>
+                  <div className="customer-notification-topline">
+                    <strong>{item.title}</strong>
+                    <time dateTime={item.created_at}>{date(item.created_at)}</time>
+                  </div>
+                  <p>{item.message}</p>
+                  {item.supplier_name && <small>Supplier: {item.supplier_name}</small>}
+                  <div className="customer-notification-actions">
+                    {item.listing_slug && <a className="text-link" href={`/marketplace/listing/${encodeURIComponent(item.listing_slug)}`}>View updated offer ↗</a>}
+                    {!item.read_at && (
+                      <button
+                        className="customer-compare-clear"
+                        type="button"
+                        disabled={notificationBusy === item.id}
+                        onClick={() => void markNotificationRead(item.id)}
+                      >
+                        {notificationBusy === item.id ? 'Updating…' : 'Mark as read'}
+                      </button>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       {!loading && (
         <section className="customer-saved-section">

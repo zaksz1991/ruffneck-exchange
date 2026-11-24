@@ -1,0 +1,12 @@
+RUFFNECK EXCHANGE v2.8.0 — APPLY GUIDE
+
+1. Confirm Supabase migrations 001–019 are already applied in the existing RuffNeck Entertainment project.
+2. In Supabase SQL Editor, run only:
+   supabase/migrations/020_rnx_customer_notification_centre.sql
+3. Deploy the complete contents of this project folder to the existing GitHub repository:
+   github.com/zaksz1991/ruffneck-exchange
+   Branch: main
+4. Keep the existing Vercel project, Root Directory ./ and environment variables.
+5. Confirm the Vercel production build succeeds, then test a saved listing by changing its price or availability and checking the signed-in customer's dashboard.
+
+No new environment variables or external services are required. Do not rerun migrations 001–019.

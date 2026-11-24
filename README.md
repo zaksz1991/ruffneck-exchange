@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v2.7.0
+# RuffNeck Exchange (RNX) — v2.8.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,14 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v2.8.0 — customer notification centre
+
+- The customer dashboard includes a private notifications panel for saved-offer updates.
+- Active customers who save a public offer see an in-app notification when its published price/price type/currency or supplier-reported availability changes.
+- Customers can mark individual notifications or all notifications as read; unread counts are shown in the dashboard.
+- In-app notifications are separate from email consent. The v2.7.0 email feature remains opt-in per saved listing and still requires a verified email address.
+- Adds migration 020 for private customer notifications and change baselines. Apply it after migrations 001–019. No new Vercel environment variable or external service is required.
 
 ## v2.7.0 — saved-offer change alerts
 
@@ -172,11 +180,11 @@ Do not paste, commit or expose actual secret values.
 
 ## Supabase migrations
 
-The cumulative v2.7.0 project contains RNX migrations 001–019. Migration 018 provides private customer saved-offer records; migration 019 adds opt-in saved-offer price and availability email alerts. For older deployments, apply only missing RNX migrations in numerical order after reviewing the existing Supabase migration history. Never rerun a migration recorded as completed. These migrations create and modify only RNX-prefixed objects; do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects.
+The cumulative v2.8.0 project contains RNX migrations 001–020. Migration 018 provides private customer saved-offer records; migration 019 adds opt-in saved-offer price and availability email alerts; migration 020 adds private in-app customer notifications. For older deployments, apply only missing RNX migrations in numerical order after reviewing the existing Supabase migration history. Never rerun a migration recorded as completed. These migrations create and modify only RNX-prefixed objects; do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects.
 
 ## Verification boundary
 
-The cumulative static regression scripts, including the v2.7.0 saved-offer alert checks, are retained in the project. The v2.7.0 packaging run verifies static source contracts and ZIP integrity. Full semantic TypeScript checking and the Next.js production build require the Vercel deployment environment. Static tests do not prove live Supabase trigger behaviour or email delivery; complete the saved-offer alert smoke test after deployment.
+The cumulative static regression scripts, including v2.8.0 customer notification-centre checks, are retained in the project. The v2.8.0 packaging run verifies the static source contracts and ZIP integrity. Full semantic TypeScript checking and the Next.js production build require the Vercel deployment environment. Static tests do not prove live Supabase trigger behaviour or email delivery; complete the saved-offer email and in-app notification smoke tests after deployment.
 
 ## Commercial deployment
 
