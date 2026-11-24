@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v3.5.0
+# RuffNeck Exchange (RNX) — v3.6.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,15 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.6.0 — private commercial quotation conversations
+
+- A customer and introduced supplier can exchange quotation-specific messages in their respective dashboards.
+- Each conversation is private to the customer and supplier recorded on that quote, after RNX contact release.
+- Messages are plain text, 2–2,000 characters, with up to 150 latest messages shown per quotation.
+- The other participant receives a generic in-app notification linking to the quotation; message contents are not copied into notifications.
+- Read-only history remains accessible after quote closure; sending stops when the quote expires/closes or the transaction outcome is finalised/disputed.
+- New Supabase migration: `026_rnx_commercial_quote_conversations.sql`. Apply after migrations 001–025.
 
 ## v3.5.0 — customer commercial quotation comparison
 

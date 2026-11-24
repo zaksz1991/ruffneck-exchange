@@ -1,5 +1,7 @@
 'use client';
 
+import { CommercialQuoteConversation } from '@/components/commercial-quote-conversation';
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 type Message = {
@@ -527,6 +529,7 @@ export function CustomerDashboard() {
                   <p>{quote.scope_description}</p>
                   <dl><div><dt>Estimated fulfilment</dt><dd>{quote.estimated_fulfilment || 'Not stated'}</dd></div><div><dt>Valid until</dt><dd>{date(quote.valid_until)}</dd></div></dl>
                   <p className="rnx-customer-quote-terms">{quote.delivery_terms}</p>
+                  <CommercialQuoteConversation quoteId={quote.id} quoteReference={quote.quote_reference} audience="customer" canSend={quote.status === 'submitted' || quote.status === 'selected'} />
                   {(quote.status === 'submitted' || quote.status === 'selected') && <button className="button button-small button-secondary rnx-quote-compare-toggle" type="button" onClick={() => toggleCommercialQuoteCompare(item.id, quote.id)} disabled={!(selectedQuoteIds.includes(quote.id)) && selectedQuoteIds.length >= 3}>{selectedQuoteIds.includes(quote.id) ? 'Remove from comparison' : selectedQuoteIds.length >= 3 ? 'Comparison limit reached' : 'Add to comparison'}</button>}
                   {quote.status === 'submitted' && <div className="customer-outcome-actions"><button className="button button-small" type="button" disabled={busy === quote.id} onClick={() => void respondToCommercialQuote(quote, 'select')}>Mark as preferred</button><button className="button button-small button-secondary" type="button" disabled={busy === quote.id} onClick={() => void respondToCommercialQuote(quote, 'decline')}>Decline quotation</button></div>}
                   {quote.status === 'selected' && <p className="form-status">You marked this as your preferred proposal. Confirm the final agreement and payment directly with the supplier.</p>}
@@ -620,7 +623,7 @@ export function CustomerDashboard() {
           </div>
 
           {notifications.length === 0 ? (
-            <div className="customer-notifications-empty">No notifications yet. Saved-offer changes and new commercial quotations from introduced suppliers will appear here.</div>
+            <div className="customer-notifications-empty">No notifications yet. Saved-offer changes, new commercial quotations and private quotation messages will appear here.</div>
           ) : (
             <div className="customer-notifications-list">
               {notifications.map((item) => (
@@ -633,7 +636,7 @@ export function CustomerDashboard() {
                   {item.supplier_name && <small>Supplier: {item.supplier_name}</small>}
                   <div className="customer-notification-actions">
                     {item.listing_slug && <a className="text-link" href={`/marketplace/listing/${encodeURIComponent(item.listing_slug)}`}>View updated offer ↗</a>}
-                    {item.related_quote_id && <a className="text-link" href={`/customer/dashboard#quote-${encodeURIComponent(item.related_quote_id)}`}>Review commercial quotation ↗</a>}
+                    {item.related_quote_id && <a className="text-link" href={`/customer/dashboard#quote-${encodeURIComponent(item.related_quote_id)}`}>{item.notification_type === 'commercial_quote_message' ? 'Open quotation conversation' : 'Review commercial quotation'} ↗</a>}
                     {!item.read_at && (
                       <button
                         className="customer-compare-clear"

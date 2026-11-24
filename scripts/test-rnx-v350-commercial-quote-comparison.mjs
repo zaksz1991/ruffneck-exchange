@@ -18,6 +18,6 @@ assert.match(component, /Estimated fulfilment/, 'Comparison must expose fulfilme
 assert.match(component, /Valid until/, 'Comparison must expose quote validity');
 assert.match(css, /\.rnx-commercial-quote-comparison-grid/, 'Comparison must have dedicated styling');
 assert.match(css, /@media\(max-width:620px\).*?\.rnx-commercial-quote-comparison-grid\{grid-template-columns:1fr\}/s, 'Comparison must stack on mobile');
-assert.equal(packageJson.version, '3.5.0', 'Package version must be updated');
+assert.match(packageJson.version, /^3\.\d+\.\d+$/, 'Package version must remain on the v3 release line');
 assert.ok(!Object.keys(packageJson.scripts).some((key) => key.includes('migration')), 'This UI-only upgrade must not add a database migration command');
 console.log('RNX v3.5.0 commercial quotation comparison regression checks passed.');

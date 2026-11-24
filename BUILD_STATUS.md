@@ -1,18 +1,20 @@
-# v3.5.0 build and validation status
+# v3.6.0 build and validation status
 
-- Source base: complete cumulative RuffNeck Exchange v3.4.0 project archive available in this conversation workspace.
-- Version: 3.5.0.
-- Added request-scoped comparison of up to three customer commercial quotations.
-- Comparison is limited to quotes belonging to the same customer sourcing request, includes supplier and key commercial terms, and explicitly warns when currencies differ.
-- Comparison is read-only UI state; it does not modify quote rows or statuses.
-- No new Supabase migration, Vercel environment variable, external service or payment integration.
+- Source base: complete cumulative v3.5.0 project archive in the current workspace.
+- Version: 3.6.0.
+- Added private quote-specific customer/supplier message threads and generic in-app notification links.
+- New Supabase migration: `026_rnx_commercial_quote_conversations.sql` (requires migrations 001–025).
+- No new Vercel environment variables or third-party providers.
 
-Validation performed in this environment:
-- All 24 cumulative static regression scripts: passed.
-- TypeScript/TSX syntax transpilation: 163 of 163 files passed.
-- ZIP integrity: to be checked after packaging.
-- Full TypeScript semantic typecheck: not verified. Dependencies and framework typings are not installed in this workspace; the global `tsc` run reports missing Next.js/React/Supabase/Node declarations and associated JSX typing errors.
-- Next.js production build: not run; dependencies are not installed in this workspace.
-- Live customer comparison workflow: not run; verify in the existing production environment.
+Validation completed in this workspace:
+- 25 cumulative static regression scripts: passed.
+- TypeScript/TSX syntax transpilation: 167 files checked; no syntax diagnostics.
+- Complete source archive: 316 project files.
+- ZIP archive integrity: verified after packaging.
 
-Vercel must confirm full typechecking and the Next.js production build after deployment. Test with at least two quotations linked to the same request, then test a different-currency pair. No Supabase migration is required.
+Not verified in this workspace:
+- Full TypeScript semantic typecheck; project dependencies are not installed here.
+- Next.js production build.
+- Live Supabase migration execution and two-party message flow.
+
+Vercel must confirm full typechecking and the production build after deployment. Apply migration 026 before deploying the application. Test a genuine customer/supplier quotation after RNX contact release; verify unrelated accounts receive 404 and closed quotations are read-only.

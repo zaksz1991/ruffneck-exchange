@@ -331,3 +331,27 @@
 .rnx-commercial-quote-comparison-card .button{justify-self:start}
 @media(max-width:850px){.rnx-commercial-quote-comparison-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.rnx-commercial-quote-comparison{padding:11px}.rnx-commercial-quote-comparison-grid{grid-template-columns:1fr}.rnx-commercial-quote-comparison-heading{align-items:stretch}.rnx-commercial-quote-comparison-heading>.button{align-self:flex-start}}
+
+
+/* v3.6.0 — private quote conversation threads */
+.rnx-quote-conversation{display:grid;gap:9px;margin-top:12px;min-width:0}
+.rnx-quote-conversation-toggle{justify-self:start}
+.rnx-quote-conversation-body{display:grid;gap:11px;padding:13px;border:1px solid #d8e1d4;border-radius:12px;background:#fbfdf9;min-width:0}
+.rnx-quote-conversation-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.rnx-quote-conversation-heading>div{min-width:0}
+.rnx-quote-conversation-heading strong{font-size:12px}
+.rnx-quote-conversation-heading p{margin:3px 0 0;color:var(--muted);font-size:11px;line-height:1.5}
+.rnx-quote-message-list{display:grid;gap:8px;list-style:none;margin:0;padding:0;max-height:360px;overflow:auto}
+.rnx-quote-message{display:grid;gap:5px;max-width:92%;padding:10px 12px;border:1px solid #e1e7de;border-radius:10px;background:#fff;min-width:0}
+.rnx-quote-message.is-own{justify-self:end;background:#eef6eb;border-color:#cfdfc8}
+.rnx-quote-message>div{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.rnx-quote-message strong{font-size:10px;color:#315d35}
+.rnx-quote-message time{font-size:9px;color:var(--muted)}
+.rnx-quote-message p{margin:0;color:#344036;font-size:12px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.rnx-quote-message-form{display:grid;gap:8px}
+.rnx-quote-message-form label{display:grid;gap:5px;font-size:11px;font-weight:800}
+.rnx-quote-message-form textarea{width:100%;min-height:78px;padding:10px;border:1px solid #cbd8c7;border-radius:8px;background:#fff;color:var(--ink);font:inherit;resize:vertical}
+.rnx-quote-message-form>div{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.rnx-quote-message-form small,.rnx-quote-conversation-note{color:var(--muted);font-size:9px;line-height:1.5}
+.rnx-quote-conversation-note{padding-top:8px;border-top:1px solid #e7ece4}
+@media(max-width:620px){.rnx-quote-conversation-body{padding:10px}.rnx-quote-message{max-width:100%}.rnx-quote-conversation-heading{align-items:center}}

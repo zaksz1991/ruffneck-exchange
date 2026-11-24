@@ -52,3 +52,10 @@ A preference selection is not an order, payment, binding agreement, proof of ful
 ## Deployment
 
 Apply `supabase/migrations/024_rnx_commercial_quotes.sql` after migrations 001–023. No additional environment variables are introduced.
+
+
+## v3.6.0 — private quotation conversations
+
+After an RNX introduction has passed supplier acceptance, payment verification, customer approval and contact release, the customer and introduced supplier can exchange quotation-specific messages from their dashboards. Messages are attached to one quotation, restricted to its two recorded participants and stored as plain text. Each new message creates a generic in-app notification for the other party; the content itself is not copied into the notification. Conversation history remains readable after closure, but sending is blocked for expired, withdrawn, declined, not-selected or otherwise closed quotes, and after a transaction outcome is completed, cancelled or disputed.
+
+Apply `supabase/migrations/026_rnx_commercial_quote_conversations.sql` after migration 025. Messages are not a contract, RNX does not process the commercial payment, and parties must independently verify final terms and payment details.

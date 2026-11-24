@@ -1,0 +1,15 @@
+RUFFNECK EXCHANGE v3.6.0 DEPLOYMENT
+
+GitHub repository: zaksz1991/ruffneck-exchange
+Branch: main
+Production: https://ruffneck-exchange.vercel.app/
+Supabase project: RuffNeck Entertainment (existing project)
+
+1. Apply supabase/migrations/026_rnx_commercial_quote_conversations.sql in the existing RuffNeck Entertainment Supabase SQL Editor.
+2. Confirm the migration succeeds before deploying the app. Do not rerun migrations 001–025.
+3. Extract the complete ZIP and replace the repository contents with the contents of the included `ruffneck exchange` folder.
+4. Commit to main and allow Vercel to deploy.
+
+No new Vercel environment variables or third-party services are required.
+
+After deployment, test with an authorised customer/supplier quotation: both accounts should be able to open the same thread, send plain-text messages and receive a generic notification. An unrelated account must not be able to read or send to that quote. Closed/expired/finalised quotations remain read-only.

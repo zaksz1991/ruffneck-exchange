@@ -1,4 +1,6 @@
 'use client';
+
+import { CommercialQuoteConversation } from '@/components/commercial-quote-conversation';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { SupplierVerificationPanel } from '@/components/supplier-verification-panel';
 
@@ -323,13 +325,13 @@ export function SupplierDashboard() {
 
     <section className="supplier-panel supplier-notifications-panel" aria-label="Commercial quotation notifications">
       <div className="supplier-section-heading">
-        <div><p className="eyebrow">COMMERCIAL QUOTATION UPDATES</p><h2>Notifications</h2><p>Customer decisions and system updates for your submitted quotations.</p></div>
+        <div><p className="eyebrow">COMMERCIAL QUOTATION UPDATES</p><h2>Notifications</h2><p>Customer decisions, quotation messages and system updates for your submitted quotations.</p></div>
         <div className="supplier-notification-heading-actions"><span>{data.unreadNotificationCount} unread</span><button className="button button-small button-secondary" type="button" disabled={busy || data.unreadNotificationCount === 0} onClick={() => void markSupplierNotificationRead()}>Mark all read</button></div>
       </div>
       {!data.notificationsAvailable ? <div className="supplier-insights-unavailable"><strong>Supplier notifications are not active yet.</strong><p>Apply Supabase migration 025 to enable commercial quotation decision alerts. Your existing supplier workspace remains available.</p></div> : data.notifications.length ? <div className="supplier-notification-list">{data.notifications.map((item) => <article className={`supplier-notification-card${item.read_at ? '' : ' is-unread'}`} key={item.id}>
         <div className="supplier-notification-topline"><strong>{item.title}</strong><time>{dateTimeText(item.created_at)}</time></div>
         <p>{item.message}</p>
-        <div className="supplier-notification-actions"><a href="#supplier-opportunities">Open opportunity inbox</a>{item.read_at ? <small>Read {dateTimeText(item.read_at)}</small> : <button className="button button-small button-secondary" type="button" disabled={busy} onClick={() => void markSupplierNotificationRead(item.id)}>Mark as read</button>}</div>
+        <div className="supplier-notification-actions">{item.related_quote_id ? <a href={`#supplier-quote-${encodeURIComponent(item.related_quote_id)}`}>Open quotation conversation</a> : <a href="#supplier-opportunities">Open opportunity inbox</a>}{item.read_at ? <small>Read {dateTimeText(item.read_at)}</small> : <button className="button button-small button-secondary" type="button" disabled={busy} onClick={() => void markSupplierNotificationRead(item.id)}>Mark as read</button>}</div>
       </article>)}</div> : <div className="supplier-notifications-empty">No commercial quotation updates have been recorded for this supplier account.</div>}
     </section>
 
@@ -461,12 +463,13 @@ export function SupplierDashboard() {
         {!offer.customer.contact_released && <small className="admin-footnote">Customer identity and direct contact details are locked. Payment and explicit customer approval are required before release.</small>}
         {offer.customer.contact_released && <section className="rnx-commercial-quote-panel" aria-label="Commercial quotation workspace">
           <div><strong>Commercial quotation</strong><p>Send the customer a priced proposal with clear scope, delivery terms and validity. This is separate from the RNX introduction fee.</p></div>
-          {offer.quotes.map((quote) => <article className="rnx-quote-record" key={quote.id}>
+          {offer.quotes.map((quote) => <article className="rnx-quote-record" id={`supplier-quote-${quote.id}`} key={quote.id}>
             <div className="rnx-quote-record-heading"><strong>{quote.quote_reference} · {quote.title}</strong><span className={`admin-state-${quote.status === 'selected' ? 'good' : quote.status === 'submitted' ? 'wait' : quote.status === 'declined' || quote.status === 'withdrawn' ? 'bad' : 'wait'}`}>{quote.status.replaceAll('_', ' ')}</span></div>
             <strong className="rnx-quote-amount">{money(quote.total_amount, quote.currency)}</strong>
             <p>{quote.scope_description}</p>
             <small>Fulfilment: {quote.estimated_fulfilment || 'Not stated'} · Valid until {dateText(quote.valid_until)}</small>
             <p className="rnx-quote-terms">{quote.delivery_terms}</p>
+            <CommercialQuoteConversation quoteId={quote.id} quoteReference={quote.quote_reference} audience="supplier" canSend={quote.status === 'submitted' || quote.status === 'selected'} />
             {quote.status === 'submitted' && <button className="button button-small button-secondary" type="button" disabled={busy} onClick={() => void withdrawCommercialQuote(quote.id)}>Withdraw quotation</button>}
             {quote.status === 'selected' && <p className="form-status">The customer marked this proposal as preferred. Confirm the final agreement and payment directly with the customer.</p>}
             {quote.status === 'not_selected' && <small>The customer selected another quotation for this request.</small>}

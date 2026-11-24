@@ -147,3 +147,11 @@ No SQL migration is required. Keep existing Supabase migrations 001–025 unchan
 
 After deployment, sign in as a customer with at least two supplier quotations for one request. Add each quotation to comparison and verify supplier, quote reference/title, submitted amount/currency, scope, delivery/payment terms, fulfilment estimate, validity and status. Test a multi-currency set and confirm the interface warns that amounts are not converted. This decision-support view does not select or accept a quotation, create an order or process a payment.
 
+
+## v3.6.0 private commercial quotation conversations
+
+- Customer and introduced supplier can exchange plain-text messages attached to one commercial quotation.
+- Conversations are private to the customer and supplier recorded on that quotation, and sending is allowed only after RNX has verified payment, customer approval and contact release.
+- Both participants receive generic in-app notifications. Message bodies are not copied into notifications.
+- New migration: `supabase/migrations/026_rnx_commercial_quote_conversations.sql`. Apply after migrations 001–025 in the existing RuffNeck Entertainment Supabase project.
+- No new environment variables or external providers. Full typechecking and the Next.js production build must be confirmed by Vercel.
