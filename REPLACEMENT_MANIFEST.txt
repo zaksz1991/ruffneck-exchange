@@ -1,4 +1,4 @@
-RUFFNECK EXCHANGE v3.2.0 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v3.3.0 — COMPLETE CUMULATIVE REPLACEMENT
 
 Project: RuffNeck Exchange (RNX)
 Repository: https://github.com/zaksz1991/ruffneck-exchange
@@ -9,25 +9,21 @@ This ZIP contains the complete Next.js application source, App Router pages and 
 
 This is a complete cumulative repository replacement, not an incremental overlay.
 
-NEW IN v3.2.0 — SUPPLIER COMMERCIAL QUOTATIONS
-- Approved suppliers can submit a priced commercial proposal only after the matching introduction passes supplier acceptance, payment verification, customer approval and contact release.
-- Quotes contain title, scope, total amount, three-letter currency, delivery/payment terms, optional fulfilment estimate and 1–60 day validity.
-- Customers can review submitted proposals in their account dashboard, mark one proposal as preferred or decline it.
-- Only one proposal can be preferred per sourcing request; previous selections and competing open proposals are retained as not-selected history.
-- Suppliers can withdraw an unselected quote and issue a revised proposal after decline, withdrawal or expiry.
-- Quote expiry is applied on dashboard reads and customer response attempts. Private quote event history and an in-app customer notification are recorded; existing Resend configuration is reused for supplier preference email alerts.
-- The commercial quote is separate from the RNX introduction fee. Customer selection is a preference only, not payment, order, binding contract or RNX guarantee.
+NEW IN v3.3.0 — COMMERCIAL QUOTATION OVERSIGHT
+- Adds a private Operations console at /admin/quotes to monitor the latest 250 commercial quotations.
+- Displays quote status, supplier business name, request category/location, proposal amount and terms, validity and recorded quote event history.
+- Supports status filtering, text search and CSV export of the visible records.
+- The page and API require the existing operations:read permission (owner and operations_admin roles). Customer names and contact fields are not selected or returned.
+- The console is read-only and explicitly distinguishes supplier proposals from RNX revenue, payments, orders, contracts and fulfilment.
 
 CUMULATIVE FEATURES RETAINED
-Supplier listings and moderation; listing editing, private images and galleries; supplier-reported availability; customer saved offers, comparisons, email alerts and notification centre; request progress timeline; supplier listing insights; memberships and supplier verification; lead enquiries and matching; manual payment verification and customer-authorised contact release; private customer tracking; RNX Operations and audit workflows; dual-confirmed transaction outcomes and moderated supplier reviews.
+Supplier listings and moderation; listing editing, private images and galleries; supplier-reported availability; customer saved offers, comparisons, email alerts and notification centre; request progress timeline; supplier listing insights; memberships and supplier verification; lead enquiries and matching; manual payment verification and customer-authorised contact release; private customer tracking; RNX Operations and audit workflows; dual-confirmed transaction outcomes and moderated supplier reviews; commercial quotations.
 
 SUPABASE
-Confirm migrations 001–023 have succeeded, then apply only:
-supabase/migrations/024_rnx_commercial_quotes.sql
-Do not rerun migrations recorded as successful. No new Vercel environment variable or external provider is required.
+No new migration is required. Confirm migration 024 (commercial quotes and quote events) is already applied in the existing RuffNeck Entertainment project. Do not rerun migrations 001–024.
 
 DEPLOYMENT
-Apply migration 024 in the existing RuffNeck Entertainment Supabase project, then extract this archive, open its `ruffneck exchange` folder, replace the existing repository contents with the complete folder contents, and commit to the `main` branch. Retain the existing Vercel project and Root Directory `./`.
+Extract this archive, open its `ruffneck exchange` folder, replace the existing repository contents with the complete folder contents, and commit to the `main` branch. Retain the existing Vercel project and Root Directory `./`.
 
 BUILD / VALIDATION LIMITS
-All 21 cumulative static regression scripts passed. TypeScript/TSX syntax transpilation passed for 12 changed source files. Full TypeScript semantic typechecking, Next.js production build and live Supabase migration/RPC execution were not completed in this environment. See BUILD_STATUS.md.
+All 22 cumulative static regression scripts passed. TypeScript/TSX syntax transpilation was checked for changed source files. Full TypeScript semantic typechecking, Next.js production build and live admin endpoint checks must still be confirmed in Vercel/production. See BUILD_STATUS.md.

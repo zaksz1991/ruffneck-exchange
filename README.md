@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v3.2.0
+# RuffNeck Exchange (RNX) — v3.3.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,15 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.3.0 — commercial quotation oversight
+
+- Adds a private RNX Operations console at `/admin/quotes` for the latest 250 supplier commercial quotations.
+- Displays supplier identity, request category and location, proposal amount, scope, delivery terms, validity and event history.
+- Supports status filtering, text search and CSV export.
+- Access is restricted to owner and operations administrator roles using the existing `operations:read` permission. The endpoint excludes customer names, email addresses and phone numbers.
+- The console is read-only; it does not modify supplier quotes or customer decisions. Quoted amounts are proposals, not RNX revenue or proof of completed transactions.
+- No database migration or new environment variable is required. Migration 024 must already be applied.
 
 ## v3.2.0 — supplier commercial quotations
 

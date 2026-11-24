@@ -1,0 +1,22 @@
+RUFFNECK EXCHANGE v3.3.0 — DEPLOYMENT INSTRUCTIONS
+
+Repository: https://github.com/zaksz1991/ruffneck-exchange
+Branch: main
+Production: https://ruffneck-exchange.vercel.app/
+Supabase project: RuffNeck Entertainment
+Vercel Root Directory: ./
+
+1. Confirm migration 024 (rnx_commercial_quotes and rnx_commercial_quote_events) is already applied in the existing RuffNeck Entertainment Supabase project.
+2. Extract the complete replacement ZIP and open the `ruffneck exchange` folder.
+3. Replace the existing GitHub repository contents with the complete folder contents.
+4. Commit the replacement to the existing `main` branch and allow Vercel to deploy.
+5. Sign in as an RNX owner or operations administrator and open `/admin/quotes`.
+6. Confirm quotation records, status filters, event histories and CSV export work as expected.
+
+No new Supabase migration, Vercel environment variable or third-party provider is required.
+
+IMPORTANT
+- This release is a complete cumulative replacement based on the supplied v3.2.0 project.
+- Do not replace the Supabase project or rerun existing migrations.
+- The Operations quotation console is read-only. It does not alter supplier proposals or customer decisions.
+- Supplier quotation amounts are not RNX revenue and customer preference is not payment, a purchase order, a binding contract or fulfilment evidence.
