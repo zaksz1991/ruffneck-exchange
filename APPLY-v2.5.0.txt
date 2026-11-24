@@ -1,0 +1,7 @@
+RUFFNECK EXCHANGE v2.5.0 — UPDATED FILES ONLY
+
+1. Copy the contents of the included `ruffneck exchange` folder into the matching locations in the existing GitHub repository. Keep all existing files that are not included in this package.
+2. Apply `supabase/migrations/018_rnx_customer_saved_listings.sql` in the existing RuffNeck Entertainment Supabase project after confirming migrations 001–017 are already applied.
+3. Commit the changed files to the `main` branch and let Vercel deploy.
+
+No new Vercel environment variables are required. Do not replace the whole repository with this archive; it contains only the files changed for v2.5.0.

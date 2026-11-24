@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function CustomerLoginPage() {
   return <main className="page-shell container narrow-shell">
-    <div className="page-intro"><p className="eyebrow">CUSTOMER ACCOUNT</p><h1>Sign in to your account.</h1><p>Track requests submitted while signed in and continue conversations with RNX Operations.</p></div>
+    <div className="page-intro"><p className="eyebrow">CUSTOMER ACCOUNT</p><h1>Sign in to your account.</h1><p>Track requests, continue conversations with RNX Operations and manage marketplace offers saved to your account.</p></div>
     <CustomerAuthForm mode="login" />
     <p className="fine-print"><Link href="/account/recovery?type=customer">Forgot your password?</Link></p>
     <p className="fine-print">New to RuffNeck Exchange? <Link href="/customer/register">Create a customer account</Link>.</p>

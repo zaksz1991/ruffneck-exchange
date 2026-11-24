@@ -35,5 +35,6 @@ assert.match(detail, /not independently verified by RNX/i);
 assert.match(marketplace, /market-availability/);
 assert.match(marketplace, /availabilityLabels/);
 assert.match(css, /supplier-availability-form/);
-assert.equal(packageJson.version, '2.4.0');
+const [major, minor] = packageJson.version.split('.').map(Number);
+assert.ok(major > 2 || (major === 2 && minor >= 4), 'package version must remain at or above v2.4.0');
 console.log('RNX v2.4.0 supplier availability regression checks passed.');
