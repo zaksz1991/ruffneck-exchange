@@ -1,12 +1,32 @@
-RUFFNECK EXCHANGE v2.9.0 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v3.1.0 — COMPLETE CUMULATIVE REPLACEMENT
 
-Project: Next.js application for RuffNeck Exchange (RNX)
+Project: RuffNeck Exchange (RNX)
 Repository: https://github.com/zaksz1991/ruffneck-exchange
 Production: https://ruffneck-exchange.vercel.app/
 Supabase project: RuffNeck Entertainment
 
-Contents include the complete application source, pages, API routes, components, server libraries, public assets, configuration, documentation, regression tests, existing Supabase migrations 001–020, new migration 021, and the migration recovery script.
+This ZIP contains the complete Next.js application source, App Router pages and API routes, React components, server libraries, public assets, configuration, operational documentation, regression tests, and Supabase migrations 001–023.
 
-New v2.9.0 feature: private customer request progress timeline for signed-in customer accounts. Tracks submission, request status changes and contact-release permission changes.
+File count: 288 files at packaging. This is a complete cumulative repository replacement, not an incremental overlay.
 
-No new Vercel environment variables are required. Apply migration 021 after confirming the prior migration history. See README-APPLY.txt, APPLY-v2.9.0.txt and docs/SUPABASE_MIGRATION_RECOVERY.md.
+NEW IN v3.1.0 — VERIFIED TRANSACTION OUTCOMES AND SUPPLIER REVIEWS
+- After an introduction has verified payment, customer approval and contact release, the customer and matched supplier can independently confirm its transaction outcome.
+- Matching completion confirmations mark the introduction completed. Matching non-completion confirmations mark it cancelled. Conflicting confirmations mark it disputed and exclude it from verified review eligibility.
+- An account-linked customer can submit one 1–5 star review after dual confirmation of completion.
+- Reviews remain private until an authorised RNX trust staff member approves publication.
+- Suppliers may publish one response to an approved review.
+- Public supplier profiles show approved reviews and the average rating calculated over the latest up to 50 displayed approved reviews.
+
+CUMULATIVE FEATURES RETAINED
+Supplier listings and moderation; supplier listing editing; private cover images and galleries; supplier-reported availability; customer saved offers, comparisons, email alerts and in-app notifications; customer request activity timeline; supplier listing analytics; supplier membership and verification; lead enquiries and matching; payment verification and contact-release controls; customer tracking; RNX Operations and audit workflows.
+
+SUPABASE
+Confirm migrations 001–022 have succeeded, then apply only:
+supabase/migrations/023_rnx_verified_transaction_reviews.sql
+Do not rerun migrations recorded as successful. No new Vercel environment variable or external service is required.
+
+DEPLOYMENT
+Extract this archive, open its `ruffneck exchange` folder, replace the existing repository contents with the complete folder contents, and commit to the `main` branch. Retain the existing Vercel project and Root Directory `./`.
+
+BUILD / VALIDATION LIMITS
+All 20 cumulative static regression scripts passed. TypeScript/TSX syntax transpilation passed for 15 changed source files. Full TypeScript semantic typechecking, Next.js production build and live Supabase migration/RPC execution were not completed in this environment. See BUILD_STATUS.md.

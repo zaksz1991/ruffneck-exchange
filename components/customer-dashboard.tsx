@@ -68,6 +68,22 @@ type SavedListing = {
   supplier: { public_slug: string; business_name: string };
 };
 
+type IntroducedOffer = {
+  id: string;
+  lead_id: string;
+  anonymised_summary: string;
+  payment_status: string;
+  contact_released: boolean;
+  created_at: string;
+  category: string;
+  state: string;
+  city: string | null;
+  supplier: { business_name: string; profile_url: string | null } | null;
+  outcome: { status: 'awaiting_confirmation' | 'completed' | 'cancelled' | 'disputed'; customer_outcome: string | null; supplier_outcome: string | null; completed_at: string | null } | null;
+  review: { id: string; rating: number; title: string; body: string; moderation_status: string; created_at: string } | null;
+  can_confirm_outcome: boolean;
+};
+
 const MAX_COMPARE_LISTINGS = 3;
 
 function date(value: string) {
@@ -132,10 +148,12 @@ export function CustomerDashboard() {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [requests, setRequests] = useState<RequestRow[]>([]);
   const [savedListings, setSavedListings] = useState<SavedListing[]>([]);
+  const [introductions, setIntroductions] = useState<IntroducedOffer[]>([]);
   const [notifications, setNotifications] = useState<CustomerNotification[]>([]);
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState('');
   const [savedBusy, setSavedBusy] = useState('');
   const [alertBusy, setAlertBusy] = useState('');
@@ -148,13 +166,14 @@ export function CustomerDashboard() {
     setLoading(true);
     setError('');
     try {
-      const [meResponse, requestResponse, savedResponse, notificationResponse] = await Promise.all([
+      const [meResponse, requestResponse, savedResponse, notificationResponse, introductionResponse] = await Promise.all([
         fetch('/api/customer/me', { cache: 'no-store' }),
         fetch('/api/customer/requests', { cache: 'no-store' }),
         fetch('/api/customer/saved-listings', { cache: 'no-store' }),
         fetch('/api/customer/notifications', { cache: 'no-store' }),
+        fetch('/api/customer/offers', { cache: 'no-store' }),
       ]);
-      if (meResponse.status === 401 || requestResponse.status === 401 || savedResponse.status === 401 || notificationResponse.status === 401) {
+      if (meResponse.status === 401 || requestResponse.status === 401 || savedResponse.status === 401 || notificationResponse.status === 401 || introductionResponse.status === 401) {
         window.location.assign('/customer/login');
         return;
       }
@@ -164,13 +183,16 @@ export function CustomerDashboard() {
       const notificationData = notificationResponse.ok
         ? await notificationResponse.json()
         : { notifications: [], unreadCount: 0 };
+      const introductionData = await introductionResponse.json().catch(() => ({}));
       if (!requestResponse.ok) throw new Error(requestData.error || 'Could not load requests.');
       if (!savedResponse.ok) throw new Error(savedData.error || 'Could not load saved offers.');
+      if (!introductionResponse.ok) throw new Error(introductionData.error || 'Could not load supplier introductions.');
       const nextSavedListings: SavedListing[] = savedData.savedListings || [];
       const nextSavedIds = new Set(nextSavedListings.map((item) => item.id));
       setCustomer(meData.customer);
       setRequests(requestData.requests || []);
       setSavedListings(nextSavedListings);
+      setIntroductions((introductionData.offers || []) as IntroducedOffer[]);
       setNotifications(notificationData.notifications || []);
       setUnreadNotificationCount(Number(notificationData.unreadCount || 0));
       setCompareIds((current) => current.filter((id) => nextSavedIds.has(id)));
@@ -283,6 +305,44 @@ export function CustomerDashboard() {
     [savedListings, compareIds],
   );
 
+  async function confirmTransactionOutcome(offer: IntroducedOffer, outcome: 'completed' | 'not_completed') {
+    const prompt = outcome === 'completed'
+      ? 'Confirm that the transaction with this introduced supplier was completed. Both parties must confirm before a verified review can be submitted.'
+      : 'Confirm that the transaction was not completed. This will be compared with the supplier response.';
+    if (!window.confirm(prompt)) return;
+    setBusy(offer.id); setError(''); setNotice('');
+    try {
+      const response = await fetch(`/api/customer/offers/${offer.id}/outcome`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ outcome }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || 'Transaction outcome could not be recorded.');
+      setNotice(result.message || 'Transaction outcome recorded.');
+      await refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Transaction outcome could not be recorded.');
+    } finally { setBusy(''); }
+  }
+
+  async function submitVerifiedReview(event: React.FormEvent<HTMLFormElement>, offer: IntroducedOffer) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const values = new FormData(form);
+    setBusy(offer.id); setError(''); setNotice('');
+    try {
+      const response = await fetch(`/api/customer/offers/${offer.id}/review`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: Number(values.get('rating')), title: values.get('title'), body: values.get('body') }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || 'Verified review could not be submitted.');
+      form.reset(); setNotice(result.message || 'Review submitted for moderation.');
+      await refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Verified review could not be submitted.');
+    } finally { setBusy(''); }
+  }
+
   async function send(leadId: string) {
     const body = (drafts[leadId] || '').trim();
     if (body.length < 2) return;
@@ -320,6 +380,7 @@ export function CustomerDashboard() {
       </div>
 
       {error && <p className="admin-error" role="alert">{error}</p>}
+      {notice && <p className="admin-notice" role="status">{notice}</p>}
 
       {loading ? (
         <div className="admin-empty">Loading your requests…</div>
@@ -366,6 +427,27 @@ export function CustomerDashboard() {
               <p className="customer-request-activity-empty">No progress events have been recorded yet. Refresh this page to check for updates.</p>
             )}
           </section>
+          {introductions.filter((offer) => offer.lead_id === item.id).length > 0 && <section className="customer-introductions" aria-label="Supplier introductions and transaction confirmations">
+            <div className="customer-introductions-heading"><div><p className="eyebrow">AUTHORISED INTRODUCTIONS</p><h4>Supplier transaction follow-up</h4></div><span>{introductions.filter((offer) => offer.lead_id === item.id).length} introductions</span></div>
+            {introductions.filter((offer) => offer.lead_id === item.id).map((offer) => <article className="customer-introduction-card" key={offer.id}>
+              <div className="customer-introduction-top"><strong>{offer.supplier?.business_name || 'Supplier introduction'}</strong><span className={`customer-status ${offer.outcome?.status === 'completed' ? 'status-qualified' : offer.outcome?.status === 'disputed' ? 'status-invalid' : ''}`}>{offer.outcome?.status?.replaceAll('_', ' ') || 'Awaiting transaction confirmation'}</span></div>
+              <p>{offer.anonymised_summary}</p>
+              {offer.supplier?.profile_url && <a className="text-link" href={offer.supplier.profile_url}>View introduced supplier ↗</a>}
+              {!offer.contact_released && <small className="fine-print">Supplier identity remains private until RNX has recorded payment, customer approval and contact release.</small>}
+              {offer.outcome?.status === 'disputed' && <p className="form-error">Your transaction outcome differs from the supplier's confirmation. RNX Operations may contact both parties to review the discrepancy.</p>}
+              {offer.contact_released && offer.can_confirm_outcome && !offer.outcome?.customer_outcome && offer.outcome?.status !== 'disputed' && <div className="customer-outcome-actions"><p>Confirm whether the introduced transaction was completed. The supplier must also confirm independently.</p><button className="button button-small" type="button" disabled={busy === offer.id} onClick={() => void confirmTransactionOutcome(offer, 'completed')}>Confirm completed</button><button className="button button-small button-secondary" type="button" disabled={busy === offer.id} onClick={() => void confirmTransactionOutcome(offer, 'not_completed')}>Not completed</button></div>}
+              {offer.outcome?.customer_outcome && <p className="fine-print">Your confirmation: {offer.outcome.customer_outcome.replaceAll('_', ' ')}. Supplier confirmation: {offer.outcome.supplier_outcome?.replaceAll('_', ' ') || 'Awaiting supplier'}.</p>}
+              {offer.outcome?.status === 'completed' && !offer.review && <form className="customer-review-form" onSubmit={(event) => void submitVerifiedReview(event, offer)}>
+                <h5>Leave a verified supplier review</h5>
+                <p>Both parties confirmed completion. Your review will be checked by RNX before it appears publicly. Do not include personal contact details.</p>
+                <label>Rating<select name="rating" defaultValue="5"><option value="5">5 — Excellent</option><option value="4">4 — Good</option><option value="3">3 — Satisfactory</option><option value="2">2 — Poor</option><option value="1">1 — Very poor</option></select></label>
+                <label>Review title<input name="title" required minLength={3} maxLength={120} placeholder="Summarise your experience" /></label>
+                <label>Your review<textarea name="body" required minLength={20} maxLength={2000} rows={4} placeholder="Describe the product or service, communication and fulfilment experience." /></label>
+                <button className="button button-small" type="submit" disabled={busy === offer.id}>{busy === offer.id ? 'Submitting…' : 'Submit verified review'}</button>
+              </form>}
+              {offer.review && <div className="customer-review-submitted"><strong>Your review · {offer.review.rating}/5</strong><span>{offer.review.moderation_status === 'approved' ? 'Published on the supplier profile' : offer.review.moderation_status === 'rejected' ? 'Not approved for publication' : offer.review.moderation_status === 'hidden' ? 'Hidden by RNX moderation' : 'Submitted · awaiting RNX moderation'}</span><h5>{offer.review.title}</h5><p>{offer.review.body}</p></div>}
+            </article>)}
+          </section>}
           <div className="customer-thread">
             <h4>Conversation with RNX</h4>
             {item.messages.length ? item.messages.map((message) => (

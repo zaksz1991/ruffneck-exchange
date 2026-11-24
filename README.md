@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v2.9.0
+# RuffNeck Exchange (RNX) — v3.1.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,24 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.1.0 — verified transaction outcomes and supplier reviews
+
+- After a paid, customer-approved introduction is contact-released, the customer and matched supplier independently confirm whether the transaction completed.
+- Matching completion confirmations unlock a verified review. Matching non-completion confirmations mark the introduction cancelled; conflicting confirmations create an operations follow-up item and do not unlock reviews.
+- Customers with account-linked requests can submit one 1–5 star review. Reviews remain private until an authorised RNX trust staff member approves publication.
+- Public supplier profiles display approved review ratings, written feedback and supplier responses. Suppliers can publish one response to an approved review.
+- Outcome confirmation verifies each actor against the customer account or supplier attached to the introduction. A database trigger independently enforces review eligibility.
+- Guest-only tracking requests are not eligible for verified reviews in this release. No new environment variable or external service is required.
+- Adds migration 023. Apply after migrations 001–022 have succeeded.
+
+## v3.0.0 — supplier listing performance insights
+
+- Suppliers can review per-listing detail-view counts for the last 7 and 30 days, plus aggregate saves and linked enquiries.
+- Listing detail-view events are captured only after the visitor accepts optional analytics. The browser records at most one view per listing per tab session.
+- View reports are not unique-person counts and exclude visitors who decline analytics. The event table stores listing/supplier references and timestamps only; customer account and contact fields are not included.
+- Adds migration 022 with private event storage and a service-role-only aggregate metrics function. Migration 022 does not reference the `availability_status` column.
+- No new environment variables or external services are required.
 
 ## v2.9.0 — customer request progress timeline
 
@@ -134,7 +152,8 @@ Customers can submit requests without paying RNX. Supplier memberships, promoted
 - Manual introduction-fee and membership-payment verification, customer consent links and database-enforced contact-release checks.
 - Supplier verification evidence vault with private storage and time-limited signed document links.
 - Customer trust cases and disputes with separate internal notes and customer-visible replies.
-- Acquisition analytics and consent-first attribution.
+- Consent-based acquisition attribution and privacy-limited supplier listing insights (consented listing-detail views, aggregate saves and linked enquiries).
+- Verified supplier feedback based on dual-confirmed transaction completion, with RNX moderation and supplier responses.
 - Account recovery and one-time email verification for customer and supplier accounts.
 - RuffNeck Entertainment product showcase alongside the wider marketplace.
 
@@ -188,11 +207,11 @@ Do not paste, commit or expose actual secret values.
 
 ## Supabase migrations
 
-The cumulative v2.9.0 project contains RNX migrations 001–021. Migration 018 provides private customer saved-offer records; migration 019 adds opt-in saved-offer price and availability email alerts; migration 020 adds private in-app customer notifications. For older deployments, apply only missing RNX migrations in numerical order after reviewing the existing Supabase migration history. Never rerun a migration recorded as completed. These migrations create and modify only RNX-prefixed objects; do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects. For the previously encountered missing `availability_status` error, see `docs/SUPABASE_MIGRATION_RECOVERY.md` and the included idempotent repair script under `supabase/repairs/`.
+The cumulative v3.1.0 project contains RNX migrations 001–023. Migration 018 provides private customer saved-offer records; migration 019 adds opt-in saved-offer price and availability email alerts; migration 020 adds private in-app customer notifications. For older deployments, apply only missing RNX migrations in numerical order after reviewing the existing Supabase migration history. Never rerun a migration recorded as completed. These migrations create and modify only RNX-prefixed objects; do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects. For the previously encountered missing `availability_status` error, see `docs/SUPABASE_MIGRATION_RECOVERY.md` and the included idempotent repair script under `supabase/repairs/`.
 
 ## Verification boundary
 
-The cumulative static regression scripts, including v2.9.0 customer request timeline checks, are retained in the project. The v2.9.0 packaging run verifies the static source contracts and ZIP integrity. Full semantic TypeScript checking and the Next.js production build require the Vercel deployment environment. Static tests do not prove live Supabase trigger behaviour or email delivery; complete the saved-offer email, in-app notification and customer request timeline smoke tests after deployment.
+The cumulative static regression scripts, including the v3.1.0 outcome/review checks, are retained in the project. The v3.1.0 packaging run verifies all 20 cumulative static test scripts and TypeScript/TSX syntax transpilation for 15 changed source files. Full semantic TypeScript checking and the Next.js production build require installed project dependencies. Static tests do not prove live Supabase trigger or RPC behaviour; apply migration 023 and confirm the Vercel build before enabling the new workflow.
 
 ## Commercial deployment
 

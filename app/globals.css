@@ -156,3 +156,69 @@
 .supplier-insights-unavailable p{margin:5px 0 0;color:var(--muted);font-size:11px;line-height:1.55}
 .supplier-insights-footnote{margin:12px 0 0;line-height:1.6}
 @media(max-width:620px){.supplier-insights-panel{padding:14px}.supplier-insights-table{min-width:600px}}
+
+/* v3.1.0 — verified transaction outcomes and supplier reviews */
+.customer-introductions{display:grid;gap:12px;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+.customer-introductions-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.customer-introductions-heading h4{font-size:17px;margin:2px 0 0}
+.customer-introductions-heading>span{font-size:11px;color:var(--muted);font-weight:800}
+.customer-introduction-card{display:grid;gap:9px;padding:15px;border:1px solid #dce5d9;border-radius:12px;background:#fbfcfa}
+.customer-introduction-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.customer-introduction-top>strong{font-size:14px}
+.customer-introduction-card>p{font-size:12px;line-height:1.65;color:#4e5c51;margin:0;white-space:pre-wrap}
+.customer-outcome-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:8px;border-top:1px solid #e5ebe2}
+.customer-outcome-actions>p{flex-basis:100%;font-size:12px;color:var(--muted);margin:0}
+.customer-review-form{display:grid;gap:10px;padding:15px;border-radius:10px;background:#f1f7ee;border:1px solid #d7e5d0}
+.customer-review-form h5{font-size:15px;margin:0}
+.customer-review-form>p{font-size:11px;line-height:1.6;color:var(--muted);margin:0}
+.customer-review-form label{display:grid;gap:5px;font-size:11px;font-weight:800}
+.customer-review-form input,.customer-review-form select,.customer-review-form textarea{width:100%;min-height:40px;border:1px solid #cbd8c7;border-radius:8px;padding:9px 10px;background:#fff;color:var(--ink);font:inherit}
+.customer-review-form textarea{resize:vertical}
+.customer-review-submitted{display:grid;gap:4px;padding:12px;border-radius:9px;background:#f2f5ef;border:1px solid #e0e8dc}
+.customer-review-submitted strong{font-size:12px}
+.customer-review-submitted span{font-size:10px;color:var(--muted)}
+.customer-review-submitted h5{font-size:14px;margin:5px 0 0}
+.customer-review-submitted p{font-size:12px;line-height:1.6;margin:0;white-space:pre-wrap}
+.supplier-transaction-outcome,.supplier-public-review{display:grid;gap:8px;margin-top:13px;padding:13px;border:1px solid #dbe5d8;border-radius:10px;background:#f8faf7}
+.supplier-transaction-outcome>strong,.supplier-public-review>strong{font-size:12px}
+.supplier-transaction-outcome>p,.supplier-public-review>p{font-size:12px;line-height:1.6;margin:0;color:#4d5a50}
+.supplier-public-review form{display:grid;gap:8px}
+.supplier-public-review label{display:grid;gap:5px;font-size:11px;font-weight:800}
+.supplier-public-review textarea{width:100%;border:1px solid #cad7c7;border-radius:8px;padding:9px;background:white;color:var(--ink);font:inherit;resize:vertical}
+.supplier-review-summary{display:flex;align-items:center;gap:12px;margin-top:18px;padding:13px 15px;border:1px solid #d8e4d2;border-radius:11px;background:#f4f8f1}
+.supplier-review-summary strong{font-size:23px;color:#315d35;white-space:nowrap}
+.supplier-review-summary span{font-size:12px;color:#5a675c}
+.supplier-public-reviews{margin:38px 0 22px}
+.supplier-public-review-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.supplier-public-review-card{padding:17px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow)}
+.supplier-public-review-top{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.supplier-public-review-top>span,.admin-review-stars{color:#a46a17;letter-spacing:2px;font-size:16px}
+.supplier-public-review-top time,.supplier-public-review-response time{font-size:10px;color:var(--muted)}
+.supplier-public-review-card h3{font-size:17px;margin:11px 0 6px}
+.supplier-public-review-card>p{font-size:12px;line-height:1.7;color:#4f5d52;white-space:pre-wrap}
+.supplier-public-review-response{margin-top:12px;padding:12px;border-radius:9px;background:#f3f6f1}
+.supplier-public-review-response strong{font-size:11px}
+.supplier-public-review-response p{font-size:12px;line-height:1.6;margin:5px 0}
+.admin-review-console{display:grid;gap:14px}
+.admin-review-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px;font-weight:800}
+.admin-review-toolbar label{display:flex;align-items:center;gap:7px;font-weight:700}
+.admin-review-toolbar select{min-height:37px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:white;color:var(--ink)}
+.admin-review-list{display:grid;gap:12px}
+.admin-review-card{padding:17px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.admin-review-card-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.admin-review-card-heading>div{display:grid;gap:3px}
+.admin-review-card-heading strong{font-size:14px}
+.admin-review-card-heading span:not(.admin-state-good):not(.admin-state-bad):not(.admin-state-wait){font-size:10px;color:var(--muted)}
+.admin-review-stars{margin-top:12px}
+.admin-review-stars small{font-size:10px;color:var(--muted);letter-spacing:0}
+.admin-review-card h3{font-size:17px;margin:5px 0}
+.admin-review-card>p{font-size:12px;line-height:1.7;white-space:pre-wrap;color:#4d5a50}
+.admin-review-proof{display:flex;flex-wrap:wrap;gap:7px 16px;padding-top:9px;border-top:1px solid var(--line);font-size:10px;color:var(--muted)}
+.admin-review-response{margin-top:10px;padding:11px;background:#f3f6f1;border-radius:8px}
+.admin-review-response strong{font-size:11px}
+.admin-review-response p{font-size:12px;margin:5px 0 0;white-space:pre-wrap}
+.admin-review-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:13px}
+@media(max-width:720px){.customer-introduction-top{align-items:flex-start;flex-direction:column}.customer-outcome-actions{align-items:stretch}.customer-outcome-actions .button{flex:1}.supplier-public-review-list{grid-template-columns:1fr}.supplier-review-summary{align-items:flex-start;flex-direction:column;gap:3px}.admin-review-toolbar{align-items:flex-start;flex-direction:column}.admin-review-toolbar label{width:100%;justify-content:space-between}.admin-review-toolbar select{flex:1;max-width:220px}}
+.admin-review-disputes{display:grid;gap:12px;padding:16px;border:1px solid #efc8c0;border-radius:12px;background:#fff8f6}
+.admin-review-disputes>div:first-child h3{font-size:17px;margin:3px 0}
+.admin-review-disputes>div:first-child p:not(.eyebrow){font-size:11px;color:#7b514b;margin:4px 0;line-height:1.55}

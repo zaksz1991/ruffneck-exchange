@@ -13,7 +13,7 @@ const consent = read('components/analytics-consent.tsx');
 const privacy = read('app/privacy/page.tsx');
 const packageJson = JSON.parse(read('package.json'));
 
-assert.equal(packageJson.version, '3.0.0');
+assert.match(packageJson.version, /^3\.\d+\.\d+$/);
 assert.match(packageJson.scripts.check, /test:rnx-v300/);
 assert.match(migration, /create table if not exists public\.rnx_listing_view_events/);
 assert.match(migration, /alter table public\.rnx_listing_view_events enable row level security/);

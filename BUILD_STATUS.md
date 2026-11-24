@@ -1,21 +1,20 @@
-# v2.9.0 build and validation status
+# v3.1.0 build and validation status
 
-- Source base: complete cumulative RNX v2.8.0 project archive supplied in this conversation.
-- Version: 2.9.0.
-- New database migration: `021_rnx_customer_request_activity_timeline.sql`.
-- New regression test: `scripts/test-rnx-v290-customer-request-timeline.mjs`.
-- Feature: account-linked customer request progress timeline.
-- Migration 021 does not reference `rnx_listings.availability_status`, saved-listing tables or migrations 017–020.
-- Included recovery script: `supabase/repairs/repair_rnx_listing_availability_prerequisite.sql` for the previously reported missing availability-column prerequisite affecting migrations 019/020.
+- Source base: complete cumulative RNX v3.0.0 project archive from this conversation.
+- Version: 3.1.0.
+- New database migration: `023_rnx_verified_transaction_reviews.sql`.
+- New customer APIs: account-linked introduction list, transaction-outcome confirmation and verified-review submission.
+- Updated supplier opportunity API and dashboard: supplier-side outcome confirmation and one-time response to published reviews.
+- New RNX Operations review queue with trust-role access control, disputed-outcome follow-up display and moderation audit entries.
+- Updated public supplier profiles with approved customer reviews and an average calculated from the latest up to 50 displayed approved reviews.
+- Admin review queue fetches transaction outcomes separately from reviews because both are sibling relations through `rnx_lead_offers`; moderation audit records use the existing allowed `lead` entity type and the associated offer ID.
 
-Validation performed:
-- All 18 cumulative static regression scripts: passed.
-- v2.9.0 request timeline regression checks: passed.
-- TypeScript syntax transpilation for both changed `.tsx`/`.ts` files: passed.
-- Dependency installation: timed out in this environment.
-- Full TypeScript semantic typecheck: not verified because required packages and type declarations (`next`, React, Node and Supabase packages) could not be installed. A `tsc --noEmit` attempt reported missing dependency/type declarations across the source project.
-- Next.js production build: not run because dependencies could not be installed.
-- Live Supabase migration and trigger behaviour: not verified in the user's project.
-- Live Vercel deployment: not verified.
+Validation performed in this environment:
+- All 20 cumulative static regression scripts through v3.1.0: passed.
+- TypeScript/TSX syntax transpilation for 15 changed source files: passed.
+- ZIP integrity: checked after packaging.
+- Full TypeScript semantic typecheck: not completed; dependency installation timed out in this environment.
+- Next.js production build: not completed; dependency installation timed out in this environment.
+- Live Supabase migration/RPC execution: not run in this environment.
 
-Do not interpret static regression or syntax-transpilation checks as proof of a successful production build or live database deployment.
+Static regression checks and syntax transpilation do not prove a full production build or live database deployment. Vercel must confirm the typecheck and production build, and the existing RuffNeck Entertainment Supabase project must confirm migration 023 and the transaction/review workflow.

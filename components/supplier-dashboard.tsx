@@ -8,7 +8,7 @@ type Membership = { id: string; status: string; quoted_amount: number | null; cu
 type GalleryImage = { id: string; image_url: string | null; sort_order: number };
 type ListingAnalytics = { views_7d: number; views_30d: number; saves_total: number; enquiries_total: number };
 type Listing = { id: string; title: string; slug: string; listing_type: string; category: string; description: string; state: string; city: string | null; price_type: string; price: number | null; currency: string; keywords: string[]; status: string; availability_status: 'unconfirmed' | 'available' | 'limited' | 'on_request' | 'out_of_stock'; availability_note: string | null; availability_updated_at: string | null; image_url: string | null; gallery_images: GalleryImage[]; analytics: ListingAnalytics; created_at: string; updated_at: string };
-type Offer = { id: string; anonymised_summary: string; quoted_fee: number; currency: string; payment_status: string; supplier_accepted_at: string | null; supplier_declined_at: string | null; supplier_response_note: string | null; payment_verified_at: string | null; customer_approved_at: string | null; customer_declined_at: string | null; contact_released_at: string | null; created_at: string; customer: { category: string; state: string; city: string | null; contact_released: boolean; name: string | null; email: string | null; phone: string | null; preferred_contact: string | null; request_details: string | null } };
+type Offer = { id: string; anonymised_summary: string; quoted_fee: number; currency: string; payment_status: string; supplier_accepted_at: string | null; supplier_declined_at: string | null; supplier_response_note: string | null; payment_verified_at: string | null; customer_approved_at: string | null; customer_declined_at: string | null; contact_released_at: string | null; created_at: string; outcome: { status: string; customer_outcome: string | null; supplier_outcome: string | null; completed_at: string | null } | null; review: { id: string; rating: number; title: string; body: string; moderation_status: string; supplier_response: string | null } | null; customer: { category: string; state: string; city: string | null; contact_released: boolean; name: string | null; email: string | null; phone: string | null; preferred_contact: string | null; request_details: string | null } };
 type DashboardData = { supplier: { business_name: string; contact_name: string; email: string; phone: string; category: string; state: string }; listings: Listing[]; listingAnalyticsAvailable: boolean; memberships: Membership[]; offers: Offer[]; plans: Plan[]; paymentInstructions: string };
 
 function planOf(membership: Membership) { return Array.isArray(membership.plan) ? membership.plan[0] : membership.plan; }
@@ -24,6 +24,7 @@ export function SupplierDashboard() {
   const [paymentSubscriptionId, setPaymentSubscriptionId] = useState('');
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
   const [galleryListingId, setGalleryListingId] = useState('');
+  const [reviewReplyDrafts, setReviewReplyDrafts] = useState<Record<string, string>>({});
 
   const refresh = useCallback(async () => {
     setLoading(true); setError('');
@@ -202,6 +203,38 @@ export function SupplierDashboard() {
     finally { setBusy(false); }
   }
 
+  async function confirmOfferOutcome(offerId: string, action: 'confirm_completed' | 'confirm_not_completed') {
+    const message = action === 'confirm_completed'
+      ? 'Confirm that the customer transaction was completed. The customer must independently confirm the same outcome before RNX treats it as verified.'
+      : 'Confirm that the customer transaction was not completed. The customer response will be compared against yours.';
+    if (!window.confirm(message)) return;
+    setBusy(true); setError(''); setNotice('');
+    try {
+      const response = await fetch(`/api/supplier/offers/${offerId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action }) });
+      const result = await response.json().catch(() => ({}));
+      if (response.status === 401) { window.location.assign('/supplier/login'); return; }
+      if (!response.ok) throw new Error(result.error || 'Transaction outcome could not be recorded.');
+      setNotice(result.message || 'Transaction outcome recorded.'); await refresh();
+    } catch (err) { setError(err instanceof Error ? err.message : 'Transaction outcome could not be recorded.'); }
+    finally { setBusy(false); }
+  }
+
+  async function respondToReview(event: React.FormEvent<HTMLFormElement>, reviewId: string) {
+    event.preventDefault();
+    const responseText = reviewReplyDrafts[reviewId]?.trim() || '';
+    if (responseText.length < 2) return;
+    setBusy(true); setError(''); setNotice('');
+    try {
+      const response = await fetch(`/api/supplier/reviews/${reviewId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ response: responseText }) });
+      const result = await response.json().catch(() => ({}));
+      if (response.status === 401) { window.location.assign('/supplier/login'); return; }
+      if (!response.ok) throw new Error(result.error || 'Review response could not be saved.');
+      setReviewReplyDrafts((current) => ({ ...current, [reviewId]: '' }));
+      setNotice(result.message || 'Public review response saved.'); await refresh();
+    } catch (err) { setError(err instanceof Error ? err.message : 'Review response could not be saved.'); }
+    finally { setBusy(false); }
+  }
+
   async function logout() {
     await fetch('/api/supplier/logout', { method: 'POST' }).catch(() => undefined);
     window.location.assign('/supplier/login');
@@ -357,6 +390,12 @@ export function SupplierDashboard() {
         {offer.supplier_declined_at && <p className="form-status">You declined this offer on {dateText(offer.supplier_declined_at)}. It cannot be re-opened from the supplier portal.</p>}
         {offer.customer.contact_released && <div className="supplier-contact-release"><strong>Customer introduction authorised and recorded</strong><p>{offer.customer.name || 'Customer'} · {offer.customer.phone || 'No phone'} · {offer.customer.email || 'No email'}</p><small>Preferred channel: {offer.customer.preferred_contact || 'Not stated'}</small></div>}
         {!offer.customer.contact_released && <small className="admin-footnote">Customer identity and direct contact details are locked. Payment and explicit customer approval are required before release.</small>}
+        {offer.customer.contact_released && <div className="supplier-transaction-outcome">
+          <strong>Transaction outcome</strong>
+          <p>{offer.outcome?.status === 'completed' ? 'Both parties confirmed completion. The customer may submit a verified review.' : offer.outcome?.status === 'cancelled' ? 'Both parties confirmed that the transaction was not completed.' : offer.outcome?.status === 'disputed' ? 'The customer and supplier recorded different outcomes. RNX Operations may review the discrepancy.' : offer.outcome?.supplier_outcome ? `Your confirmation: ${offer.outcome.supplier_outcome.replaceAll('_', ' ')} · Awaiting customer confirmation.` : 'Confirm the transaction outcome after dealing with the customer.'}</p>
+          {!offer.outcome?.supplier_outcome && <div className="supplier-offer-actions"><button className="button button-small" type="button" disabled={busy} onClick={() => void confirmOfferOutcome(offer.id, 'confirm_completed')}>Confirm completed</button><button className="button button-small button-secondary" type="button" disabled={busy} onClick={() => void confirmOfferOutcome(offer.id, 'confirm_not_completed')}>Not completed</button></div>}
+        </div>}
+        {offer.review?.moderation_status === 'approved' && <div className="supplier-public-review"><strong>Verified customer review · {offer.review.rating}/5</strong><b>{offer.review.title}</b><p>{offer.review.body}</p>{offer.review.supplier_response ? <p>Your public response: {offer.review.supplier_response}</p> : <form onSubmit={(event) => void respondToReview(event, offer.review!.id)}><label>Public response<textarea rows={3} maxLength={1000} value={reviewReplyDrafts[offer.review.id] || ''} onChange={(event) => setReviewReplyDrafts((current) => ({ ...current, [offer.review!.id]: event.target.value }))} placeholder="Respond professionally to the customer's published review." /></label><button className="button button-small" type="submit" disabled={busy || (reviewReplyDrafts[offer.review.id] || '').trim().length < 2}>Publish response</button></form>}</div>}
       </article>)}</div> : <div className="admin-empty">No opportunity offers have been assigned to this supplier.</div>}
     </section>
   </section>;

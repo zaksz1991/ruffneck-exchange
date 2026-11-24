@@ -1,14 +1,24 @@
-RUFFNECK EXCHANGE v2.9.0 — COMPLETE REPLACEMENT APPLY INSTRUCTIONS
+RUFFNECK EXCHANGE v3.1.0 — COMPLETE REPLACEMENT APPLY INSTRUCTIONS
 
-1. Extract the complete ZIP.
+GITHUB / VERCEL
+Repository: https://github.com/zaksz1991/ruffneck-exchange
+Branch: main
+Production: https://ruffneck-exchange.vercel.app/
+
+1. Extract the complete replacement ZIP.
 2. Open the `ruffneck exchange` folder.
 3. Replace the existing repository contents with the complete contents of this folder.
 4. Commit to the `main` branch.
-5. Allow the connected Vercel project to deploy. Keep Root Directory `./`.
+5. Allow the connected Vercel project to deploy. Keep the existing Root Directory `./` and existing environment variables.
 
-Supabase project: RuffNeck Entertainment. Confirm RNX migrations 001–020 are applied, then apply only migration 021:
-supabase/migrations/021_rnx_customer_request_activity_timeline.sql
+SUPABASE
+Project: RuffNeck Entertainment
+Confirm migrations 001–022 have already succeeded, then apply only:
+supabase/migrations/023_rnx_verified_transaction_reviews.sql
 
-If the earlier v2.8.0 migration failed because `public.rnx_listings.availability_status` was missing, run `supabase/repairs/repair_rnx_listing_availability_prerequisite.sql` and then re-run only the failed migrations 019 and 020. See `docs/SUPABASE_MIGRATION_RECOVERY.md`. Migration 021 does not depend on listing availability columns.
+Do not rerun migrations that Supabase has already recorded as successful. Do not delete or recreate existing tables. No new environment variables or external services are required.
 
-No new environment variables are required.
+The migration creates private, RNX-prefixed transaction-outcome and supplier-review tables and a service-role-only confirmation function. The application uses the existing customer, supplier and RNX staff sessions.
+
+VALIDATION BOUNDARY
+The cumulative static regression scripts and changed-file TypeScript syntax transpilation are included in BUILD_STATUS.md. Full semantic typechecking, Next.js production build and live Supabase execution were not completed in this packaging environment; the connected Vercel deployment and Supabase project must confirm those runtime checks.

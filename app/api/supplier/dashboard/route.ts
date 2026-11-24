@@ -16,7 +16,7 @@ export async function GET() {
         .eq('supplier_application_id', supplier.id).order('created_at', { ascending: false }).limit(250),
       db.from('rnx_membership_subscriptions').select('id,status,quoted_amount,currency,billing_interval,quote_expires_at,period_start,period_end,created_at,plan:rnx_membership_plans!inner(code,name,description,listing_limit,display_price,features),payments:rnx_membership_payments(id,amount,currency,payment_method,transaction_reference,status,supplier_note,verified_at,created_at)')
         .eq('supplier_application_id', supplier.id).order('created_at', { ascending: false }).limit(20),
-      db.from('rnx_lead_offers').select('id,anonymised_summary,quoted_fee,currency,payment_status,supplier_accepted_at,payment_verified_at,customer_approved_at,customer_declined_at,supplier_declined_at,supplier_response_note,contact_released_at,created_at,lead:rnx_leads!inner(id,name,email,phone,category,state,city,details,preferred_contact)')
+      db.from('rnx_lead_offers').select('id,anonymised_summary,quoted_fee,currency,payment_status,supplier_accepted_at,payment_verified_at,customer_approved_at,customer_declined_at,supplier_declined_at,supplier_response_note,contact_released_at,created_at,lead:rnx_leads!inner(id,name,email,phone,category,state,city,details,preferred_contact),outcome:rnx_transaction_outcomes(id,status,customer_outcome,supplier_outcome,completed_at),review:rnx_supplier_reviews(id,rating,title,body,moderation_status,supplier_response)')
         .eq('supplier_application_id', supplier.id).order('created_at', { ascending: false }).limit(50),
       db.from('rnx_membership_plans').select('id,code,name,description,listing_limit,display_price,features,sort_order').eq('active', true).order('sort_order', { ascending: true }),
     ]);
@@ -95,6 +95,8 @@ export async function GET() {
         customer_declined_at: row.customer_declined_at,
         contact_released_at: row.contact_released_at,
         created_at: row.created_at,
+        outcome: Array.isArray(row.outcome) ? row.outcome[0] ?? null : row.outcome ?? null,
+        review: Array.isArray(row.review) ? row.review[0] ?? null : row.review ?? null,
         customer: {
           category: lead?.category ?? '',
           state: lead?.state ?? '',

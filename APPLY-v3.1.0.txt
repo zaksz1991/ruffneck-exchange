@@ -1,0 +1,31 @@
+RUFFNECK EXCHANGE v3.1.0 — COMPLETE CUMULATIVE REPLACEMENT APPLY GUIDE
+
+GITHUB
+Repository: github.com/zaksz1991/ruffneck-exchange
+Branch: main
+Production: https://ruffneck-exchange.vercel.app/
+
+1. Extract the complete ZIP.
+2. Open the `ruffneck exchange` folder.
+3. Replace the existing repository contents with the complete contents of this folder.
+4. Commit to the main branch and allow Vercel to deploy.
+5. Keep the existing Vercel project, Root Directory `./`, and environment variables.
+
+SUPABASE
+Project: RuffNeck Entertainment
+
+Confirm migrations 001–022 have already succeeded, then apply only:
+supabase/migrations/023_rnx_verified_transaction_reviews.sql
+
+Do not rerun migrations already recorded as successful. The new migration is additive and creates only RNX-prefixed objects.
+
+HOW VERIFIED REVIEWS WORK
+- A supplier introduction must have a verified paid status, recorded customer approval and recorded contact release.
+- The customer and supplier independently confirm whether the transaction was completed.
+- Only matching completion confirmations make the introduction review-eligible.
+- Conflicting confirmations are flagged as disputed. No verified review can be submitted for a disputed or cancelled transaction.
+- Customers submit reviews from their account dashboard. Guest-only requests are not review-eligible in this release.
+- Reviews are private until an authorised RNX trust staff member approves publication in Operations → Verified reviews.
+- Suppliers can respond once to a published review.
+
+No new Vercel environment variables or external services are required.

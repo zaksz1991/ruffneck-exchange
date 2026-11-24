@@ -1,0 +1,26 @@
+RUFFNECK EXCHANGE v3.0.0 — COMPLETE CUMULATIVE REPLACEMENT APPLY GUIDE
+
+GITHUB
+Repository: github.com/zaksz1991/ruffneck-exchange
+Branch: main
+Production: https://ruffneck-exchange.vercel.app/
+
+1. Extract the complete ZIP.
+2. Open the `ruffneck exchange` folder.
+3. Replace the contents of the existing repository with the complete contents of this folder.
+4. Commit the replacement to the main branch.
+5. Keep the existing Vercel project, Root Directory `./`, and environment variables.
+6. Confirm the Vercel build succeeds before testing supplier analytics.
+
+SUPABASE
+Project: RuffNeck Entertainment
+
+Confirm RNX migrations 001–021 are already applied, then apply only:
+supabase/migrations/022_rnx_supplier_listing_analytics.sql
+
+The new migration does not depend on `rnx_listings.availability_status`. The supplier portal itself already uses the availability fields from migration 017. If those columns are still missing, apply the included repair script and resolve the previously failed migrations 019/020 before testing the supplier portal. Do not rerun migrations that Supabase has already recorded as successful.
+
+PRIVACY / METRIC INTERPRETATION
+Listing detail views are recorded only after the visitor has accepted optional analytics. The browser deduplicates each listing once per tab session. Views are not unique-person counts and exclude visitors who decline analytics. Saves and enquiries are aggregate totals; neither metric proves a completed sale.
+
+No new Vercel environment variables or external services are required.

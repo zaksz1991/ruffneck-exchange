@@ -227,3 +227,32 @@ export async function getApprovedListingsForSupplier(supplierId: string): Promis
     return [];
   }
 }
+
+export type PublicSupplierReview = {
+  id: string;
+  rating: number;
+  title: string;
+  body: string;
+  created_at: string;
+  supplier_response: string | null;
+  supplier_response_at: string | null;
+};
+
+export async function getApprovedSupplierReviews(supplierApplicationId: string): Promise<{ reviews: PublicSupplierReview[]; average: number; total: number }> {
+  try {
+    const { data, error } = await supabaseAdmin().from('rnx_supplier_reviews')
+      .select('id,rating,title,body,created_at,supplier_response,supplier_response_at')
+      .eq('supplier_application_id', supplierApplicationId)
+      .eq('moderation_status', 'approved')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    const reviews = (data ?? []) as PublicSupplierReview[];
+    const total = reviews.length;
+    const average = total ? reviews.reduce((sum, row) => sum + Number(row.rating), 0) / total : 0;
+    return { reviews, average, total };
+  } catch (error) {
+    console.error('[RNX] Public supplier reviews unavailable:', error instanceof Error ? error.message : 'Unknown error');
+    return { reviews: [], average: 0, total: 0 };
+  }
+}

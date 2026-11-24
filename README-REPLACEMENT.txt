@@ -1,11 +1,11 @@
-RUFFNECK EXCHANGE v2.9.0 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v3.1.0 — COMPLETE CUMULATIVE REPLACEMENT
 
-This archive contains the complete RNX Next.js source project, including application routes and APIs, React components, server libraries, public assets, deployment configuration, project documentation, regression tests and Supabase migrations 001–021.
+This archive contains the complete RNX Next.js application, routes, APIs, components, server libraries, public assets, deployment configuration, documentation, regression tests and Supabase migrations 001–023.
 
-Retained features include marketplace discovery, customer enquiries and private tracking, supplier profiles and membership, supplier verification, moderation, listing editing, private cover and gallery images, supplier-reported availability, saved offers, offer comparison, saved-offer email alerts and the customer in-app notification centre.
+New in v3.1.0: dual-confirmed transaction outcomes and verified supplier reviews. After a paid introduction has been approved and contact-released, the customer and supplier can independently report whether the transaction completed. Only matching completion confirmations permit a customer review. Reviews require RNX moderation before public publication; suppliers can publish one response to approved feedback.
 
-New in v2.9.0: the signed-in customer dashboard displays a chronological request progress timeline, including request submission, workflow status changes and contact-release permission changes.
+The existing marketplace features through v3.0.0 are retained, including supplier listing analytics, customer request timelines, notification centre, saved-offer comparison and alerts, listing photos/galleries, supplier-reported availability, supplier verification, catalogue moderation, customer tracking, lead matching and payment/contact-release controls.
 
-SUPABASE: Confirm migrations 001–020 have succeeded, then apply only migration 021 in the existing RuffNeck Entertainment project. Migration 021 does not reference listing availability columns. Resolve the earlier v2.8.0 availability prerequisite issue separately before relying on v2.8.0 saved-offer notifications.
+SUPABASE: Confirm migrations 001–022 have succeeded, then apply only `supabase/migrations/023_rnx_verified_transaction_reviews.sql` in the existing RuffNeck Entertainment project. Do not rerun completed migrations.
 
-VERCEL: No new environment variable is required. Keep existing production environment settings and Root Directory `./`.
+VERCEL: No new environment variable is required. Keep the current project and Root Directory `./`.
