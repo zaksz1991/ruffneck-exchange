@@ -1,0 +1,22 @@
+RUFFNECK EXCHANGE v3.2.0 — DEPLOYMENT INSTRUCTIONS
+
+Repository: https://github.com/zaksz1991/ruffneck-exchange
+Branch: main
+Production: https://ruffneck-exchange.vercel.app/
+Supabase project: RuffNeck Entertainment
+Vercel Root Directory: ./
+
+1. In the existing RuffNeck Entertainment Supabase project, confirm migrations 001–023 are already applied.
+2. Apply only `supabase/migrations/024_rnx_commercial_quotes.sql` in Supabase SQL Editor.
+3. Extract the complete replacement ZIP and open the `ruffneck exchange` folder.
+4. Replace the existing GitHub repository contents with the complete folder contents.
+5. Commit the replacement to the existing `main` branch and allow Vercel to deploy.
+6. Verify the Vercel production build and test a supplier quote only after an introduction has passed supplier acceptance, payment verification, customer approval and contact release.
+
+No new Vercel environment variables or third-party providers are required. Existing SUPABASE_URL/SUPABASE_SECRET_KEY (or documented service-role fallback), session secrets and Resend configuration remain unchanged.
+
+IMPORTANT
+- Do not rerun migrations 001–023 if Supabase already records them as successful.
+- The supplier's quotation amount is separate from the RNX lead-introduction fee.
+- Customer selection records a preferred proposal only. It is not payment, a binding contract or an RNX guarantee. Supplier and customer settle commercial terms directly.
+- Do not expose Supabase secret/service-role keys in browser variables.

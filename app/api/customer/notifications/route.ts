@@ -32,7 +32,7 @@ export async function GET() {
     const db = supabaseAdmin();
     const [notificationsResult, unreadResult] = await Promise.all([
       db.from('rnx_customer_notifications')
-        .select('id,notification_type,title,message,listing_id,listing_slug,listing_title,supplier_name,read_at,created_at')
+        .select('id,notification_type,title,message,listing_id,listing_slug,listing_title,supplier_name,related_quote_id,read_at,created_at')
         .eq('customer_id', customerId)
         .order('created_at', { ascending: false })
         .limit(60),

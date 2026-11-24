@@ -222,3 +222,29 @@
 .admin-review-disputes{display:grid;gap:12px;padding:16px;border:1px solid #efc8c0;border-radius:12px;background:#fff8f6}
 .admin-review-disputes>div:first-child h3{font-size:17px;margin:3px 0}
 .admin-review-disputes>div:first-child p:not(.eyebrow){font-size:11px;color:#7b514b;margin:4px 0;line-height:1.55}
+
+/* RNX v3.2.0 — supplier commercial quotation workspace */
+.rnx-commercial-quote-panel,.rnx-customer-quotes{display:grid;gap:12px;margin-top:14px;padding:14px;border:1px solid #d8e4d4;border-radius:11px;background:#f7faf5;min-width:0}
+.rnx-commercial-quote-panel>div:first-child strong,.rnx-customer-quotes h5{font-size:14px;margin:0}
+.rnx-commercial-quote-panel>div:first-child p,.rnx-customer-quotes>div:first-child>p:not(.eyebrow){font-size:11px;line-height:1.6;color:var(--muted);margin:4px 0 0}
+.rnx-commercial-quote-form{display:grid;gap:10px;padding:13px;border:1px solid #dce5d8;border-radius:9px;background:#fff}
+.rnx-commercial-quote-form h4{font-size:14px;margin:0}
+.rnx-commercial-quote-form label{display:grid;gap:5px;font-size:11px;font-weight:800;min-width:0}
+.rnx-commercial-quote-form input,.rnx-commercial-quote-form select,.rnx-commercial-quote-form textarea{width:100%;min-width:0;min-height:40px;padding:9px 10px;border:1px solid #cbd7c8;border-radius:8px;background:#fff;color:var(--ink);font:inherit}
+.rnx-commercial-quote-form textarea{resize:vertical}
+.rnx-quote-form-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.rnx-quote-record,.rnx-customer-quote{display:grid;gap:8px;min-width:0;padding:13px;border:1px solid #e0e7dc;border-radius:9px;background:#fff}
+.rnx-quote-record-heading,.rnx-customer-quote-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.rnx-quote-record-heading>strong,.rnx-customer-quote-heading>strong{font-size:12px;overflow-wrap:anywhere}
+.rnx-quote-amount,.rnx-customer-quote-amount{font-size:20px;color:#315d35}
+.rnx-quote-record>p,.rnx-customer-quote>p{margin:0;font-size:12px;line-height:1.65;color:#4c594e;white-space:pre-wrap;overflow-wrap:anywhere}
+.rnx-quote-record>small,.rnx-customer-quote>small{font-size:10px;line-height:1.5;color:var(--muted)}
+.rnx-quote-terms,.rnx-customer-quote-terms{padding:10px;border-radius:8px;background:#f4f6f2}
+.rnx-quote-disclaimer{font-size:10px;line-height:1.6;color:var(--muted)}
+.rnx-customer-quotes{margin-top:12px;background:#f8faf7}
+.rnx-customer-quotes>div:first-child h5{font-size:15px;margin:2px 0}
+.rnx-customer-quote dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}
+.rnx-customer-quote dl>div{padding:8px;border-radius:7px;background:#f5f7f3;min-width:0}
+.rnx-customer-quote dt{font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.rnx-customer-quote dd{font-size:11px;margin:3px 0 0;overflow-wrap:anywhere}
+@media(max-width:620px){.rnx-quote-form-row,.rnx-customer-quote dl{grid-template-columns:1fr}.rnx-quote-record-heading,.rnx-customer-quote-heading{align-items:flex-start;flex-direction:column}.rnx-commercial-quote-panel,.rnx-customer-quotes{padding:11px}}

@@ -7,5 +7,5 @@ export const metadata: Metadata = { title: 'Supplier Dashboard', robots: { index
 export const dynamic = 'force-dynamic';
 export default async function SupplierDashboardPage() {
   if (!(await hasSupplierSession())) redirect('/supplier/login');
-  return <main className="page-shell container supplier-page-shell"><div className="page-intro"><p className="eyebrow">BUSINESS WORKSPACE</p><h1>Supplier dashboard.</h1><p>Manage catalogue submissions, membership and customer opportunity workflows.</p></div><SupplierDashboard /></main>;
+  return <main className="page-shell container supplier-page-shell"><div className="page-intro"><p className="eyebrow">BUSINESS WORKSPACE</p><h1>Supplier dashboard.</h1><p>Manage catalogue submissions, membership, authorised customer introductions and commercial quotations.</p></div><SupplierDashboard /></main>;
 }

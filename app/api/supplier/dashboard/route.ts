@@ -11,6 +11,8 @@ export async function GET() {
   if (!supplier) return NextResponse.json({ error: 'Supplier sign-in required.' }, { status: 401 });
   try {
     const db = supabaseAdmin();
+    const { error: quoteExpiryError } = await db.rpc('rnx_expire_commercial_quotes');
+    if (quoteExpiryError) throw quoteExpiryError;
     const [listingsResult, membershipsResult, offersResult, plansResult] = await Promise.all([
       db.from('rnx_listings').select('id,title,slug,listing_type,category,description,state,city,price_type,price,currency,keywords,status,availability_status,availability_note,availability_updated_at,image_path,created_at,updated_at')
         .eq('supplier_application_id', supplier.id).order('created_at', { ascending: false }).limit(250),
@@ -78,7 +80,25 @@ export async function GET() {
         }))),
       };
     }));
-    const offers = (offersResult.data ?? []).map((row: any) => {
+    const offerRows = offersResult.data ?? [];
+    const offerIds = offerRows.map((row: any) => row.id);
+    let quoteRows: any[] = [];
+    if (offerIds.length) {
+      const { data: quotes, error: quotesError } = await db.from('rnx_commercial_quotes')
+        .select('id,lead_offer_id,quote_reference,title,scope_description,total_amount,currency,delivery_terms,estimated_fulfilment,valid_until,status,created_at,responded_at')
+        .in('lead_offer_id', offerIds)
+        .eq('supplier_application_id', supplier.id)
+        .order('created_at', { ascending: false });
+      if (quotesError) throw quotesError;
+      quoteRows = quotes ?? [];
+    }
+    const quotesByOffer = new Map<string, any[]>();
+    for (const quote of quoteRows) {
+      const rows = quotesByOffer.get(quote.lead_offer_id) ?? [];
+      rows.push(quote);
+      quotesByOffer.set(quote.lead_offer_id, rows);
+    }
+    const offers = offerRows.map((row: any) => {
       const lead = Array.isArray(row.lead) ? row.lead[0] : row.lead;
       const released = Boolean(row.contact_released_at && row.payment_status === 'paid' && row.payment_verified_at && row.customer_approved_at);
       return {
@@ -97,6 +117,7 @@ export async function GET() {
         created_at: row.created_at,
         outcome: Array.isArray(row.outcome) ? row.outcome[0] ?? null : row.outcome ?? null,
         review: Array.isArray(row.review) ? row.review[0] ?? null : row.review ?? null,
+        quotes: quotesByOffer.get(row.id) ?? [],
         customer: {
           category: lead?.category ?? '',
           state: lead?.state ?? '',

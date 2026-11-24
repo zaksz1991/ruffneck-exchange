@@ -1,6 +1,6 @@
 {
   "name": "ruffneck-exchange",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "private": true,
   "engines": {
     "node": ">=20.9.0"
@@ -16,7 +16,7 @@
     "test:supplier-listing-controls": "node scripts/test-supplier-listing-controls.mjs",
     "test:rnx-v180": "node scripts/test-rnx-v180-operations-upgrade.mjs",
     "test:rnx-v190": "node scripts/test-rnx-v190-marketplace-search.mjs",
-    "check": "npm run test:account-recovery && npm run test:email-verification && npm run test:supplier-form-build-fix && npm run test:supplier-listing-controls && npm run test:rnx-v180 && npm run test:rnx-v190 && npm run test:rnx-v200 && npm run test:rnx-v210 && npm run test:rnx-v220 && npm run test:rnx-v221 && npm run test:rnx-v222 && npm run test:rnx-v230 && npm run test:rnx-v240 && npm run test:rnx-v250 && npm run test:rnx-v260 && npm run test:rnx-v270 && npm run test:rnx-v280 && npm run test:rnx-v290 && npm run test:rnx-v300 && npm run test:rnx-v310 && npm run typecheck && npm run build",
+    "check": "npm run test:account-recovery && npm run test:email-verification && npm run test:supplier-form-build-fix && npm run test:supplier-listing-controls && npm run test:rnx-v180 && npm run test:rnx-v190 && npm run test:rnx-v200 && npm run test:rnx-v210 && npm run test:rnx-v220 && npm run test:rnx-v221 && npm run test:rnx-v222 && npm run test:rnx-v230 && npm run test:rnx-v240 && npm run test:rnx-v250 && npm run test:rnx-v260 && npm run test:rnx-v270 && npm run test:rnx-v280 && npm run test:rnx-v290 && npm run test:rnx-v300 && npm run test:rnx-v310 && npm run test:rnx-v320 && npm run typecheck && npm run build",
     "test:rnx-v200": "node scripts/test-rnx-v200-listing-enquiry.mjs",
     "test:rnx-v210": "node scripts/test-rnx-v210-supplier-listing-edit.mjs",
     "test:rnx-v220": "node scripts/test-rnx-v220-listing-images.mjs",
@@ -30,7 +30,8 @@
     "test:rnx-v280": "node scripts/test-rnx-v280-customer-notification-centre.mjs",
     "test:rnx-v290": "node scripts/test-rnx-v290-customer-request-timeline.mjs",
     "test:rnx-v300": "node scripts/test-rnx-v300-supplier-listing-insights.mjs",
-    "test:rnx-v310": "node scripts/test-rnx-v310-verified-transaction-reviews.mjs"
+    "test:rnx-v310": "node scripts/test-rnx-v310-verified-transaction-reviews.mjs",
+    "test:rnx-v320": "node scripts/test-rnx-v320-commercial-quotes.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",

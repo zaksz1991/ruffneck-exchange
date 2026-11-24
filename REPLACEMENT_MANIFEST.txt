@@ -1,32 +1,33 @@
-RUFFNECK EXCHANGE v3.1.0 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v3.2.0 — COMPLETE CUMULATIVE REPLACEMENT
 
 Project: RuffNeck Exchange (RNX)
 Repository: https://github.com/zaksz1991/ruffneck-exchange
 Production: https://ruffneck-exchange.vercel.app/
 Supabase project: RuffNeck Entertainment
 
-This ZIP contains the complete Next.js application source, App Router pages and API routes, React components, server libraries, public assets, configuration, operational documentation, regression tests, and Supabase migrations 001–023.
+This ZIP contains the complete Next.js application source, App Router pages and API routes, React components, server libraries, public assets, configuration, operational documentation, regression tests, and Supabase migrations 001–024.
 
-File count: 288 files at packaging. This is a complete cumulative repository replacement, not an incremental overlay.
+This is a complete cumulative repository replacement, not an incremental overlay.
 
-NEW IN v3.1.0 — VERIFIED TRANSACTION OUTCOMES AND SUPPLIER REVIEWS
-- After an introduction has verified payment, customer approval and contact release, the customer and matched supplier can independently confirm its transaction outcome.
-- Matching completion confirmations mark the introduction completed. Matching non-completion confirmations mark it cancelled. Conflicting confirmations mark it disputed and exclude it from verified review eligibility.
-- An account-linked customer can submit one 1–5 star review after dual confirmation of completion.
-- Reviews remain private until an authorised RNX trust staff member approves publication.
-- Suppliers may publish one response to an approved review.
-- Public supplier profiles show approved reviews and the average rating calculated over the latest up to 50 displayed approved reviews.
+NEW IN v3.2.0 — SUPPLIER COMMERCIAL QUOTATIONS
+- Approved suppliers can submit a priced commercial proposal only after the matching introduction passes supplier acceptance, payment verification, customer approval and contact release.
+- Quotes contain title, scope, total amount, three-letter currency, delivery/payment terms, optional fulfilment estimate and 1–60 day validity.
+- Customers can review submitted proposals in their account dashboard, mark one proposal as preferred or decline it.
+- Only one proposal can be preferred per sourcing request; previous selections and competing open proposals are retained as not-selected history.
+- Suppliers can withdraw an unselected quote and issue a revised proposal after decline, withdrawal or expiry.
+- Quote expiry is applied on dashboard reads and customer response attempts. Private quote event history and an in-app customer notification are recorded; existing Resend configuration is reused for supplier preference email alerts.
+- The commercial quote is separate from the RNX introduction fee. Customer selection is a preference only, not payment, order, binding contract or RNX guarantee.
 
 CUMULATIVE FEATURES RETAINED
-Supplier listings and moderation; supplier listing editing; private cover images and galleries; supplier-reported availability; customer saved offers, comparisons, email alerts and in-app notifications; customer request activity timeline; supplier listing analytics; supplier membership and verification; lead enquiries and matching; payment verification and contact-release controls; customer tracking; RNX Operations and audit workflows.
+Supplier listings and moderation; listing editing, private images and galleries; supplier-reported availability; customer saved offers, comparisons, email alerts and notification centre; request progress timeline; supplier listing insights; memberships and supplier verification; lead enquiries and matching; manual payment verification and customer-authorised contact release; private customer tracking; RNX Operations and audit workflows; dual-confirmed transaction outcomes and moderated supplier reviews.
 
 SUPABASE
-Confirm migrations 001–022 have succeeded, then apply only:
-supabase/migrations/023_rnx_verified_transaction_reviews.sql
-Do not rerun migrations recorded as successful. No new Vercel environment variable or external service is required.
+Confirm migrations 001–023 have succeeded, then apply only:
+supabase/migrations/024_rnx_commercial_quotes.sql
+Do not rerun migrations recorded as successful. No new Vercel environment variable or external provider is required.
 
 DEPLOYMENT
-Extract this archive, open its `ruffneck exchange` folder, replace the existing repository contents with the complete folder contents, and commit to the `main` branch. Retain the existing Vercel project and Root Directory `./`.
+Apply migration 024 in the existing RuffNeck Entertainment Supabase project, then extract this archive, open its `ruffneck exchange` folder, replace the existing repository contents with the complete folder contents, and commit to the `main` branch. Retain the existing Vercel project and Root Directory `./`.
 
 BUILD / VALIDATION LIMITS
-All 20 cumulative static regression scripts passed. TypeScript/TSX syntax transpilation passed for 15 changed source files. Full TypeScript semantic typechecking, Next.js production build and live Supabase migration/RPC execution were not completed in this environment. See BUILD_STATUS.md.
+All 21 cumulative static regression scripts passed. TypeScript/TSX syntax transpilation passed for 12 changed source files. Full TypeScript semantic typechecking, Next.js production build and live Supabase migration/RPC execution were not completed in this environment. See BUILD_STATUS.md.

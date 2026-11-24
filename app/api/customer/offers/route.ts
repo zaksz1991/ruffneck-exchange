@@ -16,7 +16,10 @@ export async function GET() {
   if (!customerId) return NextResponse.json({ error: 'Sign in to view your supplier introductions.' }, { status: 401, headers: PRIVATE_HEADERS });
 
   try {
-    const { data, error } = await supabaseAdmin()
+    const db = supabaseAdmin();
+    const { error: expiryError } = await db.rpc('rnx_expire_commercial_quotes');
+    if (expiryError) throw expiryError;
+    const { data, error } = await db
       .from('rnx_lead_offers')
       .select('id,lead_id,anonymised_summary,payment_status,payment_verified_at,customer_approved_at,contact_released_at,created_at,supplier_application_id,supplier:rnx_supplier_applications!inner(business_name,public_slug),lead:rnx_leads!inner(id,category,state,city,customer_id),outcome:rnx_transaction_outcomes(id,status,customer_outcome,supplier_outcome,customer_confirmed_at,supplier_confirmed_at,completed_at),review:rnx_supplier_reviews(id,rating,title,body,moderation_status,created_at)')
       .eq('lead.customer_id', customerId)
@@ -24,7 +27,20 @@ export async function GET() {
       .limit(100);
     if (error) throw error;
 
-    const offers = (data ?? []).map((row: any) => {
+    const rows = data ?? [];
+    const offerIds = rows.map((row: any) => row.id);
+    let quoteRows: any[] = [];
+    if (offerIds.length) {
+      const { data: quotes, error: quotesError } = await db.from('rnx_commercial_quotes')
+        .select('id,lead_offer_id,quote_reference,title,scope_description,total_amount,currency,delivery_terms,estimated_fulfilment,valid_until,status,created_at,responded_at')
+        .in('lead_offer_id', offerIds)
+        .eq('customer_id', customerId)
+        .order('created_at', { ascending: false });
+      if (quotesError) throw quotesError;
+      quoteRows = quotes ?? [];
+    }
+
+    const offers = rows.map((row: any) => {
       const lead = one(row.lead);
       const supplier = one(row.supplier);
       const outcome = one(row.outcome);
@@ -61,12 +77,13 @@ export async function GET() {
           created_at: review.created_at,
         } : null,
         can_confirm_outcome: contactReleased && Boolean(lead?.customer_id),
+        quotes: quoteRows.filter((quote) => quote.lead_offer_id === row.id),
       };
     });
 
     return NextResponse.json({ offers }, { headers: PRIVATE_HEADERS });
   } catch (error) {
     console.error('[RNX customer] Introductions could not be loaded:', error instanceof Error ? error.message : 'unknown');
-    return NextResponse.json({ error: 'Your supplier introductions could not be loaded. Confirm migration 023 is applied.' }, { status: 503, headers: PRIVATE_HEADERS });
+    return NextResponse.json({ error: 'Your supplier introductions could not be loaded. Confirm migrations 023 and 024 are applied.' }, { status: 503, headers: PRIVATE_HEADERS });
   }
 }

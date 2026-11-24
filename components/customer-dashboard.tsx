@@ -46,6 +46,7 @@ type CustomerNotification = {
   listing_slug: string | null;
   listing_title: string | null;
   supplier_name: string | null;
+  related_quote_id: string | null;
   read_at: string | null;
   created_at: string;
 };
@@ -68,6 +69,22 @@ type SavedListing = {
   supplier: { public_slug: string; business_name: string };
 };
 
+type CustomerCommercialQuote = {
+  id: string;
+  lead_offer_id: string;
+  quote_reference: string;
+  title: string;
+  scope_description: string;
+  total_amount: number;
+  currency: string;
+  delivery_terms: string;
+  estimated_fulfilment: string | null;
+  valid_until: string;
+  status: 'submitted' | 'selected' | 'not_selected' | 'declined' | 'withdrawn' | 'expired';
+  created_at: string;
+  responded_at: string | null;
+};
+
 type IntroducedOffer = {
   id: string;
   lead_id: string;
@@ -82,6 +99,7 @@ type IntroducedOffer = {
   outcome: { status: 'awaiting_confirmation' | 'completed' | 'cancelled' | 'disputed'; customer_outcome: string | null; supplier_outcome: string | null; completed_at: string | null } | null;
   review: { id: string; rating: number; title: string; body: string; moderation_status: string; created_at: string } | null;
   can_confirm_outcome: boolean;
+  quotes: CustomerCommercialQuote[];
 };
 
 const MAX_COMPARE_LISTINGS = 3;
@@ -91,6 +109,14 @@ function date(value: string) {
   return Number.isNaN(parsed.getTime())
     ? '—'
     : parsed.toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+function quoteMoney(value: number, currency: string) {
+  try {
+    return new Intl.NumberFormat('en-NG', { style: 'currency', currency, maximumFractionDigits: 2 }).format(Number(value));
+  } catch {
+    return `${currency} ${Number(value).toLocaleString('en-NG')}`;
+  }
 }
 
 function requestStatusLabel(value: string | null) {
@@ -305,6 +331,30 @@ export function CustomerDashboard() {
     [savedListings, compareIds],
   );
 
+  async function respondToCommercialQuote(quote: CustomerCommercialQuote, action: 'select' | 'decline') {
+    const prompt = action === 'select'
+      ? 'Mark this quotation as your preferred proposal? This records your preference only. It does not make a payment or create a contract.'
+      : 'Decline this quotation? The supplier may submit a revised proposal.';
+    if (!window.confirm(prompt)) return;
+    setBusy(quote.id); setError(''); setNotice('');
+    try {
+      const response = await fetch(`/api/customer/quotes/${quote.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (response.status === 401) { window.location.assign('/customer/login'); return; }
+      if (!response.ok) throw new Error(result.error || 'Quotation decision could not be saved.');
+      setNotice(result.message || 'Quotation decision saved.');
+      await refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Quotation decision could not be saved.');
+    } finally {
+      setBusy('');
+    }
+  }
+
   async function confirmTransactionOutcome(offer: IntroducedOffer, outcome: 'completed' | 'not_completed') {
     const prompt = outcome === 'completed'
       ? 'Confirm that the transaction with this introduced supplier was completed. Both parties must confirm before a verified review can be submitted.'
@@ -433,6 +483,21 @@ export function CustomerDashboard() {
               <div className="customer-introduction-top"><strong>{offer.supplier?.business_name || 'Supplier introduction'}</strong><span className={`customer-status ${offer.outcome?.status === 'completed' ? 'status-qualified' : offer.outcome?.status === 'disputed' ? 'status-invalid' : ''}`}>{offer.outcome?.status?.replaceAll('_', ' ') || 'Awaiting transaction confirmation'}</span></div>
               <p>{offer.anonymised_summary}</p>
               {offer.supplier?.profile_url && <a className="text-link" href={offer.supplier.profile_url}>View introduced supplier ↗</a>}
+              {offer.quotes?.length > 0 && <section className="rnx-customer-quotes" aria-label="Supplier commercial quotations">
+                <div><p className="eyebrow">COMMERCIAL PROPOSALS</p><h5>Supplier quotations</h5><p>These proposals are separate from the RNX introduction fee. Compare scope, amount, delivery terms and validity.</p></div>
+                {offer.quotes.map((quote) => <article className="rnx-customer-quote" id={`quote-${quote.id}`} key={quote.id}>
+                  <div className="rnx-customer-quote-heading"><strong>{quote.quote_reference} · {quote.title}</strong><span className={`admin-state-${quote.status === 'selected' ? 'good' : quote.status === 'submitted' ? 'wait' : quote.status === 'declined' || quote.status === 'withdrawn' ? 'bad' : 'wait'}`}>{quote.status.replaceAll('_', ' ')}</span></div>
+                  <strong className="rnx-customer-quote-amount">{quoteMoney(quote.total_amount, quote.currency)}</strong>
+                  <p>{quote.scope_description}</p>
+                  <dl><div><dt>Estimated fulfilment</dt><dd>{quote.estimated_fulfilment || 'Not stated'}</dd></div><div><dt>Valid until</dt><dd>{date(quote.valid_until)}</dd></div></dl>
+                  <p className="rnx-customer-quote-terms">{quote.delivery_terms}</p>
+                  {quote.status === 'submitted' && <div className="customer-outcome-actions"><button className="button button-small" type="button" disabled={busy === quote.id} onClick={() => void respondToCommercialQuote(quote, 'select')}>Mark as preferred</button><button className="button button-small button-secondary" type="button" disabled={busy === quote.id} onClick={() => void respondToCommercialQuote(quote, 'decline')}>Decline quotation</button></div>}
+                  {quote.status === 'selected' && <p className="form-status">You marked this as your preferred proposal. Confirm the final agreement and payment directly with the supplier.</p>}
+                  {quote.status === 'not_selected' && <small>This quotation was not selected because you marked another proposal as preferred.</small>}
+                  {quote.status === 'expired' && <small>This quotation has expired. Ask the supplier for an updated proposal.</small>}
+                </article>)}
+                <small className="rnx-quote-disclaimer">Marking a quotation as preferred is not a payment, contract or RNX guarantee. Confirm final specifications, taxes, payment destination, delivery, warranties and other terms directly with the supplier before committing funds.</small>
+              </section>}
               {!offer.contact_released && <small className="fine-print">Supplier identity remains private until RNX has recorded payment, customer approval and contact release.</small>}
               {offer.outcome?.status === 'disputed' && <p className="form-error">Your transaction outcome differs from the supplier's confirmation. RNX Operations may contact both parties to review the discrepancy.</p>}
               {offer.contact_released && offer.can_confirm_outcome && !offer.outcome?.customer_outcome && offer.outcome?.status !== 'disputed' && <div className="customer-outcome-actions"><p>Confirm whether the introduced transaction was completed. The supplier must also confirm independently.</p><button className="button button-small" type="button" disabled={busy === offer.id} onClick={() => void confirmTransactionOutcome(offer, 'completed')}>Confirm completed</button><button className="button button-small button-secondary" type="button" disabled={busy === offer.id} onClick={() => void confirmTransactionOutcome(offer, 'not_completed')}>Not completed</button></div>}
@@ -478,7 +543,7 @@ export function CustomerDashboard() {
             <div>
               <p className="eyebrow">ACCOUNT ACTIVITY</p>
               <h3 id="customer-notifications-title">Notifications</h3>
-              <p>Updates about offers you have saved. Email alerts remain a separate preference on each saved offer.</p>
+              <p>Updates about saved offers and commercial quotations from suppliers you have been introduced to. Email alerts remain a separate preference on each saved offer.</p>
             </div>
             <div className="customer-notifications-heading-actions">
               <span>{unreadNotificationCount} unread</span>
@@ -494,7 +559,7 @@ export function CustomerDashboard() {
           </div>
 
           {notifications.length === 0 ? (
-            <div className="customer-notifications-empty">No notifications yet. When a saved public offer changes its published price or supplier-reported availability, the update will appear here.</div>
+            <div className="customer-notifications-empty">No notifications yet. Saved-offer changes and new commercial quotations from introduced suppliers will appear here.</div>
           ) : (
             <div className="customer-notifications-list">
               {notifications.map((item) => (
@@ -507,6 +572,7 @@ export function CustomerDashboard() {
                   {item.supplier_name && <small>Supplier: {item.supplier_name}</small>}
                   <div className="customer-notification-actions">
                     {item.listing_slug && <a className="text-link" href={`/marketplace/listing/${encodeURIComponent(item.listing_slug)}`}>View updated offer ↗</a>}
+                    {item.related_quote_id && <a className="text-link" href={`/customer/dashboard#quote-${encodeURIComponent(item.related_quote_id)}`}>Review commercial quotation ↗</a>}
                     {!item.read_at && (
                       <button
                         className="customer-compare-clear"

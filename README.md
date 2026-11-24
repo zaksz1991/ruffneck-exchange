@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v3.1.0
+# RuffNeck Exchange (RNX) — v3.2.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,14 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.2.0 — supplier commercial quotations
+
+- Adds structured supplier commercial proposals after the RNX introduction has passed supplier acceptance, payment verification, customer approval and contact release.
+- Customers can review scope, total price, currency, delivery terms and quote validity in their account dashboard; they can mark one proposal as preferred or decline it.
+- Supplier withdrawals, customer decisions, quote expiry and private event history are recorded. Customers receive an in-app quote notification; suppliers receive a configured email when their proposal is marked preferred.
+- The supplier quote is separate from the RNX introduction fee. Customer selection is preference only, not payment, an order, a binding contract or RNX guarantee.
+- Adds migration 024. Apply after migrations 001–023 have succeeded.
 
 ## v3.1.0 — verified transaction outcomes and supplier reviews
 
@@ -154,6 +162,7 @@ Customers can submit requests without paying RNX. Supplier memberships, promoted
 - Customer trust cases and disputes with separate internal notes and customer-visible replies.
 - Consent-based acquisition attribution and privacy-limited supplier listing insights (consented listing-detail views, aggregate saves and linked enquiries).
 - Verified supplier feedback based on dual-confirmed transaction completion, with RNX moderation and supplier responses.
+- Private supplier commercial quotations after authorised introductions, customer preference selection, withdrawal/expiry history, in-app customer alerts and configured supplier email notifications.
 - Account recovery and one-time email verification for customer and supplier accounts.
 - RuffNeck Entertainment product showcase alongside the wider marketplace.
 
@@ -207,11 +216,11 @@ Do not paste, commit or expose actual secret values.
 
 ## Supabase migrations
 
-The cumulative v3.1.0 project contains RNX migrations 001–023. Migration 018 provides private customer saved-offer records; migration 019 adds opt-in saved-offer price and availability email alerts; migration 020 adds private in-app customer notifications. For older deployments, apply only missing RNX migrations in numerical order after reviewing the existing Supabase migration history. Never rerun a migration recorded as completed. These migrations create and modify only RNX-prefixed objects; do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects. For the previously encountered missing `availability_status` error, see `docs/SUPABASE_MIGRATION_RECOVERY.md` and the included idempotent repair script under `supabase/repairs/`.
+The cumulative v3.2.0 project contains RNX migrations 001–024. Migration 018 provides private customer saved-offer records; migration 019 adds opt-in saved-offer price and availability email alerts; migration 020 adds private in-app customer notifications. For older deployments, apply only missing RNX migrations in numerical order after reviewing the existing Supabase migration history. Never rerun a migration recorded as completed. These migrations create and modify only RNX-prefixed objects; do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects. For the previously encountered missing `availability_status` error, see `docs/SUPABASE_MIGRATION_RECOVERY.md` and the included idempotent repair script under `supabase/repairs/`.
 
 ## Verification boundary
 
-The cumulative static regression scripts, including the v3.1.0 outcome/review checks, are retained in the project. The v3.1.0 packaging run verifies all 20 cumulative static test scripts and TypeScript/TSX syntax transpilation for 15 changed source files. Full semantic TypeScript checking and the Next.js production build require installed project dependencies. Static tests do not prove live Supabase trigger or RPC behaviour; apply migration 023 and confirm the Vercel build before enabling the new workflow.
+The cumulative static regression scripts, including the v3.2.0 commercial quote checks, are retained in the project. Full semantic TypeScript checking and the Next.js production build require installed project dependencies. Static tests do not prove live Supabase RPC behaviour; apply migration 024 and confirm the Vercel build before enabling the new workflow.
 
 ## Commercial deployment
 
