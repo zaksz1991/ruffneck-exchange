@@ -164,3 +164,7 @@ Review Vercel plan terms for commercial use before monetised production operatio
 ## Latest repair release
 
 Version 2.2.2 fixes Supabase `PromiseLike` audit error handling in supplier listing edits, pauses and resubmissions. See `RELEASE-NOTES-v2.2.2.md`.
+
+
+## v2.4.0 — Supplier-reported availability
+Suppliers can update the availability of approved offers without pausing the listing. Public cards and listing pages display the supplier-provided status, optional note and update time; buyers can filter listings by status. Availability is not independently verified by RNX. Apply migration 017 after migrations 001–016.

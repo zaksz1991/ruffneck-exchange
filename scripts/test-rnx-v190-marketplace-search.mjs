@@ -33,7 +33,7 @@ assert.match(marketplace, /name="sort"/);
 assert.match(marketplace, /listingType,/);
 assert.match(marketplace, /priceType,/);
 assert.match(marketplace, /sort,/);
-assert.match(marketplace, /\(q \|\| category \|\| state \|\| listingType \|\| priceType \|\| sort !== 'newest'\)/);
+assert.match(marketplace, /\(q \|\| category \|\| state \|\| listingType \|\| priceType \|\| availability \|\| sort !== 'newest'\)/);
 assert.match(marketplace, /href="\/marketplace">Clear all filters/);
 assert.match(marketplace, /Submit a free sourcing request/);
 assert.match(marketplace, /makeQuery\(\{ state: item/);

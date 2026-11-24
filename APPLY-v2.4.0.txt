@@ -1,0 +1,18 @@
+RUFFNECK EXCHANGE v2.4.0 — COMPLETE CUMULATIVE REPLACEMENT
+
+1. In the existing RuffNeck Entertainment Supabase project, confirm RNX migrations 001–016 are applied, then run `supabase/migrations/017_rnx_listing_availability.sql` in the Supabase SQL Editor.
+2. Extract this ZIP.
+3. Replace the GitHub repository contents with the contents of the `ruffneck exchange` folder, preserving paths.
+4. Commit the complete replacement to the `main` branch of github.com/zaksz1991/ruffneck-exchange.
+5. Keep the existing Vercel environment variables unchanged. No new variable is required.
+6. Allow the existing Vercel project to deploy from `main`. Review both TypeScript validation and the Next.js production build.
+
+After deployment, test with an approved test supplier listing:
+- Set the status to Available and add a short note.
+- Confirm the supplier portal reports the new status and timestamp.
+- Confirm the public listing card and detail page display the status.
+- Filter the marketplace by availability.
+- Set the listing to Currently unavailable and confirm the out-of-stock state is clearly displayed.
+- Confirm a different supplier cannot update the listing through the API.
+
+Do not rerun migrations 001–016. No new Vercel environment variable is required.

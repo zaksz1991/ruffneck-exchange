@@ -25,7 +25,7 @@ assert.match(listingRoute, /\.select\('id,title,status,updated_at'\)/);
 assert.match(listingRoute, /supplier_listing_edited/);
 assert.match(listingRoute, /supplier_listing_paused/);
 assert.match(listingRoute, /rnx_admin_audit_log/);
-assert.match(dashboardRoute, /description,state,city,price_type,price,currency,keywords,status,image_path,created_at,updated_at/);
+assert.match(dashboardRoute, /description,state,city,price_type,price,currency,keywords,status,availability_status,availability_note,availability_updated_at,image_path,created_at,updated_at/);
 assert.match(dashboardUi, /setEditingListing/);
 assert.match(dashboardUi, /submitListing\(event, editingListing\.id\)/);
 assert.match(dashboardUi, /action: 'update'/);

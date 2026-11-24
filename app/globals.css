@@ -93,3 +93,20 @@
 /* RNX v2.3.0 supplier gallery and public listing gallery */
 .listing-gallery{display:grid;gap:10px;margin-bottom:24px}.listing-gallery-main{display:block;width:100%;max-height:500px;aspect-ratio:16/9;object-fit:contain;border-radius:12px;background:#f1f4ef}.listing-gallery-thumbnails{display:flex;gap:9px;overflow-x:auto;padding:2px 1px 7px}.listing-gallery-thumbnail{flex:0 0 88px;width:88px;height:68px;padding:3px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer}.listing-gallery-thumbnail.is-active{border:2px solid var(--green-dark);box-shadow:0 0 0 2px #e1eedc}.listing-gallery-thumbnail img{display:block;width:100%;height:100%;object-fit:cover;border-radius:5px}.supplier-photo-stack{display:grid;gap:4px;justify-items:start}.supplier-photo-stack small{font-size:10px;color:var(--muted)}.supplier-gallery-manager{display:grid;gap:12px;padding:16px;border:1px solid var(--line);border-radius:10px;background:#f8faf7}.supplier-gallery-manager>div:first-child strong{font-size:13px}.supplier-gallery-manager>div:first-child p{margin:4px 0 0;color:var(--muted);font-size:11px;line-height:1.5}.supplier-gallery-thumbnails{display:flex;flex-wrap:wrap;gap:12px}.supplier-gallery-photo{display:grid;gap:6px;width:112px}.supplier-gallery-photo img{width:112px;height:84px;object-fit:cover;border:1px solid var(--line);border-radius:7px;background:#edf2eb}.supplier-gallery-photo .button{width:100%}.supplier-gallery-upload{display:flex;align-items:end;gap:12px;flex-wrap:wrap;padding-top:11px;border-top:1px solid var(--line)}.supplier-gallery-upload label{display:grid;gap:5px;font-size:11px;font-weight:800}.supplier-gallery-upload input{max-width:100%;font-size:11px}.admin-listing-photo-stack{display:flex;flex-wrap:wrap;gap:4px;align-items:center}.admin-listing-photo-stack .supplier-listing-thumb{width:52px;height:42px}.admin-listing-photo-stack+small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
 @media(max-width:620px){.listing-gallery-main{aspect-ratio:4/3}.listing-gallery-thumbnail{flex-basis:76px;width:76px;height:60px}.supplier-gallery-upload{align-items:stretch;flex-direction:column}.supplier-gallery-upload .button{width:100%}}
+
+
+/* RNX v2.4.0 — supplier-reported listing availability */
+.listing-availability{display:inline-flex;align-items:center;width:max-content;max-width:100%;margin:9px 0 0;padding:5px 8px;border:1px solid #dce5d8;border-radius:999px;background:#f5f8f3;color:#586554;font-size:10px;font-weight:800;line-height:1.3}
+.availability-available{border-color:#c5dfbd;background:#edf7e8;color:#2e642e}
+.availability-limited{border-color:#ead9ad;background:#fff8e8;color:#80611e}
+.availability-on_request,.availability-unconfirmed{border-color:#dce2d9;background:#f5f7f4;color:#5e695e}
+.availability-out_of_stock{border-color:#edc9c2;background:#fff1ee;color:#98483b}
+.listing-availability-panel{display:grid;gap:6px;margin:14px 0;padding:15px 16px;border:1px solid #dce5d8;border-radius:11px;background:#f7faf5;color:#465545}
+.listing-availability-panel strong{font-size:13px}
+.listing-availability-panel p{margin:0;font-size:12px;line-height:1.55;white-space:pre-wrap}
+.listing-availability-panel small{font-size:10px;line-height:1.5;color:#69766a}
+.supplier-availability-form{display:grid;gap:7px;min-width:190px;margin-top:9px;padding:9px;border:1px solid #e0e7dd;border-radius:8px;background:#f8faf7}
+.supplier-availability-form label{display:grid;gap:4px;font-size:10px;font-weight:800;color:#4e5d50}
+.supplier-availability-form input,.supplier-availability-form select{width:100%;min-width:0;min-height:34px;border:1px solid #cfd9d0;border-radius:7px;padding:6px 8px;background:#fff;color:var(--ink);font:inherit;font-size:11px}
+.supplier-availability-form small{font-size:10px;color:var(--muted)}
+@media(max-width:620px){.supplier-availability-form{min-width:0}.listing-availability-panel{padding:12px}}

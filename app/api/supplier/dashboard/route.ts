@@ -12,7 +12,7 @@ export async function GET() {
   try {
     const db = supabaseAdmin();
     const [listingsResult, membershipsResult, offersResult, plansResult] = await Promise.all([
-      db.from('rnx_listings').select('id,title,slug,listing_type,category,description,state,city,price_type,price,currency,keywords,status,image_path,created_at,updated_at')
+      db.from('rnx_listings').select('id,title,slug,listing_type,category,description,state,city,price_type,price,currency,keywords,status,availability_status,availability_note,availability_updated_at,image_path,created_at,updated_at')
         .eq('supplier_application_id', supplier.id).order('created_at', { ascending: false }).limit(250),
       db.from('rnx_membership_subscriptions').select('id,status,quoted_amount,currency,billing_interval,quote_expires_at,period_start,period_end,created_at,plan:rnx_membership_plans!inner(code,name,description,listing_limit,display_price,features),payments:rnx_membership_payments(id,amount,currency,payment_method,transaction_reference,status,supplier_note,verified_at,created_at)')
         .eq('supplier_application_id', supplier.id).order('created_at', { ascending: false }).limit(20),

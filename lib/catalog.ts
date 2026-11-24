@@ -16,6 +16,7 @@ export type PublicSupplier = {
 };
 
 export type ListingGalleryImage = { id: string; image_url: string; sort_order: number };
+export type ListingAvailability = 'unconfirmed' | 'available' | 'limited' | 'on_request' | 'out_of_stock';
 
 export type PublicListing = {
   id: string;
@@ -32,6 +33,9 @@ export type PublicListing = {
   condition: string | null;
   keywords: string[] | null;
   created_at: string;
+  availability_status: ListingAvailability;
+  availability_note: string | null;
+  availability_updated_at: string | null;
   image_url: string | null;
   gallery_images?: ListingGalleryImage[];
   supplier: PublicSupplier;
@@ -44,6 +48,7 @@ export type ListingFilters = {
   category?: string;
   listingType?: PublicListing['listing_type'];
   priceType?: PublicListing['price_type'];
+  availability?: Exclude<ListingAvailability, 'unconfirmed'>;
   sort?: ListingSort;
   limit?: number;
   includeImages?: boolean;
@@ -64,7 +69,7 @@ export async function getApprovedListings(filters: ListingFilters = {}): Promise
     const db = supabaseAdmin();
     let query = db
       .from('rnx_listings')
-      .select('id,slug,title,listing_type,category,description,state,city,price_type,price,currency,condition,keywords,created_at,image_path,supplier:rnx_supplier_applications!inner(id,public_slug,business_name,business_type,category,state,website,description,status)')
+      .select('id,slug,title,listing_type,category,description,state,city,price_type,price,currency,condition,keywords,created_at,availability_status,availability_note,availability_updated_at,image_path,supplier:rnx_supplier_applications!inner(id,public_slug,business_name,business_type,category,state,website,description,status)')
       .eq('status', 'approved')
       .eq('supplier.status', 'approved')
       .not('supplier.public_slug', 'is', null);
@@ -73,6 +78,7 @@ export async function getApprovedListings(filters: ListingFilters = {}): Promise
     if (filters.state) query = query.eq('state', filters.state);
     if (filters.listingType) query = query.eq('listing_type', filters.listingType);
     if (filters.priceType) query = query.eq('price_type', filters.priceType);
+    if (filters.availability) query = query.eq('availability_status', filters.availability);
 
     if (filters.sort === 'title') {
       query = query.order('title', { ascending: true }).order('created_at', { ascending: false });
@@ -113,7 +119,7 @@ export async function getApprovedListingBySlug(slug: string, options: { includeI
     const db = supabaseAdmin();
     const { data, error } = await db
       .from('rnx_listings')
-      .select('id,supplier_application_id,slug,title,listing_type,category,description,state,city,price_type,price,currency,condition,keywords,created_at,image_path,supplier:rnx_supplier_applications!inner(id,public_slug,business_name,business_type,category,state,website,description,status)')
+      .select('id,supplier_application_id,slug,title,listing_type,category,description,state,city,price_type,price,currency,condition,keywords,created_at,availability_status,availability_note,availability_updated_at,image_path,supplier:rnx_supplier_applications!inner(id,public_slug,business_name,business_type,category,state,website,description,status)')
       .eq('slug', slug)
       .eq('status', 'approved')
       .eq('supplier.status', 'approved')
@@ -202,7 +208,7 @@ export async function getApprovedListingsForSupplier(supplierId: string): Promis
     const db = supabaseAdmin();
     const { data, error } = await db
       .from('rnx_listings')
-      .select('id,slug,title,listing_type,category,description,state,city,price_type,price,currency,condition,keywords,created_at,image_path,supplier:rnx_supplier_applications!inner(id,public_slug,business_name,business_type,category,state,website,description,status)')
+      .select('id,slug,title,listing_type,category,description,state,city,price_type,price,currency,condition,keywords,created_at,availability_status,availability_note,availability_updated_at,image_path,supplier:rnx_supplier_applications!inner(id,public_slug,business_name,business_type,category,state,website,description,status)')
       .eq('supplier_application_id', supplierId)
       .eq('status', 'approved')
       .eq('supplier.status', 'approved')

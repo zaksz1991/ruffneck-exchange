@@ -56,5 +56,6 @@ assert.match(publicGallery, /listing-gallery-thumbnail/);
 assert.match(listingPage, /<ListingGallery/);
 assert.match(adminOverview, /rnx_listing_gallery_images/);
 assert.match(adminConsole, /additional photos/);
-assert.equal(packageJson.version, '2.3.0');
+const releaseVersion = packageJson.version.split('.').map(Number);
+assert.ok(releaseVersion[0] > 2 || (releaseVersion[0] === 2 && releaseVersion[1] > 3) || (releaseVersion[0] === 2 && releaseVersion[1] === 3 && releaseVersion[2] >= 0), 'The cumulative release must retain v2.3.0 functionality.');
 console.log('RNX v2.3.0 listing gallery regression checks passed.');

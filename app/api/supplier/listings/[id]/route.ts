@@ -8,6 +8,11 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const actionSchema = z.object({ action: z.enum(['pause', 'reactivate']) });
+const availabilitySchema = z.object({
+  action: z.literal('availability'),
+  availability_status: z.enum(['available', 'limited', 'on_request', 'out_of_stock']),
+  availability_note: z.string().trim().max(240).optional().or(z.literal('')),
+});
 const updateSchema = z.object({
   action: z.literal('update'),
   title: z.string().trim().min(3).max(180),
@@ -45,6 +50,41 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       .select('id,status').eq('id', id).eq('supplier_application_id', supplier.id).maybeSingle();
     if (lookupError) throw new Error('Listing lookup failed.');
     if (!listing) return NextResponse.json({ error: 'Listing not found.' }, { status: 404 });
+
+    if (raw && typeof raw === 'object' && (raw as { action?: unknown }).action === 'availability') {
+      const parsed = availabilitySchema.safeParse(raw);
+      if (!parsed.success) {
+        return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Review the availability details.' }, { status: 400 });
+      }
+      if (listing.status !== 'approved') {
+        return NextResponse.json({ error: 'Availability can only be updated on a currently approved public listing.' }, { status: 409 });
+      }
+      const values = parsed.data;
+      const updatedAt = new Date().toISOString();
+      const { data: updated, error } = await db.from('rnx_listings').update({
+        availability_status: values.availability_status,
+        availability_note: values.availability_note || null,
+        availability_updated_at: updatedAt,
+      }).eq('id', id).eq('supplier_application_id', supplier.id).eq('status', 'approved')
+        .select('id,availability_status,availability_note,availability_updated_at').maybeSingle();
+      if (error) {
+        console.error('[RNX supplier listing availability]', { code: error.code, message: error.message });
+        throw new Error('Listing availability update failed.');
+      }
+      if (!updated) return NextResponse.json({ error: 'The listing changed while you were updating availability. Refresh the portal and try again.' }, { status: 409 });
+      try {
+        const { error: auditError } = await db.from('rnx_admin_audit_log').insert({
+          action: 'supplier_listing_availability_updated',
+          entity_type: 'listing',
+          entity_id: id,
+          details: { supplier_application_id: supplier.id, availability_status: values.availability_status, availability_updated_at: updatedAt },
+        });
+        if (auditError) console.error('[RNX supplier availability audit]', auditError.message);
+      } catch (auditError) {
+        console.error('[RNX supplier availability audit]', auditError instanceof Error ? auditError.message : 'Audit insert failed');
+      }
+      return NextResponse.json({ ok: true, listing: updated, message: 'Availability updated. The public listing now displays this supplier-reported status.' });
+    }
 
     if (raw && typeof raw === 'object' && (raw as { action?: unknown }).action === 'update') {
       const parsed = updateSchema.safeParse(raw);

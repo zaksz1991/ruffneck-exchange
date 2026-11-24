@@ -6,7 +6,7 @@ type Plan = { id: string; code: string; name: string; description: string; listi
 type Payment = { id: string; amount: number; currency: string; payment_method: string; transaction_reference: string; status: string; supplier_note?: string | null; verified_at?: string | null; created_at: string };
 type Membership = { id: string; status: string; quoted_amount: number | null; currency: string; billing_interval: string; quote_expires_at: string | null; period_start: string | null; period_end: string | null; created_at: string; plan: Plan | Plan[]; payments: Payment[] };
 type GalleryImage = { id: string; image_url: string | null; sort_order: number };
-type Listing = { id: string; title: string; slug: string; listing_type: string; category: string; description: string; state: string; city: string | null; price_type: string; price: number | null; currency: string; keywords: string[]; status: string; image_url: string | null; gallery_images: GalleryImage[]; created_at: string; updated_at: string };
+type Listing = { id: string; title: string; slug: string; listing_type: string; category: string; description: string; state: string; city: string | null; price_type: string; price: number | null; currency: string; keywords: string[]; status: string; availability_status: 'unconfirmed' | 'available' | 'limited' | 'on_request' | 'out_of_stock'; availability_note: string | null; availability_updated_at: string | null; image_url: string | null; gallery_images: GalleryImage[]; created_at: string; updated_at: string };
 type Offer = { id: string; anonymised_summary: string; quoted_fee: number; currency: string; payment_status: string; supplier_accepted_at: string | null; supplier_declined_at: string | null; supplier_response_note: string | null; payment_verified_at: string | null; customer_approved_at: string | null; customer_declined_at: string | null; contact_released_at: string | null; created_at: string; customer: { category: string; state: string; city: string | null; contact_released: boolean; name: string | null; email: string | null; phone: string | null; preferred_contact: string | null; request_details: string | null } };
 type DashboardData = { supplier: { business_name: string; contact_name: string; email: string; phone: string; category: string; state: string }; listings: Listing[]; memberships: Membership[]; offers: Offer[]; plans: Plan[]; paymentInstructions: string };
 
@@ -119,6 +119,32 @@ export function SupplierDashboard() {
       await refresh();
     } catch (err) { setError(err instanceof Error ? err.message : 'Listing status could not be changed.'); }
     finally { setBusy(false); }
+  }
+
+  async function updateAvailability(event: React.FormEvent<HTMLFormElement>, listing: Listing) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setBusy(true); setError(''); setNotice('');
+    try {
+      const response = await fetch(`/api/supplier/listings/${listing.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'availability',
+          availability_status: form.get('availability_status'),
+          availability_note: form.get('availability_note'),
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (response.status === 401) { window.location.assign('/supplier/login'); return; }
+      if (!response.ok) throw new Error(result.error || 'Availability could not be updated.');
+      setNotice(result.message || 'Availability updated.');
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Availability could not be updated.');
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function uploadGalleryImages(event: React.FormEvent<HTMLFormElement>, listing: Listing) {
@@ -270,6 +296,14 @@ export function SupplierDashboard() {
             {listing.status === 'approved' ? <button className="button button-small button-dark" type="button" disabled={busy} onClick={() => void changeListingStatus(listing.id, 'pause')}>Pause to edit</button> : <button className="button button-small" type="button" disabled={busy} onClick={() => setEditingListing(listing)}>{listing.status === 'rejected' ? 'Correct & resubmit' : 'Edit offer'}</button>}
             {listing.status === 'paused' && <button className="button button-small button-secondary" type="button" disabled={busy} onClick={() => void changeListingStatus(listing.id, 'reactivate')}>Submit unchanged</button>}
             <button className="button button-small" type="button" disabled={busy || listing.status === 'approved'} title={listing.status === 'approved' ? 'Pause this approved listing before managing gallery photos.' : 'Manage additional listing photos'} onClick={() => setGalleryListingId((current) => current === listing.id ? '' : listing.id)}>{galleryListingId === listing.id ? 'Close photos' : `Manage photos (${listing.gallery_images?.length || 0}/4)`}</button>
+            {listing.status === 'approved' && <form key={`${listing.id}-${listing.availability_status}-${listing.availability_note || ''}-${listing.availability_updated_at || ''}`} className="supplier-availability-form" onSubmit={(event) => void updateAvailability(event, listing)}>
+              <label>Public availability<select name="availability_status" defaultValue={listing.availability_status || 'unconfirmed'}>
+                <option value="unconfirmed" disabled>Not confirmed — choose a status</option><option value="available">Available</option><option value="limited">Limited availability</option><option value="on_request">Confirm on request</option><option value="out_of_stock">Currently unavailable</option>
+              </select></label>
+              <label>Availability note (optional)<input name="availability_note" maxLength={240} defaultValue={listing.availability_note || ''} placeholder="e.g. Delivery in 3–5 days" /></label>
+              <button className="button button-small button-dark" type="submit" disabled={busy}>Update availability</button>
+              {listing.availability_updated_at && <small>Supplier updated {dateText(listing.availability_updated_at)}</small>}
+            </form>}
           </td>
           <td>{dateText(listing.created_at)}</td>
         </tr>

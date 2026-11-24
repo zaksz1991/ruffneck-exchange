@@ -1,25 +1,24 @@
-# RuffNeck Exchange v2.3.0 — build and validation status
+# RuffNeck Exchange v2.4.0 — build and validation status
 
 ## Included functionality
-- Complete cumulative RNX application retained through v2.2.2.
-- Suppliers can add and remove up to four additional listing photos alongside the existing cover image.
-- Gallery photos use the existing private Supabase Storage bucket. Uploads accept genuine JPEG, PNG and WebP files up to 4 MB each.
-- The private supplier dashboard manages extra photos. Listing approval state controls when photos can be changed.
-- Approved public listing detail pages show an interactive photo gallery. Marketplace cards continue to use the single cover image.
-- RNX moderators can preview cover and gallery photos before approving a pending listing.
+- Complete cumulative RNX application retained through v2.3.0.
+- Suppliers can update availability on approved listings without pausing the listing or resubmitting catalogue content for moderation.
+- Supported values: available, limited availability, confirm on request, and currently unavailable. Existing listings default to unconfirmed.
+- Suppliers can add an optional 240-character availability note.
+- Public listing cards, detail pages and marketplace filters expose the supplier-reported availability.
 
 ## Security and database
-- Migration 016 adds `rnx_listing_gallery_images`, enables RLS and revokes browser-role privileges.
-- Database triggers enforce supplier ownership and allowed moderation states for uploads and deletions, plus a hard maximum of four additional photos per listing while serialising concurrent inserts on the listing row.
-- Upload and delete APIs require same-origin requests and the authenticated supplier session, and scope records to the supplier and listing.
-- Failed batch uploads clean up already uploaded Storage objects. Audit events are best-effort and do not invalidate a completed action.
-- No new Vercel environment variables or external providers.
+- Migration 017 adds the status, note and last-update timestamp to `rnx_listings`.
+- Updates require same-origin requests, authenticated supplier sessions, supplier ownership and approved listing status.
+- API validation and database constraints restrict allowed values and note length.
+- Audit events are best-effort and do not turn successful changes into failures.
+- Public copy explicitly states that availability is supplier-reported, not independently verified by RNX.
+- No new Vercel environment variables, Storage buckets or external providers.
 
 ## Validation
-- Added `test-rnx-v230-listing-gallery.mjs` to check migration controls, upload/delete security, database enforcement, signed URLs, supplier portal management, public gallery rendering and admin preview integration.
-- The static regression suite must be run in the project environment.
-- Full TypeScript typechecking, the Next.js production build, live Supabase migration execution and live Storage upload testing have not yet been executed in this environment. Vercel and the existing Supabase project must confirm them after deployment.
+- Added `test-rnx-v240-listing-availability.mjs` for migration controls, API authentication/ownership scoping, supplier portal controls, public rendering and search filtering.
+- Full TypeScript typechecking, Next.js production build, live Supabase migration execution and live availability update have not been executed in this environment. Confirm compilation through Vercel after deployment.
 
 ## Deployment
-- Apply migration 016 only after confirming RNX migrations 001–015 are present in the RuffNeck Entertainment Supabase project.
-- No new environment variables. Retain the existing `SUPABASE_URL` and server-side secret configuration.
+- Apply migration 017 only after confirming RNX migrations 001–016 are already present in the RuffNeck Entertainment Supabase project.
+- No new environment variables. Retain current server-side Supabase credentials.

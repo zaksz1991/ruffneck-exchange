@@ -29,6 +29,12 @@ export default async function ListingDetailPage({ params }: Props) {
       <h1>{listing.title}</h1>
       <div className="listing-meta"><span>{listing.category}</span><span>{[listing.city, listing.state].filter(Boolean).join(', ')}</span></div>
       <p className="listing-detail-price">{priceLabel(listing)}</p>
+      <section className={`listing-availability-panel availability-${listing.availability_status || 'unconfirmed'}`} aria-label="Supplier-reported availability">
+        <strong>{listing.availability_status === 'available' ? 'Supplier reports this offer is available' : listing.availability_status === 'limited' ? 'Supplier reports limited availability' : listing.availability_status === 'on_request' ? 'Availability must be confirmed on request' : listing.availability_status === 'out_of_stock' ? 'Supplier reports this offer is currently unavailable' : 'Availability has not been confirmed by the supplier'}</strong>
+        {listing.availability_note && <p>{listing.availability_note}</p>}
+        {listing.availability_updated_at && <small>Supplier update: {new Date(listing.availability_updated_at).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' })}</small>}
+        <small>Availability is reported by the supplier and is not independently verified by RNX. Confirm before ordering or paying.</small>
+      </section>
       <div className="listing-description"><h2>Offer details</h2><p>{listing.description}</p></div>
       {listing.condition && <p><strong>Condition:</strong> {listing.condition}</p>}
       <div className="supplier-summary"><span className="listing-type">SUPPLIER</span><h2><Link href={`/suppliers/${listing.supplier.public_slug}`}>{listing.supplier.business_name}</Link></h2><p>{listing.supplier.business_type} · {listing.supplier.state}</p><Link className="text-link" href={`/suppliers/${listing.supplier.public_slug}`}>View supplier profile ↗</Link></div>
