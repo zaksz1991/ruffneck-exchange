@@ -124,3 +124,12 @@ Confirm migrations 001–019 are applied, then apply only `supabase/migrations/0
 The customer dashboard displays the latest 60 notifications and the total unread count. Customers can mark one notification or all notifications as read. The API requires an active signed-in customer session; read-state updates are same-origin and customer-scoped. The notification table has RLS enabled and no direct browser-role privileges.
 
 The existing v2.7.0 email flow remains separate: only customers who enable email alerts for that saved offer and have a verified email address enter the email outbox. No new environment variables, external services or cron changes are required for in-app notifications. Test by saving a published listing with a customer account, changing its price or availability as the supplier, completing any required moderation, and checking that customer dashboard.
+
+
+## v2.9.0 customer request progress timeline
+
+Confirm the prior RNX migrations are applied, then apply only `supabase/migrations/021_rnx_customer_request_activity_timeline.sql` in the existing RuffNeck Entertainment Supabase project. The migration records account-linked request submission, request status changes and contact-release permission changes. It uses only existing RNX customer and lead tables; it does not reference `availability_status`, saved-listing columns or unrelated application tables.
+
+The customer requests API reads events only for the currently authenticated customer and the request IDs returned for that customer. The activity table has RLS enabled and direct browser-role access revoked. Existing account-linked requests receive a submission marker using their original request creation timestamp; old status transitions are not invented. Guest requests continue to use the existing private tracking-link workflow.
+
+After Vercel deploys, sign in with a test customer, open a request in the dashboard, and verify the request-received event. Then change that test request's status in RNX Operations and verify a new timeline event appears after refreshing the customer dashboard. Test a contact-release permission transition separately.

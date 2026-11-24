@@ -10,6 +10,16 @@ type Message = {
   created_at: string;
 };
 
+type RequestActivity = {
+  id: string;
+  event_type: 'request_submitted' | 'status_changed' | 'contact_release_changed';
+  previous_status: string | null;
+  new_status: string | null;
+  previous_contact_release_status: string | null;
+  new_contact_release_status: string | null;
+  created_at: string;
+};
+
 type RequestRow = {
   id: string;
   request_type: string;
@@ -22,6 +32,7 @@ type RequestRow = {
   created_at: string;
   last_activity_at: string | null;
   messages: Message[];
+  activity: RequestActivity[];
 };
 
 type Customer = { id: string; name: string; email: string };
@@ -64,6 +75,46 @@ function date(value: string) {
   return Number.isNaN(parsed.getTime())
     ? '—'
     : parsed.toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+function requestStatusLabel(value: string | null) {
+  const labels: Record<string, string> = {
+    new: 'Received',
+    qualifying: 'Under review',
+    qualified: 'Qualified',
+    matched: 'Supplier match available',
+    closed: 'Closed',
+    invalid: 'Unable to process',
+  };
+  return value ? labels[value] || value.replaceAll('_', ' ') : 'Not recorded';
+}
+
+function contactReleaseLabel(value: string | null) {
+  const labels: Record<string, string> = {
+    locked: 'Your contact details remain private',
+    customer_approved: 'Your approval is recorded; contact release is pending',
+    released: 'The approved supplier introduction has been released',
+  };
+  return value ? labels[value] || value.replaceAll('_', ' ') : 'Not recorded';
+}
+
+function requestActivityTitle(item: RequestActivity) {
+  if (item.event_type === 'request_submitted') return 'Request received by RNX';
+  if (item.event_type === 'status_changed') return 'Request status updated';
+  if (item.event_type === 'contact_release_changed') return 'Introduction permission updated';
+  return 'Request updated';
+}
+
+function requestActivityDetail(item: RequestActivity) {
+  if (item.event_type === 'status_changed') {
+    return `${requestStatusLabel(item.previous_status)} → ${requestStatusLabel(item.new_status)}`;
+  }
+  if (item.event_type === 'contact_release_changed') {
+    return `${contactReleaseLabel(item.previous_contact_release_status)} → ${contactReleaseLabel(item.new_contact_release_status)}`;
+  }
+  return item.new_status
+    ? `Your request was recorded with the status: ${requestStatusLabel(item.new_status)}.`
+    : 'Your request was recorded. Earlier status history is not available.';
 }
 
 function availabilityLabel(value: string) {
@@ -290,9 +341,31 @@ export function CustomerDashboard() {
           </div>
           <p className="customer-request-details">{item.details}</p>
           <div className="customer-request-meta">
-            <span>Contact release: {item.contact_release_status}</span>
+            <span>Contact release: {contactReleaseLabel(item.contact_release_status)}</span>
             <span>Last activity: {date(item.last_activity_at || item.created_at)}</span>
           </div>
+          <section className="customer-request-activity" aria-label="Request progress timeline">
+            <div className="customer-request-activity-heading">
+              <h4>Request progress</h4>
+              <span>{item.activity.length} recorded updates</span>
+            </div>
+            {item.activity.length ? (
+              <ol className="customer-request-activity-list">
+                {item.activity.map((event) => (
+                  <li className="customer-request-activity-item" key={event.id}>
+                    <span className="customer-request-activity-dot" aria-hidden="true" />
+                    <div>
+                      <strong>{requestActivityTitle(event)}</strong>
+                      <p>{requestActivityDetail(event)}</p>
+                      <time dateTime={event.created_at}>{date(event.created_at)}</time>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="customer-request-activity-empty">No progress events have been recorded yet. Refresh this page to check for updates.</p>
+            )}
+          </section>
           <div className="customer-thread">
             <h4>Conversation with RNX</h4>
             {item.messages.length ? item.messages.map((message) => (

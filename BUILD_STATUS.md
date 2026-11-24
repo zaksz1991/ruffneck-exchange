@@ -1,27 +1,21 @@
-# RuffNeck Exchange v2.8.0 — build and validation status
+# v2.9.0 build and validation status
 
-## Included functionality
-- Complete cumulative RNX source retained through v2.7.0.
-- Added a private in-app notification centre to the customer dashboard.
-- Active customers who saved a public listing receive an in-app notification when its published price/price type/currency or supplier-reported availability changes.
-- Notifications include listing and supplier context, a listing link, timestamp and read/unread state.
-- Customers can mark individual notifications or all notifications as read.
-- Existing v2.7.0 email alerts remain separately opt-in and continue to require an active customer, verified email and `alerts_enabled = true`.
+- Source base: complete cumulative RNX v2.8.0 project archive supplied in this conversation.
+- Version: 2.9.0.
+- New database migration: `021_rnx_customer_request_activity_timeline.sql`.
+- New regression test: `scripts/test-rnx-v290-customer-request-timeline.mjs`.
+- Feature: account-linked customer request progress timeline.
+- Migration 021 does not reference `rnx_listings.availability_status`, saved-listing tables or migrations 017–020.
+- Included recovery script: `supabase/repairs/repair_rnx_listing_availability_prerequisite.sql` for the previously reported missing availability-column prerequisite affecting migrations 019/020.
 
-## Security and database
-- New API: `GET/PATCH /api/customer/notifications`.
-- API access requires a valid active customer session. Read-state changes require a same-origin request and are scoped to the signed-in customer ID.
-- Notification records are private in `rnx_customer_notifications`; RLS is enabled and direct `public`, `anon` and `authenticated` access is revoked.
-- New migration: `020_rnx_customer_notification_centre.sql`.
-- Migration adds independent in-app change baselines to saved listings and updates the listing-change trigger while preserving v2.7.0's separate verified-email/opt-in email flow.
-- No new Vercel environment variable or external service is required.
+Validation performed:
+- All 18 cumulative static regression scripts: passed.
+- v2.9.0 request timeline regression checks: passed.
+- TypeScript syntax transpilation for both changed `.tsx`/`.ts` files: passed.
+- Dependency installation: timed out in this environment.
+- Full TypeScript semantic typecheck: not verified because required packages and type declarations (`next`, React, Node and Supabase packages) could not be installed. A `tsc --noEmit` attempt reported missing dependency/type declarations across the source project.
+- Next.js production build: not run because dependencies could not be installed.
+- Live Supabase migration and trigger behaviour: not verified in the user's project.
+- Live Vercel deployment: not verified.
 
-## Validation
-- Added `test-rnx-v280-customer-notification-centre.mjs`.
-- Retained all prior cumulative regression scripts and added v2.8.0 to `npm run check`.
-- Static regression and TypeScript syntax checks are run against the delivered source; full semantic typechecking and Next.js production build require dependencies and final Vercel confirmation.
-- Live Supabase migration/trigger execution and real customer notification behaviour have not been verified in production.
-
-## Deployment
-- Apply only migration 020 after confirming migrations 001–019 are already applied in RuffNeck Entertainment.
-- Deploy this complete project to `github.com/zaksz1991/ruffneck-exchange`, branch `main`, using the existing Vercel project and Root Directory `./`.
+Do not interpret static regression or syntax-transpilation checks as proof of a successful production build or live database deployment.

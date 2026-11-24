@@ -1,0 +1,15 @@
+RUFFNECK EXCHANGE v2.9.0 — COMPLETE REPLACEMENT APPLY INSTRUCTIONS
+
+1. Extract the complete ZIP.
+2. Open the `ruffneck exchange` folder.
+3. Replace the existing GitHub repository contents with the complete contents of this folder.
+4. Commit to the `main` branch.
+5. Allow the connected Vercel project to deploy. Keep Root Directory `./`.
+
+SUPABASE PROJECT: RuffNeck Entertainment.
+Confirm the existing RNX migrations 001–020 are applied, then apply only:
+supabase/migrations/021_rnx_customer_request_activity_timeline.sql
+
+Important: the earlier v2.8.0 notification centre still depends on the listing availability schema from migration 017. If Supabase previously reported that `rnx_listings.availability_status` was missing, first apply `supabase/repairs/repair_rnx_listing_availability_prerequisite.sql`, confirm all three availability columns exist, then re-run only the failed migrations 019 and 020 as instructed. See `docs/SUPABASE_MIGRATION_RECOVERY.md`. Do not rerun migrations already recorded as successfully applied. Migration 021 itself does not reference `availability_status`.
+
+No new Vercel environment variable is required. The existing Supabase server configuration is reused.

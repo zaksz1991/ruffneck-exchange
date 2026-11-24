@@ -1,5 +1,12 @@
-RUFFNECK EXCHANGE v2.8.0 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v2.9.0 — COMPLETE CUMULATIVE REPLACEMENT
 
-This archive contains the complete cumulative Next.js source project, including application routes, API handlers, React components, server libraries, public assets, deployment configuration, project documentation, regression scripts and Supabase migrations 001–020.
+Project: Next.js application for RuffNeck Exchange (RNX)
+Repository: https://github.com/zaksz1991/ruffneck-exchange
+Production: https://ruffneck-exchange.vercel.app/
+Supabase project: RuffNeck Entertainment
 
-v2.8.0 adds the customer notification centre for saved marketplace offer price and supplier-reported availability changes. It retains v2.7.0's separately opt-in email alerts and all earlier cumulative upgrades.
+Contents include the complete application source, pages, API routes, components, server libraries, public assets, configuration, documentation, regression tests, existing Supabase migrations 001–020, new migration 021, and the migration recovery script.
+
+New v2.9.0 feature: private customer request progress timeline for signed-in customer accounts. Tracks submission, request status changes and contact-release permission changes.
+
+No new Vercel environment variables are required. Apply migration 021 after confirming the prior migration history. See README-APPLY.txt, APPLY-v2.9.0.txt and docs/SUPABASE_MIGRATION_RECOVERY.md.
