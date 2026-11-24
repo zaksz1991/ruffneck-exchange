@@ -14,7 +14,7 @@ const trackingRoute = await read('app/api/track/[token]/route.ts');
 const trackingUi = await read('components/tracking-page.tsx');
 const pkg = JSON.parse(await read('package.json'));
 
-assert.equal(pkg.version, '2.1.0');
+assert.equal(pkg.version, '2.2.0');
 assert.match(pkg.scripts['test:rnx-v200'], /test-rnx-v200-listing-enquiry/);
 assert.match(pkg.scripts.check, /test:rnx-v200/);
 assert.match(migration, /referenced_listing_id uuid[\s\S]*references public\.rnx_listings\(id\) on delete set null/i);

@@ -7,7 +7,7 @@ const marketplace = await readFile(new URL('app/marketplace/page.tsx', root), 'u
 const requestPage = await readFile(new URL('app/request/page.tsx', root), 'utf8');
 const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 
-assert.equal(pkg.version, '2.1.0');
+assert.equal(pkg.version, '2.2.0');
 assert.match(pkg.scripts['test:rnx-v190'], /test-rnx-v190-marketplace-search\.mjs/);
 assert.match(pkg.scripts.check, /test:rnx-v180/);
 assert.match(pkg.scripts.check, /test:rnx-v190/);

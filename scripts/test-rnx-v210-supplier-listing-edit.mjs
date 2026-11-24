@@ -9,7 +9,7 @@ const dashboardRoute = await read('app/api/supplier/dashboard/route.ts');
 const dashboardUi = await read('components/supplier-dashboard.tsx');
 const css = await read('app/globals.css');
 
-assert.equal(pkg.version, '2.1.0');
+assert.equal(pkg.version, '2.2.0');
 assert.match(pkg.scripts['test:rnx-v210'], /test-rnx-v210-supplier-listing-edit/);
 assert.match(pkg.scripts.check, /test:rnx-v210/);
 assert.match(listingRoute, /getAuthenticatedSupplier\(\)/);
@@ -24,7 +24,7 @@ assert.match(listingRoute, /\.select\('id,title,status,updated_at'\)/);
 assert.match(listingRoute, /supplier_listing_edited/);
 assert.match(listingRoute, /supplier_listing_paused/);
 assert.match(listingRoute, /rnx_admin_audit_log/);
-assert.match(dashboardRoute, /description,state,city,price_type,price,currency,keywords,status,created_at,updated_at/);
+assert.match(dashboardRoute, /description,state,city,price_type,price,currency,keywords,status,image_path,created_at,updated_at/);
 assert.match(dashboardUi, /setEditingListing/);
 assert.match(dashboardUi, /submitListing\(event, editingListing\.id\)/);
 assert.match(dashboardUi, /action: 'update'/);

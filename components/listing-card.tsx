@@ -11,6 +11,7 @@ export function ListingCard({ listing }: { listing: PublicListing }) {
   return (
     <article className="listing-card">
       <Link className="listing-main-link" href={`/marketplace/listing/${listing.slug}`}>
+        {listing.image_url ? <img className="listing-card-image" src={listing.image_url} alt={listing.title} loading="lazy" decoding="async" /> : <div className="listing-card-image listing-image-placeholder" aria-hidden="true"><span>{listing.category}</span><strong>RUFFNECK EXCHANGE</strong></div>}
         <span className="listing-type">{listing.listing_type}</span>
         <h3>{listing.title}</h3>
         <p>{listing.description.length > 145 ? `${listing.description.slice(0, 145).trim()}…` : listing.description}</p>

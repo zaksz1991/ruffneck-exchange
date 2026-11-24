@@ -15,7 +15,7 @@ Set in Vercel Project Settings → Environment Variables:
 Do not paste secret values into source files, GitHub, browser code or variables prefixed with `NEXT_PUBLIC_`.
 
 ## Supabase caution
-RNX uses only `rnx_*` tables. Confirm the target project and migration history before applying anything. The current cumulative release contains migrations 001–014: core, catalogue, operations, introductions, supplier memberships/portal, customer accounts/tracking/messaging, notification delivery, consent-first attribution, staff access control, trust cases, supplier verification/private evidence storage, account recovery, email verification and listing-specific enquiry context. Apply only missing migrations in numerical order; never rerun a migration that has already succeeded. These migrations are additive to RNX objects and do not modify RuffNeck Entertainment LMS, Social Hub, billing, product, profile or Prospector tables.
+RNX uses only `rnx_*` tables. Confirm the target project and migration history before applying anything. The current cumulative release contains migrations 001–015: core, catalogue, operations, introductions, supplier memberships/portal, customer accounts/tracking/messaging, notification delivery, consent-first attribution, staff access control, trust cases, supplier verification/private evidence storage, account recovery, email verification, listing-specific enquiry context and private listing cover images. Apply only missing migrations in numerical order; never rerun a migration that has already succeeded. These migrations are additive to RNX objects and do not modify RuffNeck Entertainment LMS, Social Hub, billing, product, profile or Prospector tables.
 
 ## Deployment check
 1. Confirm a new deployment was created from the latest `main` commit.
@@ -79,9 +79,21 @@ Post-deployment checks:
 6. Confirm supplier-facing screens still do not expose customer contact details before the existing permission and payment gates complete.
 
 
+## v2.2.0 supplier listing cover images
+
+Confirm migrations 001–014 are already applied, then apply only `supabase/migrations/015_rnx_listing_images.sql`. The migration adds nullable `rnx_listings.image_path` and a restrictive Storage policy preventing browser roles from reading or writing the private `rnx-listing-images` bucket. The bucket is provisioned by the server on first supplier upload. No environment variable is added.
+
+Post-deployment checks:
+1. Sign in with a non-production supplier account and create a pending listing with a JPEG, PNG or WebP image under 4 MB.
+2. Confirm the supplier portal displays the image thumbnail and a replacement image can be uploaded after editing an eligible listing.
+3. Confirm an approved listing must be paused before its image changes.
+4. Approve the test listing through RNX operations and confirm the marketplace card and detail page show the photo.
+5. Confirm a pending or rejected listing is not visible on public marketplace pages and that anonymous browser access to the private Storage bucket is denied.
+6. Confirm an oversized file, SVG, or file with a renamed extension is rejected.
+
 ## v2.1.0 supplier catalogue editing
 
 - Suppliers can edit their pending, rejected and paused offers in the supplier portal.
 - Approved offers must be paused before editing; saved changes return to `pending` moderation.
-- No Supabase migration or new environment variable is needed. Keep migrations 001–014 applied.
+- No additional Supabase migration is needed for v2.1.0 itself. The cumulative v2.2.0 release requires migration 015; keep migrations 001–015 applied after applying it.
 - Run the repository `check` script and confirm a successful Vercel production build after deployment.

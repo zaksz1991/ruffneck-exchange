@@ -1,0 +1,14 @@
+RUFFNECK EXCHANGE v2.2.0 — COMPLETE CUMULATIVE REPLACEMENT
+
+1. Download and extract the complete ZIP.
+2. Replace the repository contents with the contents of the `ruffneck exchange` folder.
+3. Commit and push the replacement to the `main` branch of github.com/zaksz1991/ruffneck-exchange.
+4. Allow the existing Vercel project to deploy from `main`.
+5. In the shared RuffNeck Entertainment Supabase project used by RNX, confirm migrations 001–014 are already applied, then apply only `supabase/migrations/015_rnx_listing_images.sql`.
+6. Do not rerun any migration that has already succeeded. Migration 015 is additive and affects only RNX listing image metadata and the RNX listing-image Storage bucket access boundary.
+7. No new Vercel environment variable is required. The existing server-side Supabase URL and secret remain in use.
+8. After deployment, sign in as a test supplier, upload a JPEG/PNG/WebP image under 4 MB, confirm it appears in the supplier portal, submit the listing for review, approve it through RNX operations and verify the image appears on the public marketplace card and listing detail page.
+
+This is a complete cumulative source archive, not an incremental overlay. It retains prior RNX pages, APIs, migrations, tests, documentation, release features and brand assets.
+
+Validation boundary: static source-contract tests do not prove live Supabase Storage or Vercel behaviour. Confirm the Vercel production build and the photo upload/approval flow after deployment.

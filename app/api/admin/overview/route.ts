@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminSession, hasPermission } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase-server';
+import { signedListingImageUrl } from '@/lib/listing-image-storage';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -14,18 +15,22 @@ export async function GET() {
     const [suppliersResult, approvedResult, listingsResult, leadsResult, offersResult] = await Promise.all([
       db.from('rnx_supplier_applications').select('id,business_name,contact_name,email,phone,business_type,category,state,status,created_at').eq('status', 'pending').order('created_at', { ascending: true }).limit(50),
       db.from('rnx_supplier_applications').select('id,business_name,category,state,status').eq('status', 'approved').order('business_name', { ascending: true }).limit(300),
-      db.from('rnx_listings').select('id,title,listing_type,category,state,status,created_at,supplier:rnx_supplier_applications!inner(business_name,status)').eq('status', 'pending').order('created_at', { ascending: true }).limit(50),
+      db.from('rnx_listings').select('id,title,listing_type,category,state,status,created_at,image_path,supplier:rnx_supplier_applications!inner(business_name,status)').eq('status', 'pending').order('created_at', { ascending: true }).limit(50),
       db.from('rnx_leads').select('id,request_type,name,email,phone,state,city,category,details,referenced_listing_id,referenced_listing_slug,referenced_listing_title,referenced_supplier_name,preferred_contact,status,contact_release_status,created_at').not('status', 'in', '(closed,invalid)').order('created_at', { ascending: false }).limit(50),
       db.from('rnx_lead_offers').select('id,lead_id,supplier_application_id,anonymised_summary,quoted_fee,currency,payment_status,payment_reference,payment_amount,supplier_accepted_at,supplier_declined_at,payment_verified_at,customer_approved_at,customer_declined_at,contact_released_at,customer_approval_token_expires_at,created_at,supplier:rnx_supplier_applications!inner(business_name),lead:rnx_leads!inner(name,phone,email,category,state,city)').order('created_at', { ascending: false }).limit(100),
     ]);
     const error = suppliersResult.error || approvedResult.error || listingsResult.error || leadsResult.error || offersResult.error;
     if (error) {
       console.error('[RNX admin] Overview query failed:', { code: error.code, message: error.message });
-      return NextResponse.json({ error: 'Operations data could not be loaded. Confirm migrations 001–004 and Supabase server credentials.' }, { status: 503 });
+      return NextResponse.json({ error: 'Operations data could not be loaded. Confirm the cumulative RNX migrations 001–015 and Supabase server credentials.' }, { status: 503 });
     }
+    const listings = await Promise.all((listingsResult.data ?? []).map(async (row: any) => ({
+      ...row,
+      image_url: await signedListingImageUrl(db, row.image_path),
+    })));
     return NextResponse.json({
       suppliers: suppliersResult.data ?? [], approvedSuppliers: approvedResult.data ?? [],
-      listings: listingsResult.data ?? [], leads: leadsResult.data ?? [], offers: offersResult.data ?? [],
+      listings, leads: leadsResult.data ?? [], offers: offersResult.data ?? [],
       counts: {
         suppliers: suppliersResult.data?.length ?? 0,
         listings: listingsResult.data?.length ?? 0,

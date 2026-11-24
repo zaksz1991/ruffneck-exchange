@@ -1,5 +1,6 @@
 import 'server-only';
 import { supabaseAdmin } from '@/lib/supabase-server';
+import { signedListingImageUrl } from '@/lib/listing-image-storage';
 
 export type PublicSupplier = {
   id: string;
@@ -29,6 +30,7 @@ export type PublicListing = {
   condition: string | null;
   keywords: string[] | null;
   created_at: string;
+  image_url: string | null;
   supplier: PublicSupplier;
 };
 
@@ -41,6 +43,7 @@ export type ListingFilters = {
   priceType?: PublicListing['price_type'];
   sort?: ListingSort;
   limit?: number;
+  includeImages?: boolean;
 };
 
 function cleanSearch(value: string): string {
@@ -58,7 +61,7 @@ export async function getApprovedListings(filters: ListingFilters = {}): Promise
     const db = supabaseAdmin();
     let query = db
       .from('rnx_listings')
-      .select('id,slug,title,listing_type,category,description,state,city,price_type,price,currency,condition,keywords,created_at,supplier:rnx_supplier_applications!inner(id,public_slug,business_name,business_type,category,state,website,description,status)')
+      .select('id,slug,title,listing_type,category,description,state,city,price_type,price,currency,condition,keywords,created_at,image_path,supplier:rnx_supplier_applications!inner(id,public_slug,business_name,business_type,category,state,website,description,status)')
       .eq('status', 'approved')
       .eq('supplier.status', 'approved')
       .not('supplier.public_slug', 'is', null);
@@ -84,7 +87,7 @@ export async function getApprovedListings(filters: ListingFilters = {}): Promise
     const q = cleanSearch(filters.q ?? '');
     const category = cleanSearch(filters.category ?? '');
 
-    return rows.filter((listing) => {
+    const filtered = rows.filter((listing) => {
       if (category && !cleanSearch(listing.category).includes(category) && !category.includes(cleanSearch(listing.category))) return false;
       if (q) {
         const searchable = [listing.title, listing.category, listing.description, listing.state, listing.city ?? '', ...(listing.keywords ?? []), listing.supplier.business_name].join(' ');
@@ -92,18 +95,22 @@ export async function getApprovedListings(filters: ListingFilters = {}): Promise
       }
       return true;
     });
+    return await Promise.all(filtered.map(async (listing: any) => ({
+      ...listing,
+      image_url: filters.includeImages === false ? null : await signedListingImageUrl(db, listing.image_path),
+    }))) as PublicListing[];
   } catch (error) {
     console.error('[RNX] Catalogue unavailable:', error instanceof Error ? error.message : 'Unknown error');
     return [];
   }
 }
 
-export async function getApprovedListingBySlug(slug: string): Promise<PublicListing | null> {
+export async function getApprovedListingBySlug(slug: string, options: { includeImage?: boolean } = {}): Promise<PublicListing | null> {
   try {
     const db = supabaseAdmin();
     const { data, error } = await db
       .from('rnx_listings')
-      .select('id,slug,title,listing_type,category,description,state,city,price_type,price,currency,condition,keywords,created_at,supplier:rnx_supplier_applications!inner(id,public_slug,business_name,business_type,category,state,website,description,status)')
+      .select('id,slug,title,listing_type,category,description,state,city,price_type,price,currency,condition,keywords,created_at,image_path,supplier:rnx_supplier_applications!inner(id,public_slug,business_name,business_type,category,state,website,description,status)')
       .eq('slug', slug)
       .eq('status', 'approved')
       .eq('supplier.status', 'approved')
@@ -113,7 +120,9 @@ export async function getApprovedListingBySlug(slug: string): Promise<PublicList
       console.error('[RNX] Listing detail query failed:', { code: error.code, message: error.message });
       return null;
     }
-    return data as unknown as PublicListing | null;
+    if (!data) return null;
+    const row = data as any;
+    return { ...row, image_url: options.includeImage === false ? null : await signedListingImageUrl(db, row.image_path) } as PublicListing;
   } catch (error) {
     console.error('[RNX] Listing detail unavailable:', error instanceof Error ? error.message : 'Unknown error');
     return null;
@@ -171,7 +180,7 @@ export async function getApprovedListingsForSupplier(supplierId: string): Promis
     const db = supabaseAdmin();
     const { data, error } = await db
       .from('rnx_listings')
-      .select('id,slug,title,listing_type,category,description,state,city,price_type,price,currency,condition,keywords,created_at,supplier:rnx_supplier_applications!inner(id,public_slug,business_name,business_type,category,state,website,description,status)')
+      .select('id,slug,title,listing_type,category,description,state,city,price_type,price,currency,condition,keywords,created_at,image_path,supplier:rnx_supplier_applications!inner(id,public_slug,business_name,business_type,category,state,website,description,status)')
       .eq('supplier_application_id', supplierId)
       .eq('status', 'approved')
       .eq('supplier.status', 'approved')
@@ -181,7 +190,10 @@ export async function getApprovedListingsForSupplier(supplierId: string): Promis
       console.error('[RNX] Supplier listings query failed:', { code: error.code, message: error.message });
       return [];
     }
-    return (data ?? []) as unknown as PublicListing[];
+    return await Promise.all((data ?? []).map(async (row: any) => ({
+      ...row,
+      image_url: await signedListingImageUrl(db, row.image_path),
+    }))) as PublicListing[];
   } catch (error) {
     console.error('[RNX] Supplier listings unavailable:', error instanceof Error ? error.message : 'Unknown error');
     return [];

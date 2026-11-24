@@ -12,7 +12,7 @@ function priceLabel(listing: NonNullable<Awaited<ReturnType<typeof getApprovedLi
 }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const listing = await getApprovedListingBySlug(slug);
+  const listing = await getApprovedListingBySlug(slug, { includeImage: false });
   if (!listing) return { title: 'Offer not found', robots: { index: false, follow: true } };
   return { title: listing.title, description: `${listing.title} from ${listing.supplier.business_name}. ${listing.category} in ${listing.state}.`, alternates: { canonical: `/marketplace/listing/${slug}` } };
 }
@@ -23,6 +23,7 @@ export default async function ListingDetailPage({ params }: Props) {
   return <main className="page-shell container narrow-shell">
     <div className="breadcrumbs"><Link href="/marketplace">Marketplace</Link><span>/</span><span>{listing.category}</span></div>
     <article className="listing-detail-card">
+      {listing.image_url ? <img className="listing-detail-image" src={listing.image_url} alt={listing.title} decoding="async" /> : <div className="listing-detail-image listing-image-placeholder" aria-hidden="true"><span>{listing.category}</span><strong>RUFFNECK EXCHANGE</strong></div>}
       <span className="listing-type">{listing.listing_type}</span>
       <h1>{listing.title}</h1>
       <div className="listing-meta"><span>{listing.category}</span><span>{[listing.city, listing.state].filter(Boolean).join(', ')}</span></div>

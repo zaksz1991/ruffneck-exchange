@@ -1,18 +1,19 @@
-# RuffNeck Exchange v2.1.0 — build and validation status
+# RuffNeck Exchange v2.2.0 — build and validation status
 
 ## Implemented
-- Supplier portal now loads the full editable catalogue fields for the authenticated supplier.
-- Suppliers can edit pending, rejected and paused listings without creating duplicate catalogue records.
-- Approved listings must be paused before editing; edits return the listing to `pending` for RNX moderation.
-- Rejected listings can be corrected and resubmitted; paused listings can also be resubmitted unchanged.
-- Server-side updates validate all fields, scope the record to the authenticated supplier, preserve the slug, guard against concurrent status changes and write supplier-action audit records.
-- No database migration or environment-variable change is required.
+- Supplier catalogue supports one cover image per listing.
+- Uploads accept JPEG, PNG and WebP, maximum 4 MB, with server-side file-signature validation.
+- Image changes require supplier authentication, same-origin requests, ownership checks and pending/rejected/paused listing status. Approved listings must first be paused.
+- Images are stored in a private Supabase Storage bucket; public marketplace pages receive short-lived signed URLs only for offers that pass the existing supplier/listing approval query.
+- Supplier portal previews images and displays listing thumbnails. RNX staff can preview submitted images in the pending catalogue review queue. Public listing cards and details display the approved cover image or a branded fallback.
+- Replaced image objects are removed after the database update succeeds; upload events enter the existing RNX audit log.
 
 ## Validation
-- Static regression tests cover supplier ownership, same-origin protection, status gating, field validation, price consistency, stale update protection and the supplier edit UI.
-- Full TypeScript semantic check and Next.js production build have not been run in this packaging environment because dependencies are not installed. They must be completed by the deployment environment.
-- Live Supabase and Vercel behaviour is not established by static tests.
+- Static regression test `test:rnx-v220` checks migration, private storage, type/size constraints, file-signature checks, ownership, moderation guards, signed URLs and UI integration.
+- Earlier regression tests remain part of the cumulative `check` script.
+- Full TypeScript semantic checking and Next.js production build have not been completed in this packaging environment. Live Supabase Storage and Vercel behaviour are not established by static tests.
 
 ## Deployment
-- Replace the complete repository with this cumulative v2.1.0 source archive.
-- No Supabase SQL migration is required for v2.1.0. Keep previously applied migrations 001–014; do not rerun them.
+- Replace the complete repository with this cumulative v2.2.0 source archive.
+- Confirm migrations 001–014 are already applied, then apply only migration 015.
+- No new environment variable is required. The private `rnx-listing-images` bucket is created and configured by the server-side upload helper on first use.

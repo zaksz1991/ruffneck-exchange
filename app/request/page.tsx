@@ -17,7 +17,7 @@ export default async function RequestPage({ searchParams }: { searchParams: Prom
   const params = await searchParams;
   const rawListingSlug = first(params.listing).trim().slice(0, 180);
   const safeListingSlug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(rawListingSlug) ? rawListingSlug : '';
-  const referencedListing = safeListingSlug ? await getApprovedListingBySlug(safeListingSlug) : null;
+  const referencedListing = safeListingSlug ? await getApprovedListingBySlug(safeListingSlug, { includeImage: false }) : null;
   const initialCategory = (first(params.category) || first(params.requirement) || referencedListing?.category || '').trim().slice(0, 100);
   const requestedState = first(params.state).trim();
   // URL state values and listing records are both checked against the supported state list.

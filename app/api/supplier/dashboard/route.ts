@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAuthenticatedSupplier } from '@/lib/supplier-session';
 import { supabaseAdmin } from '@/lib/supabase-server';
+import { signedListingImageUrl } from '@/lib/listing-image-storage';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -11,7 +12,7 @@ export async function GET() {
   try {
     const db = supabaseAdmin();
     const [listingsResult, membershipsResult, offersResult, plansResult] = await Promise.all([
-      db.from('rnx_listings').select('id,title,slug,listing_type,category,description,state,city,price_type,price,currency,keywords,status,created_at,updated_at')
+      db.from('rnx_listings').select('id,title,slug,listing_type,category,description,state,city,price_type,price,currency,keywords,status,image_path,created_at,updated_at')
         .eq('supplier_application_id', supplier.id).order('created_at', { ascending: false }).limit(250),
       db.from('rnx_membership_subscriptions').select('id,status,quoted_amount,currency,billing_interval,quote_expires_at,period_start,period_end,created_at,plan:rnx_membership_plans!inner(code,name,description,listing_limit,display_price,features),payments:rnx_membership_payments(id,amount,currency,payment_method,transaction_reference,status,supplier_note,verified_at,created_at)')
         .eq('supplier_application_id', supplier.id).order('created_at', { ascending: false }).limit(20),
@@ -22,8 +23,12 @@ export async function GET() {
     const error = listingsResult.error || membershipsResult.error || offersResult.error || plansResult.error;
     if (error) {
       console.error('[RNX supplier dashboard]', { code: error.code, message: error.message });
-      return NextResponse.json({ error: 'Supplier information could not be loaded. Confirm migration 005 is applied.' }, { status: 503 });
+      return NextResponse.json({ error: 'Supplier information could not be loaded. Confirm the cumulative RNX migrations are applied.' }, { status: 503 });
     }
+    const listings = await Promise.all((listingsResult.data ?? []).map(async (row: any) => ({
+      ...row,
+      image_url: await signedListingImageUrl(db, row.image_path),
+    })));
     const offers = (offersResult.data ?? []).map((row: any) => {
       const lead = Array.isArray(row.lead) ? row.lead[0] : row.lead;
       const released = Boolean(row.contact_released_at && row.payment_status === 'paid' && row.payment_verified_at && row.customer_approved_at);
@@ -56,7 +61,7 @@ export async function GET() {
     });
     return NextResponse.json({
       supplier,
-      listings: listingsResult.data ?? [],
+      listings,
       memberships: membershipsResult.data ?? [],
       offers,
       plans: plansResult.data ?? [],

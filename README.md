@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v2.1.0
+# RuffNeck Exchange (RNX) — v2.2.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,15 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v2.2.0 — supplier listing cover images
+
+- Suppliers can add or replace one cover image when submitting or editing a listing.
+- Accepts JPEG, PNG and WebP files up to 4 MB; the server checks the actual file signature rather than trusting browser MIME metadata.
+- Supplier image updates require ownership and an editable listing state. Approved listings must be paused before their image can change, and all listing edits still return to RNX moderation.
+- Images are stored in a private Supabase Storage bucket. Public listing cards and details receive short-lived signed image URLs only after both the listing and supplier pass the existing approval checks; RNX reviewers can preview images in the moderation queue.
+- Listings without an image retain a branded fallback. No new environment variable or external image provider is required.
+- Adds RNX migration 015 for the listing image path and restrictive Storage access policy. The private bucket is provisioned by the server on first upload.
 
 ## v2.1.0 — Supplier catalogue editing and re-review
 
@@ -54,7 +63,7 @@ Customers can submit requests without paying RNX. Supplier memberships, promoted
 
 ## Platform features
 
-- Multi-industry department and state discovery, approved supplier profiles and separately moderated product/service listings.
+- Multi-industry department and state discovery, approved supplier profiles and separately moderated product/service listings with supplier-submitted cover images.
 - Marketplace search by keyword and state, now extended with offer-type, pricing-type and sort controls.
 - Customer sourcing requests linked to the specific published offers customers enquire about, private guest tracking links, optional customer accounts and customer-to-operations messages.
 - Staff operations console with role-based access, supplier/listing moderation, lead qualification and audit records.
@@ -117,11 +126,11 @@ Do not paste, commit or expose actual secret values.
 
 ## Supabase migrations
 
-The cumulative project includes RNX migrations 001–014. Migration 014 was introduced in v2.0.0; v2.1.0 adds no database migration. Confirm that all required migrations are already applied and never rerun a migration recorded as completed. For an older deployment, apply only missing RNX migrations in numerical order. Do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects.
+The cumulative project includes RNX migrations 001–015. Migration 015 adds listing cover-image metadata and a restrictive private Storage access policy. Confirm that migrations 001–014 are already applied, then apply only migration 015. Never rerun a migration recorded as completed. For an older deployment, apply only missing RNX migrations in numerical order. Do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects.
 
 ## Verification boundary
 
-The account recovery, email verification, supplier form/listing controls, v1.8 operations, v1.9 marketplace search, v2.0 listing enquiry and v2.1 supplier catalogue edit source-contract tests all passed in this packaging run. TypeScript syntax transpilation passed for the three changed TS/TSX files. Full semantic TypeScript checking and the Next.js production build remain unverified because project dependencies are not installed in this environment (`next` is unavailable and React/Next/Supabase type declarations are missing). Static checks do not prove live Supabase or Vercel behaviour; confirm the production build after deployment.
+The account recovery, email verification, supplier form/listing controls, v1.8 operations, v1.9 marketplace search, v2.0 listing enquiry, v2.1 supplier catalogue edit and v2.2 listing-image source-contract tests passed in this packaging run. TypeScript syntax transpilation passed for the eight changed TypeScript/TSX files. Full semantic TypeScript checking and the Next.js production build remain unverified because project dependencies are not installed in this environment. Static checks do not prove live Supabase Storage or Vercel behaviour; confirm the production build and image upload flow after deployment.
 
 ## Commercial deployment
 
