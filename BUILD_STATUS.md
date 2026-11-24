@@ -1,24 +1,24 @@
-# RuffNeck Exchange v2.4.0 — build and validation status
+# RuffNeck Exchange v2.6.0 — build and validation status
 
 ## Included functionality
-- Complete cumulative RNX application retained through v2.3.0.
-- Suppliers can update availability on approved listings without pausing the listing or resubmitting catalogue content for moderation.
-- Supported values: available, limited availability, confirm on request, and currently unavailable. Existing listings default to unconfirmed.
-- Suppliers can add an optional 240-character availability note.
-- Public listing cards, detail pages and marketplace filters expose the supplier-reported availability.
+- Complete cumulative RNX project retained through v2.5.0.
+- Customer dashboard supports side-by-side comparison of two or three saved marketplace offers.
+- Comparison includes supplier, category, listing type, location, published price, supplier-reported availability and saved date.
+- Customer can return to each listing or supplier profile from the comparison.
+- Selection is capped at three, cleared when an offer is unsaved and reconciled when saved-offer data refreshes.
+- Mobile layout uses a horizontally scrollable comparison table.
 
 ## Security and database
-- Migration 017 adds the status, note and last-update timestamp to `rnx_listings`.
-- Updates require same-origin requests, authenticated supplier sessions, supplier ownership and approved listing status.
-- API validation and database constraints restrict allowed values and note length.
-- Audit events are best-effort and do not turn successful changes into failures.
-- Public copy explicitly states that availability is supplier-reported, not independently verified by RNX.
-- No new Vercel environment variables, Storage buckets or external providers.
+- Comparison uses the existing authenticated customer dashboard data returned by `/api/customer/saved-listings`.
+- No customer or supplier data is added to browser storage or a new database table.
+- No Supabase migration or Vercel environment variable is required for v2.6.0. Migration 018 from v2.5.0 remains required for the cumulative saved-offer feature.
+- Comparison makes no price-conversion or independent verification claims.
 
 ## Validation
-- Added `test-rnx-v240-listing-availability.mjs` for migration controls, API authentication/ownership scoping, supplier portal controls, public rendering and search filtering.
-- Full TypeScript typechecking, Next.js production build, live Supabase migration execution and live availability update have not been executed in this environment. Confirm compilation through Vercel after deployment.
+- Added `test-rnx-v260-customer-offer-comparison.mjs` for selection limits, comparison contents, currency and availability disclaimers, responsive styling and version integration.
+- Existing v2.0.0–v2.5.0 regression scripts are retained.
+- Full TypeScript semantic checking and Next.js production build were not executed in this environment because the project's npm dependencies are not installed locally. Confirm both with Vercel after deployment.
 
 ## Deployment
-- Apply migration 017 only after confirming RNX migrations 001–016 are already present in the RuffNeck Entertainment Supabase project.
-- No new environment variables. Retain current server-side Supabase credentials.
+- No new SQL is required. Confirm migration 018 is already applied in the existing RuffNeck Entertainment Supabase project.
+- Keep the existing production Vercel environment variables and Root Directory `./`.

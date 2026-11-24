@@ -1,0 +1,18 @@
+RUFFNECK EXCHANGE v2.6.0 — CUSTOMER SAVED-OFFER COMPARISON
+
+This is a complete cumulative replacement project ZIP. It includes the source project and all upgrades through v2.6.0.
+
+DEPLOYMENT
+1. Extract the ZIP.
+2. Open the `ruffneck exchange` folder.
+3. Replace the contents of the existing GitHub repository with the complete folder contents.
+4. Commit to the `main` branch and allow Vercel to deploy.
+
+SUPABASE
+Project: RuffNeck Entertainment. No new SQL migration is required for v2.6.0. This version uses the existing saved-offer feature and requires migration 018 from v2.5.0 to have already been applied. Do not rerun migrations 001–018.
+
+VERCEL
+No new environment variables, project changes, Storage buckets or external services are required. Retain the existing production environment variables and Root Directory `./`.
+
+POST-DEPLOYMENT CHECK
+Use a non-production customer account with at least two saved offers. Select two or three offers, open the comparison, inspect supplier/category/type/location/price/availability, test listing and supplier links, and verify that unsaving an offer removes it from the comparison.

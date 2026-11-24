@@ -1,13 +1,11 @@
-RUFFNECK EXCHANGE — v0.1.2 REPAIR PATCH
+RUFFNECK EXCHANGE v2.6.0 — COMPLETE CUMULATIVE REPLACEMENT
 
-This patch updates the existing project. It does not replace the repository.
+1. Extract the complete ZIP.
+2. Open the `ruffneck exchange` folder.
+3. Replace the existing repository contents with the complete contents of this folder.
+4. Commit to the `main` branch.
+5. Allow the connected Vercel project to deploy. Keep the existing Root Directory `./`.
 
-1. Extract the ZIP on your computer.
-2. Open the existing GitHub repository: https://github.com/zaksz1991/ruffneck-exchange
-3. Choose Add file > Upload files.
-4. Upload the included files while preserving their folder paths. 5. Commit the changes to the main branch.
-6. Vercel should then receive a new commit deployment through the already-connected repository.
+Supabase project: RuffNeck Entertainment. No new migration is required for v2.6.0. Confirm migration 018 from v2.5.0 is already applied. Do not rerun migrations 001–018.
 
-Do not upload the patch's top-level rnx-repair folder as a nested folder. Upload the contents of that folder so that package.json remains at the repository root and app/, lib/ remain at their existing paths.
-
-Do not change the Vercel Root Directory. It remains ./.
+No new Vercel environment variables are required.

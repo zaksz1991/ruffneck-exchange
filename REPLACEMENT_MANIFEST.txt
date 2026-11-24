@@ -1,5 +1,5 @@
-RUFFNECK EXCHANGE v2.4.0 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v2.6.0 — COMPLETE CUMULATIVE REPLACEMENT
 
-Archive includes the full Next.js source tree: app routes, API handlers, React components, server libraries, public brand and placeholder assets, project/deployment configuration, documentation, static regression scripts and Supabase migrations 001–017.
+Archive includes the complete Next.js source project: application routes, API handlers, React components, server libraries, public brand and placeholder assets, deployment configuration, project documentation, regression scripts and Supabase migrations 001–018.
 
-Version 2.4.0 adds supplier-reported availability management for approved listings. All v2.3.0 features and prior cumulative build corrections are retained.
+Version 2.6.0 adds side-by-side comparison of up to three saved marketplace offers in the signed-in customer dashboard. All v2.5.0 saved-offer functionality and previous cumulative fixes are retained.

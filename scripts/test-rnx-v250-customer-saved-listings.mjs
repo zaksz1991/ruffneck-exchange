@@ -30,7 +30,7 @@ assert.match(button, /method: saved \? 'DELETE' : 'POST'/);
 assert.match(detail, /SaveListingButton/);
 assert.match(detail, /currentCustomerId/);
 assert.match(dashboard, /Saved offers/);
-assert.match(dashboard, /removeSaved\(listingId:string\)/);
+assert.match(dashboard, /removeSaved\(listingId:\s*string\)/);
 assert.match(css, /customer-saved-grid/);
 
 console.log('RNX v2.5.0 customer saved listings regression checks passed.');

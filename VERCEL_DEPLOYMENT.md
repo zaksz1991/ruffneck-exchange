@@ -15,7 +15,7 @@ Set in Vercel Project Settings → Environment Variables:
 Do not paste secret values into source files, GitHub, browser code or variables prefixed with `NEXT_PUBLIC_`.
 
 ## Supabase caution
-RNX uses only `rnx_*` tables. Confirm the target project and migration history before applying anything. The current cumulative release contains migrations 001–015: core, catalogue, operations, introductions, supplier memberships/portal, customer accounts/tracking/messaging, notification delivery, consent-first attribution, staff access control, trust cases, supplier verification/private evidence storage, account recovery, email verification, listing-specific enquiry context and private listing cover images. Apply only missing migrations in numerical order; never rerun a migration that has already succeeded. These migrations are additive to RNX objects and do not modify RuffNeck Entertainment LMS, Social Hub, billing, product, profile or Prospector tables.
+RNX uses only `rnx_*` tables. Confirm the target project and migration history before applying anything. The current cumulative release contains migrations 001–018: core, catalogue, operations, introductions, supplier memberships/portal, customer accounts/tracking/messaging, notification delivery, consent-first attribution, staff access control, trust cases, supplier verification/private evidence storage, account recovery, email verification, listing-specific enquiry context, private listing cover images, private listing photo galleries, supplier-reported availability and private customer saved listings. Apply only missing migrations in numerical order; never rerun a migration that has already succeeded. These migrations are additive to RNX objects and do not modify RuffNeck Entertainment LMS, Social Hub, billing, product, profile or Prospector tables.
 
 ## Deployment check
 1. Confirm a new deployment was created from the latest `main` commit.
@@ -101,3 +101,10 @@ Post-deployment checks:
 - Approved offers must be paused before editing; saved changes return to `pending` moderation.
 - No additional Supabase migration is needed for v2.1.0 itself. The cumulative v2.2.0 release requires migration 015; keep migrations 001–015 applied after applying it.
 - Run the repository `check` script and confirm a successful Vercel production build after deployment.
+
+
+## v2.6.0 saved-offer comparison
+
+The customer dashboard now lets signed-in customers select up to three bookmarked offers and compare supplier, category, listing type, location, published price, supplier-reported availability and saved date. The UI reads the existing `/api/customer/saved-listings` response; comparison selection is client-side only. No Supabase migration or Vercel environment-variable change is required for v2.6.0. The cumulative deployment must already have migration 018 (`rnx_customer_saved_listings`) from v2.5.0.
+
+After deployment, sign in with a test customer account, save at least two currently approved offers, select them for comparison, confirm the comparison table and listing/supplier links, select a third offer, verify a fourth cannot be selected, and remove one saved offer to confirm it is also removed from comparison. Confirm that the disclaimer remains visible and that currencies are not silently converted.

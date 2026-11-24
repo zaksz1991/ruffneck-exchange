@@ -22,7 +22,7 @@ export async function GET() {
     const error = suppliersResult.error || approvedResult.error || listingsResult.error || leadsResult.error || offersResult.error;
     if (error) {
       console.error('[RNX admin] Overview query failed:', { code: error.code, message: error.message });
-      return NextResponse.json({ error: 'Operations data could not be loaded. Confirm the cumulative RNX migrations 001–015 and Supabase server credentials.' }, { status: 503 });
+      return NextResponse.json({ error: 'Operations data could not be loaded. Confirm the cumulative RNX migrations and Supabase server credentials.' }, { status: 503 });
     }
     const listingRows = listingsResult.data ?? [];
     const listingIds = listingRows.map((row: any) => row.id);
