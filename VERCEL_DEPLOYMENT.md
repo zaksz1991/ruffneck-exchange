@@ -133,3 +133,10 @@ Confirm the prior RNX migrations are applied, then apply only `supabase/migratio
 The customer requests API reads events only for the currently authenticated customer and the request IDs returned for that customer. The activity table has RLS enabled and direct browser-role access revoked. Existing account-linked requests receive a submission marker using their original request creation timestamp; old status transitions are not invented. Guest requests continue to use the existing private tracking-link workflow.
 
 After Vercel deploys, sign in with a test customer, open a request in the dashboard, and verify the request-received event. Then change that test request's status in RNX Operations and verify a new timeline event appears after refreshing the customer dashboard. Test a contact-release permission transition separately.
+
+
+## v3.4.0 supplier commercial quotation notifications
+
+Confirm migrations 001–024 are applied, then apply only `supabase/migrations/025_rnx_supplier_quote_notifications.sql` in the existing RuffNeck Entertainment project. The migration creates a private supplier notification table and a trigger that records notices when a quote becomes selected, not selected, declined or expired. The supplier dashboard reads the latest 40 notifications and unread count; read-state updates are authenticated and scoped to the current supplier.
+
+No new environment variables or external services are required. The supplier notification API does not return customer names, email addresses or phone numbers. Test using a test introduction and quotation: change the quotation status through the customer account, then verify the supplier sees the correct notice and can mark it read.

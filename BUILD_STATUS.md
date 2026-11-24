@@ -1,20 +1,19 @@
-# v3.3.0 build and validation status
+# v3.4.0 build and validation status
 
-- Source base: complete cumulative RuffNeck Exchange v3.2.0 project archive uploaded in this conversation.
-- Version: 3.3.0.
-- New Supabase migration: none. The feature reads the existing commercial quotation and event tables introduced by migration 024.
-- Added private Operations page: `/admin/quotes`.
-- Added authenticated API: `/api/admin/quotes`; requires an active admin session and `operations:read`.
-- The API returns a bounded latest-250 quote set, supplier business name, request category/location and quote event history. It does not select customer name, email or phone fields.
-- Added status filters, text search, CSV export, summary counts and a read-only commercial disclaimer.
-- Updated the admin home navigation and package version/check script.
+- Source base: complete cumulative RuffNeck Exchange v3.3.0 project archive uploaded in this conversation.
+- Version: 3.4.0.
+- New Supabase migration: `025_rnx_supplier_quote_notifications.sql`; requires migrations 001–024.
+- Added private supplier notification centre for quote statuses `selected`, `not_selected`, `declined` and `expired`.
+- Added authenticated supplier read-state API at `/api/supplier/notifications`; updates are same-origin and supplier-scoped.
+- Extended supplier dashboard API with the latest 40 notifications and unread count. Missing migration 025 is handled as a temporary unavailable feature so the existing dashboard remains usable before the migration is applied.
+- No new environment variables or external providers.
 
 Validation performed in this environment:
-- All 22 cumulative static regression scripts: passed.
-- TypeScript/TSX syntax transpilation for changed source files: passed.
+- All 23 cumulative static regression scripts: passed.
+- TypeScript/TSX syntax transpilation: 162 of 162 files passed.
 - ZIP integrity: checked after packaging.
-- Full TypeScript semantic typecheck: not completed; project dependencies are not installed in this environment.
-- Next.js production build: not completed; project dependencies are not installed in this environment.
-- Live admin endpoint and production data checks: not run in this environment.
+- Full TypeScript semantic typecheck: not verified; project dependencies and framework type declarations are not installed in this workspace. A global `tsc` attempt reported missing dependencies/types, so it cannot establish project-level type correctness.
+- Next.js production build: not run; dependencies are not installed in this workspace.
+- Live Supabase trigger and supplier portal test: not run in this environment. Migration 025 must be applied before testing.
 
-Static checks and syntax transpilation do not prove a full production build or live endpoint functionality. Migration 024 must already exist in the existing RuffNeck Entertainment Supabase project. Vercel must confirm semantic typechecking and the production build after deployment.
+Vercel must confirm the full TypeScript check and production build after deployment. The migration and supplier portal workflow must be tested in the existing RuffNeck Entertainment project.

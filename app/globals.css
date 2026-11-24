@@ -291,3 +291,20 @@
 .admin-commercial-note{margin:0;padding:13px;border:1px solid #d9e4d2;border-radius:9px;background:#f3f8f0;color:#50634d;font-size:10px;line-height:1.65}
 @media(max-width:900px){.admin-commercial-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:620px){.admin-commercial-toolbar{grid-template-columns:1fr}.admin-commercial-card-top{flex-direction:column}.admin-commercial-status{max-width:100%}.admin-commercial-grid{grid-template-columns:1fr}.admin-commercial-actions{width:100%}.admin-commercial-actions .button{flex:1}}
+
+
+/* v3.4.0 supplier commercial quotation notifications */
+.supplier-notifications-panel{display:grid;gap:13px}
+.supplier-notification-heading-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.supplier-notification-heading-actions>span{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;background:#edf4e9;color:#385d35;font-size:11px;font-weight:900;white-space:nowrap}
+.supplier-notification-list{display:grid;gap:9px}
+.supplier-notification-card{display:grid;gap:8px;padding:13px 14px;border:1px solid var(--line);border-radius:11px;background:#fff}
+.supplier-notification-card.is-unread{border-color:#9bb993;background:#f7fbf4;box-shadow:inset 3px 0 0 #5c8953}
+.supplier-notification-topline{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.supplier-notification-topline strong{font-size:13px;line-height:1.45}
+.supplier-notification-topline time,.supplier-notification-actions small{color:var(--muted);font-size:10px;white-space:nowrap}
+.supplier-notification-card>p{margin:0;color:#445047;font-size:12px;line-height:1.65}
+.supplier-notification-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.supplier-notification-actions a{font-size:11px;font-weight:800;color:var(--green-dark);text-decoration:underline}
+.supplier-notifications-empty{padding:16px;border:1px dashed #d2ddd0;border-radius:11px;color:var(--muted);font-size:12px;line-height:1.6}
+@media(max-width:620px){.supplier-notification-heading-actions{width:100%;justify-content:space-between}.supplier-notification-topline{flex-direction:column;gap:3px}.supplier-notification-topline time{white-space:normal}}

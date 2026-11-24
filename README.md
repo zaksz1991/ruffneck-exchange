@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v3.3.0
+# RuffNeck Exchange (RNX) — v3.4.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,14 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.4.0 — supplier commercial quotation notifications
+
+- Adds a private supplier notification centre for customer and system decisions on commercial quotations.
+- Suppliers receive in-app notifications when a quotation is selected, not selected, declined or expired.
+- The supplier dashboard shows the latest 40 notifications and an unread count; suppliers can mark one notification or all notifications as read.
+- Notification reads and updates are scoped to the currently authenticated supplier. The server API does not expose customer identity or contact details.
+- Adds migration 025. Apply after migrations 001–024 have succeeded. No new environment variables or external providers are required.
 
 ## v3.3.0 — commercial quotation oversight
 

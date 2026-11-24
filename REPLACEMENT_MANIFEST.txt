@@ -1,29 +1,10 @@
-RUFFNECK EXCHANGE v3.3.0 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v3.4.0 COMPLETE REPLACEMENT
 
-Project: RuffNeck Exchange (RNX)
-Repository: https://github.com/zaksz1991/ruffneck-exchange
-Production: https://ruffneck-exchange.vercel.app/
-Supabase project: RuffNeck Entertainment
-
-This ZIP contains the complete Next.js application source, App Router pages and API routes, React components, server libraries, public assets, configuration, operational documentation, regression tests, and Supabase migrations 001–024.
-
-This is a complete cumulative repository replacement, not an incremental overlay.
-
-NEW IN v3.3.0 — COMMERCIAL QUOTATION OVERSIGHT
-- Adds a private Operations console at /admin/quotes to monitor the latest 250 commercial quotations.
-- Displays quote status, supplier business name, request category/location, proposal amount and terms, validity and recorded quote event history.
-- Supports status filtering, text search and CSV export of the visible records.
-- The page and API require the existing operations:read permission (owner and operations_admin roles). Customer names and contact fields are not selected or returned.
-- The console is read-only and explicitly distinguishes supplier proposals from RNX revenue, payments, orders, contracts and fulfilment.
-
-CUMULATIVE FEATURES RETAINED
-Supplier listings and moderation; listing editing, private images and galleries; supplier-reported availability; customer saved offers, comparisons, email alerts and notification centre; request progress timeline; supplier listing insights; memberships and supplier verification; lead enquiries and matching; manual payment verification and customer-authorised contact release; private customer tracking; RNX Operations and audit workflows; dual-confirmed transaction outcomes and moderated supplier reviews; commercial quotations.
-
-SUPABASE
-No new migration is required. Confirm migration 024 (commercial quotes and quote events) is already applied in the existing RuffNeck Entertainment project. Do not rerun migrations 001–024.
-
-DEPLOYMENT
-Extract this archive, open its `ruffneck exchange` folder, replace the existing repository contents with the complete folder contents, and commit to the `main` branch. Retain the existing Vercel project and Root Directory `./`.
-
-BUILD / VALIDATION LIMITS
-All 22 cumulative static regression scripts passed. TypeScript/TSX syntax transpilation was checked for changed source files. Full TypeScript semantic typechecking, Next.js production build and live admin endpoint checks must still be confirmed in Vercel/production. See BUILD_STATUS.md.
+Complete cumulative Next.js project based on v3.3.0.
+Includes app routes, API routes, components, libraries, public assets, configuration, documentation, tests and Supabase migrations 001–025.
+New migration: 025_rnx_supplier_quote_notifications.sql.
+New server route: app/api/supplier/notifications/route.ts.
+No new environment variables.
+Target repository: github.com/zaksz1991/ruffneck-exchange (main).
+Target production: https://ruffneck-exchange.vercel.app/
+Supabase: existing RuffNeck Entertainment project.

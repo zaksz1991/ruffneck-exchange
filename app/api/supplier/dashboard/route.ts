@@ -13,7 +13,7 @@ export async function GET() {
     const db = supabaseAdmin();
     const { error: quoteExpiryError } = await db.rpc('rnx_expire_commercial_quotes');
     if (quoteExpiryError) throw quoteExpiryError;
-    const [listingsResult, membershipsResult, offersResult, plansResult] = await Promise.all([
+    const [listingsResult, membershipsResult, offersResult, plansResult, notificationsResult, unreadNotificationsResult] = await Promise.all([
       db.from('rnx_listings').select('id,title,slug,listing_type,category,description,state,city,price_type,price,currency,keywords,status,availability_status,availability_note,availability_updated_at,image_path,created_at,updated_at')
         .eq('supplier_application_id', supplier.id).order('created_at', { ascending: false }).limit(250),
       db.from('rnx_membership_subscriptions').select('id,status,quoted_amount,currency,billing_interval,quote_expires_at,period_start,period_end,created_at,plan:rnx_membership_plans!inner(code,name,description,listing_limit,display_price,features),payments:rnx_membership_payments(id,amount,currency,payment_method,transaction_reference,status,supplier_note,verified_at,created_at)')
@@ -21,8 +21,14 @@ export async function GET() {
       db.from('rnx_lead_offers').select('id,anonymised_summary,quoted_fee,currency,payment_status,supplier_accepted_at,payment_verified_at,customer_approved_at,customer_declined_at,supplier_declined_at,supplier_response_note,contact_released_at,created_at,lead:rnx_leads!inner(id,name,email,phone,category,state,city,details,preferred_contact),outcome:rnx_transaction_outcomes(id,status,customer_outcome,supplier_outcome,completed_at),review:rnx_supplier_reviews(id,rating,title,body,moderation_status,supplier_response)')
         .eq('supplier_application_id', supplier.id).order('created_at', { ascending: false }).limit(50),
       db.from('rnx_membership_plans').select('id,code,name,description,listing_limit,display_price,features,sort_order').eq('active', true).order('sort_order', { ascending: true }),
+      db.from('rnx_supplier_notifications').select('id,notification_type,title,message,related_quote_id,read_at,created_at').eq('supplier_application_id', supplier.id).order('created_at', { ascending: false }).limit(40),
+      db.from('rnx_supplier_notifications').select('id', { count: 'exact', head: true }).eq('supplier_application_id', supplier.id).is('read_at', null),
     ]);
-    const error = listingsResult.error || membershipsResult.error || offersResult.error || plansResult.error;
+    const notificationErrors = [notificationsResult.error, unreadNotificationsResult.error].filter(Boolean) as Array<{ code?: string; message?: string }>;
+    const isMissingNotificationsTable = (item: { code?: string }) => ['42P01', 'PGRST205'].includes(item.code || '');
+    const notificationsTableMissing = notificationErrors.some(isMissingNotificationsTable);
+    const nonMissingNotificationError = notificationErrors.find((item) => !isMissingNotificationsTable(item));
+    const error = listingsResult.error || membershipsResult.error || offersResult.error || plansResult.error || nonMissingNotificationError || null;
     if (error) {
       console.error('[RNX supplier dashboard]', { code: error.code, message: error.message });
       return NextResponse.json({ error: 'Supplier information could not be loaded. Confirm the cumulative RNX migrations are applied.' }, { status: 503 });
@@ -139,6 +145,9 @@ export async function GET() {
       offers,
       plans: plansResult.data ?? [],
       paymentInstructions: process.env.RNX_PAYMENT_INSTRUCTIONS?.trim() || 'RNX operations will provide verified payment instructions after issuing a quotation. Do not transfer funds to an unverified account or person.',
+      notifications: notificationsTableMissing ? [] : notificationsResult.data ?? [],
+      unreadNotificationCount: notificationsTableMissing ? 0 : unreadNotificationsResult.count ?? 0,
+      notificationsAvailable: !notificationsTableMissing,
     }, { headers: { 'Cache-Control': 'no-store, private' } });
   } catch (error) {
     console.error('[RNX supplier dashboard]', error instanceof Error ? error.message : 'Unknown error');

@@ -1,0 +1,23 @@
+RUFFNECK EXCHANGE v3.4.0 — DEPLOYMENT INSTRUCTIONS
+
+Repository: https://github.com/zaksz1991/ruffneck-exchange
+Branch: main
+Production: https://ruffneck-exchange.vercel.app/
+Supabase project: RuffNeck Entertainment
+Vercel Root Directory: ./
+
+1. Confirm migrations 001–024 are applied in the existing RuffNeck Entertainment Supabase project.
+2. Apply only `supabase/migrations/025_rnx_supplier_quote_notifications.sql`.
+3. Extract the complete replacement ZIP and open the `ruffneck exchange` folder.
+4. Replace the existing GitHub repository contents with the complete folder contents.
+5. Commit to the existing `main` branch and allow Vercel to deploy.
+6. Sign in as an approved supplier with portal access. Open the supplier dashboard and confirm the Notifications panel loads.
+7. Use a test introduction/quotation to submit a quote, then record a customer selection, non-selection or decline. Confirm a notification appears for the supplier and that individual/all read controls work.
+
+No new Vercel environment variables or external providers are required.
+
+IMPORTANT
+- This is a complete cumulative repository replacement based on the supplied v3.3.0 project, not an incremental overlay.
+- Do not replace the Supabase project or rerun migrations 001–024.
+- The migration adds a private supplier-scoped notification table and a trigger on quotation status changes.
+- Supplier notifications do not include customer names or contact details. Existing payment, customer approval and contact-release controls are unchanged.

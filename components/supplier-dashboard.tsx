@@ -9,11 +9,13 @@ type GalleryImage = { id: string; image_url: string | null; sort_order: number }
 type ListingAnalytics = { views_7d: number; views_30d: number; saves_total: number; enquiries_total: number };
 type Listing = { id: string; title: string; slug: string; listing_type: string; category: string; description: string; state: string; city: string | null; price_type: string; price: number | null; currency: string; keywords: string[]; status: string; availability_status: 'unconfirmed' | 'available' | 'limited' | 'on_request' | 'out_of_stock'; availability_note: string | null; availability_updated_at: string | null; image_url: string | null; gallery_images: GalleryImage[]; analytics: ListingAnalytics; created_at: string; updated_at: string };
 type CommercialQuote = { id: string; lead_offer_id: string; quote_reference: string; title: string; scope_description: string; total_amount: number; currency: string; delivery_terms: string; estimated_fulfilment: string | null; valid_until: string; status: 'submitted' | 'selected' | 'not_selected' | 'declined' | 'withdrawn' | 'expired'; created_at: string; responded_at: string | null };
+type SupplierNotification = { id: string; notification_type: string; title: string; message: string; related_quote_id: string | null; read_at: string | null; created_at: string };
 type Offer = { id: string; anonymised_summary: string; quoted_fee: number; currency: string; payment_status: string; supplier_accepted_at: string | null; supplier_declined_at: string | null; supplier_response_note: string | null; payment_verified_at: string | null; customer_approved_at: string | null; customer_declined_at: string | null; contact_released_at: string | null; created_at: string; outcome: { status: string; customer_outcome: string | null; supplier_outcome: string | null; completed_at: string | null } | null; review: { id: string; rating: number; title: string; body: string; moderation_status: string; supplier_response: string | null } | null; quotes: CommercialQuote[]; customer: { category: string; state: string; city: string | null; contact_released: boolean; name: string | null; email: string | null; phone: string | null; preferred_contact: string | null; request_details: string | null } };
-type DashboardData = { supplier: { business_name: string; contact_name: string; email: string; phone: string; category: string; state: string }; listings: Listing[]; listingAnalyticsAvailable: boolean; memberships: Membership[]; offers: Offer[]; plans: Plan[]; paymentInstructions: string };
+type DashboardData = { supplier: { business_name: string; contact_name: string; email: string; phone: string; category: string; state: string }; listings: Listing[]; listingAnalyticsAvailable: boolean; memberships: Membership[]; offers: Offer[]; plans: Plan[]; paymentInstructions: string; notifications: SupplierNotification[]; unreadNotificationCount: number; notificationsAvailable: boolean };
 
 function planOf(membership: Membership) { return Array.isArray(membership.plan) ? membership.plan[0] : membership.plan; }
 function dateText(value?: string | null) { return value ? new Date(value).toLocaleDateString('en-NG', { dateStyle: 'medium' }) : '—'; }
+function dateTimeText(value?: string | null) { return value ? new Date(value).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' }) : '—'; }
 function money(value: number | null, currency = 'NGN') { if (value === null) return 'Awaiting quotation'; try { return new Intl.NumberFormat('en-NG', { style: 'currency', currency, maximumFractionDigits: 2 }).format(Number(value)); } catch { return `${currency} ${value}`; } }
 
 export function SupplierDashboard() {
@@ -281,6 +283,19 @@ export function SupplierDashboard() {
     window.location.assign('/supplier/login');
   }
 
+  async function markSupplierNotificationRead(notificationId?: string) {
+    setBusy(true); setError(''); setNotice('');
+    try {
+      const response = await fetch('/api/supplier/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(notificationId ? { notification_id: notificationId } : { mark_all_read: true }) });
+      const result = await response.json().catch(() => ({}));
+      if (response.status === 401) { window.location.assign('/supplier/login'); return; }
+      if (!response.ok) throw new Error(result.error || 'Notification status could not be updated.');
+      setNotice(notificationId ? 'Notification marked as read.' : 'All supplier notifications marked as read.');
+      await refresh();
+    } catch (err) { setError(err instanceof Error ? err.message : 'Notification status could not be updated.'); }
+    finally { setBusy(false); }
+  }
+
   const currentMembership = useMemo(() => {
     if (!data) return null;
     return data.memberships.find((m) => m.status === 'awaiting_payment' || m.status === 'requested')
@@ -304,6 +319,19 @@ export function SupplierDashboard() {
       <article><span>Opportunity offers</span><strong>{data.offers.length}</strong></article>
       <article><span>Current membership</span><strong>{plan?.name || 'Starter'}</strong></article>
     </div>
+
+
+    <section className="supplier-panel supplier-notifications-panel" aria-label="Commercial quotation notifications">
+      <div className="supplier-section-heading">
+        <div><p className="eyebrow">COMMERCIAL QUOTATION UPDATES</p><h2>Notifications</h2><p>Customer decisions and system updates for your submitted quotations.</p></div>
+        <div className="supplier-notification-heading-actions"><span>{data.unreadNotificationCount} unread</span><button className="button button-small button-secondary" type="button" disabled={busy || data.unreadNotificationCount === 0} onClick={() => void markSupplierNotificationRead()}>Mark all read</button></div>
+      </div>
+      {!data.notificationsAvailable ? <div className="supplier-insights-unavailable"><strong>Supplier notifications are not active yet.</strong><p>Apply Supabase migration 025 to enable commercial quotation decision alerts. Your existing supplier workspace remains available.</p></div> : data.notifications.length ? <div className="supplier-notification-list">{data.notifications.map((item) => <article className={`supplier-notification-card${item.read_at ? '' : ' is-unread'}`} key={item.id}>
+        <div className="supplier-notification-topline"><strong>{item.title}</strong><time>{dateTimeText(item.created_at)}</time></div>
+        <p>{item.message}</p>
+        <div className="supplier-notification-actions"><a href="#supplier-opportunities">Open opportunity inbox</a>{item.read_at ? <small>Read {dateTimeText(item.read_at)}</small> : <button className="button button-small button-secondary" type="button" disabled={busy} onClick={() => void markSupplierNotificationRead(item.id)}>Mark as read</button>}</div>
+      </article>)}</div> : <div className="supplier-notifications-empty">No commercial quotation updates have been recorded for this supplier account.</div>}
+    </section>
 
     <SupplierVerificationPanel />
 
@@ -420,7 +448,7 @@ export function SupplierDashboard() {
       </Fragment>)}</tbody></table></div> : <div className="admin-empty">No catalogue listings submitted yet.</div>}
     </section>
 
-    <section className="supplier-panel">
+    <section className="supplier-panel" id="supplier-opportunities">
       <div className="supplier-section-heading"><div><p className="eyebrow">OPPORTUNITY INBOX</p><h2>Customer opportunities</h2><p>Only anonymised summaries are shown until the RNX contact-release process has completed.</p></div><span>{data.offers.length} offers</span></div>
       {data.offers.length ? <div className="supplier-opportunity-list">{data.offers.map((offer) => <article className="supplier-opportunity" key={offer.id}>
         <div className="supplier-opportunity-top"><span className={`admin-state-${offer.supplier_declined_at ? 'bad' : offer.payment_status === 'paid' ? 'good' : 'wait'}`}>{offer.supplier_declined_at ? 'supplier declined' : offer.payment_status}</span><small>{dateText(offer.created_at)}</small></div>
