@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v2.6.0
+# RuffNeck Exchange (RNX) — v2.7.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -8,20 +8,21 @@ Production: https://ruffneck-exchange.vercel.app/
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
 
-## v2.6.0 — customer saved-offer comparison
+## v2.7.0 — saved-offer change alerts
 
-- Signed-in customers can select up to three offers from their saved-offer shortlist and compare them in a side-by-side table.
-- Comparison includes supplier, category, listing type, location, displayed price, supplier-reported availability and save date, with links back to each listing and supplier profile.
-- The comparison selection is held in the customer dashboard session and is removed automatically when an offer is unsaved or is no longer returned by the saved-offer API.
-- The comparison clearly states that availability and pricing are supplier-reported, prices are not converted between currencies, and RNX does not independently verify stock, quality or delivery terms.
-- This is a client-side enhancement to the existing private saved-offer data. No new Supabase migration, environment variable, storage bucket or external provider is required.
+- Customers can explicitly enable or disable email alerts for each saved marketplace offer.
+- RNX queues an email when a saved listing's published price, currency/price type or supplier-reported availability changes.
+- The current published values are captured when alerts are enabled, so changes made before opt-in are not reported as new changes.
+- A price edit made while a listing is paused is detected when the edited listing is approved and republished.
+- Alerts are sent only to active customers with a verified email address and an explicit per-listing opt-in.
+- Uses the existing RNX email outbox and Resend notification worker. Apply migration 019 after migrations 001–018. No new Vercel environment variable is required; email delivery still depends on the existing Resend configuration.
 
 ## v2.5.0 — customer saved offers
 
 - Signed-in customers can save published marketplace listings and review or remove them from their dashboard.
 - Saved offers retain supplier, location, price, current supplier-reported availability and listing imagery, while API access remains scoped to the authenticated customer.
 - Adds migration 018 for private customer bookmarks, with RLS, browser-role revocation and a trigger that permits only approved listing/supplier records.
-- Requires migration 018; apply it after migrations 001–017. v2.6.0 itself adds no additional SQL.
+- Requires migration 018; apply it after migrations 001–017.
 
 ## v2.4.0 — supplier-reported availability
 
@@ -110,7 +111,7 @@ Customers can submit requests without paying RNX. Supplier memberships, promoted
 
 - Multi-industry department and state discovery, approved supplier profiles and separately moderated product/service listings with supplier-submitted cover images.
 - Marketplace search by keyword and state, now extended with offer-type, pricing-type and sort controls.
-- Customer sourcing requests linked to the specific published offers customers enquire about, private guest tracking links, optional customer accounts, customer-to-operations messages and side-by-side comparison of up to three saved offers.
+- Customer sourcing requests linked to the specific published offers customers enquire about, private guest tracking links, optional customer accounts, customer-to-operations messages and side-by-side comparison of up to three saved offers, with optional email alerts when saved offers change their published price or supplier-reported availability.
 - Staff operations console with role-based access, supplier/listing moderation, lead qualification and audit records.
 - Supplier matching recommendations for staff review; recommendations do not automatically create offers or disclose customer details.
 - Supplier portal with private anonymised opportunities, accept/decline decisions, catalogue controls and membership operations.
@@ -171,11 +172,11 @@ Do not paste, commit or expose actual secret values.
 
 ## Supabase migrations
 
-The cumulative v2.6.0 project contains RNX migrations 001–018. Migration 018 provides the private customer saved-offer records. v2.6.0 itself adds no migration. For older deployments, apply only missing RNX migrations in numerical order after reviewing the existing Supabase migration history. Never rerun a migration recorded as completed. These migrations create and modify only RNX-prefixed objects; do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects.
+The cumulative v2.7.0 project contains RNX migrations 001–019. Migration 018 provides private customer saved-offer records; migration 019 adds opt-in saved-offer price and availability email alerts. For older deployments, apply only missing RNX migrations in numerical order after reviewing the existing Supabase migration history. Never rerun a migration recorded as completed. These migrations create and modify only RNX-prefixed objects; do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects.
 
 ## Verification boundary
 
-All repository static regression scripts, including the v2.6.0 offer-comparison checks, passed in the packaging run. TypeScript/TSX syntax transpilation passed for the updated customer dashboard component. A full semantic TypeScript check and Next.js production build were not run because project dependencies are not installed in this environment. Confirm both through the Vercel deployment build. Static tests do not prove live Supabase or production-browser behaviour; complete the customer comparison smoke test after deployment.
+The cumulative static regression scripts, including the v2.7.0 saved-offer alert checks, are retained in the project. The v2.7.0 packaging run verifies static source contracts and ZIP integrity. Full semantic TypeScript checking and the Next.js production build require the Vercel deployment environment. Static tests do not prove live Supabase trigger behaviour or email delivery; complete the saved-offer alert smoke test after deployment.
 
 ## Commercial deployment
 

@@ -39,6 +39,7 @@ type SavedListing = {
   currency: string;
   availability_status: string;
   saved_at: string;
+  alerts_enabled: boolean;
   image_url: string | null;
   supplier: { public_slug: string; business_name: string };
 };
@@ -71,6 +72,7 @@ export function CustomerDashboard() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState('');
   const [savedBusy, setSavedBusy] = useState('');
+  const [alertBusy, setAlertBusy] = useState('');
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
@@ -132,6 +134,26 @@ export function CustomerDashboard() {
       setError(caught instanceof Error ? caught.message : 'Could not remove this saved offer.');
     } finally {
       setSavedBusy('');
+    }
+  }
+
+
+  async function updateSavedOfferAlerts(listingId: string, enabled: boolean) {
+    setAlertBusy(listingId);
+    setError('');
+    try {
+      const response = await fetch('/api/customer/saved-listings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listing_id: listingId, alerts_enabled: enabled }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Could not update email alerts.');
+      setSavedListings((items) => items.map((item) => item.id === listingId ? { ...item, alerts_enabled: enabled } : item));
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Could not update email alerts.');
+    } finally {
+      setAlertBusy('');
     }
   }
 
@@ -252,7 +274,7 @@ export function CustomerDashboard() {
             <div>
               <p className="eyebrow">YOUR SHORTLIST</p>
               <h3>Saved offers</h3>
-              <p>Offers you bookmarked from the public marketplace.</p>
+              <p>Offers you bookmarked from the public marketplace. Enable email alerts on any offer to hear about published price or availability changes.</p>
             </div>
             <span>{savedListings.length} saved</span>
           </div>
@@ -313,10 +335,22 @@ export function CustomerDashboard() {
                           >
                             {selected ? 'Remove from compare' : atLimit ? 'Compare limit reached' : 'Add to compare'}
                           </button>
+                          <button
+                            className={`button button-small ${item.alerts_enabled ? '' : 'button-secondary'}`}
+                            type="button"
+                            aria-pressed={item.alerts_enabled}
+                            disabled={alertBusy === item.id}
+                            onClick={() => void updateSavedOfferAlerts(item.id, !item.alerts_enabled)}
+                          >
+                            {alertBusy === item.id ? 'Saving…' : item.alerts_enabled ? 'Turn off email alerts' : 'Get email alerts'}
+                          </button>
                           <button className="button button-small button-secondary" type="button" disabled={savedBusy === item.id} onClick={() => void removeSaved(item.id)}>
                             {savedBusy === item.id ? 'Removing…' : 'Remove saved'}
                           </button>
                         </div>
+                        <small className={`customer-alert-status${item.alerts_enabled ? ' is-enabled' : ''}`}>
+                          {item.alerts_enabled ? 'Email alerts are on for published price and availability changes.' : 'Email alerts are off.'}
+                        </small>
                       </div>
                     </article>
                   );

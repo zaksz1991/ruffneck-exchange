@@ -1,0 +1,13 @@
+RUFFNECK EXCHANGE v2.7.0 — SUPABASE AND VERCEL DEPLOYMENT
+
+1. Confirm migrations 001–018 are already applied in the existing RuffNeck Entertainment Supabase project.
+2. Apply only `supabase/migrations/019_rnx_saved_listing_change_alerts.sql`.
+3. Replace the GitHub repository contents with the complete contents of the included `ruffneck exchange` folder.
+4. Commit to `main` and allow the existing Vercel project to deploy. Keep Root Directory `./`.
+5. Verify that the Vercel build completes before testing saved-offer alerts.
+
+No new environment variable is required. Email delivery uses the existing `RESEND_API_KEY`, `RNX_NOTIFICATION_FROM_EMAIL` and `CRON_SECRET` settings. If those are not configured, alert rows remain pending. The deployed notification cron currently processes the outbox daily; the RNX Operations console can also process the queue manually.
+
+Customer test: use a verified test account, save an approved listing, open Customer Dashboard, enable email alerts, change the test listing's availability or price through its normal supplier/moderation workflow, and confirm one queued email is created. Confirm a price edit made while paused produces an alert only after the listing is approved again. Disable alerts and confirm later changes do not create messages.
+
+Do not rerun migrations 001–018. Do not apply this migration to a different Supabase project.

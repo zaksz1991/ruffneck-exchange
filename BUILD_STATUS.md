@@ -1,24 +1,23 @@
-# RuffNeck Exchange v2.6.0 — build and validation status
+# RuffNeck Exchange v2.7.0 — build and validation status
 
 ## Included functionality
-- Complete cumulative RNX project retained through v2.5.0.
-- Customer dashboard supports side-by-side comparison of two or three saved marketplace offers.
-- Comparison includes supplier, category, listing type, location, published price, supplier-reported availability and saved date.
-- Customer can return to each listing or supplier profile from the comparison.
-- Selection is capped at three, cleared when an offer is unsaved and reconciled when saved-offer data refreshes.
-- Mobile layout uses a horizontally scrollable comparison table.
+- Complete cumulative RNX project retained through v2.6.0.
+- Customers can explicitly enable/disable email change alerts on individual saved offers.
+- Database trigger queues one email for active, email-verified customers when a watched listing's published price/currency/price type or supplier-reported availability changes.
+- Baseline values are captured when alerts are enabled; paused listing price edits are detected when the listing is re-approved.
+- Alerts use the existing RNX notification outbox, retry worker and Resend integration.
 
 ## Security and database
-- Comparison uses the existing authenticated customer dashboard data returned by `/api/customer/saved-listings`.
-- No customer or supplier data is added to browser storage or a new database table.
-- No Supabase migration or Vercel environment variable is required for v2.6.0. Migration 018 from v2.5.0 remains required for the cumulative saved-offer feature.
-- Comparison makes no price-conversion or independent verification claims.
+- Customer preference changes require a signed-in customer session and same-origin request. The database RPC scopes changes to the authenticated customer ID supplied by the server.
+- Alert email is sent only to active customers with a verified email address and an explicit per-listing opt-in.
+- New migration: `019_rnx_saved_listing_change_alerts.sql`. It adds columns to `rnx_customer_saved_listings`, a service-role-only preference function and a trigger on `rnx_listings`.
+- No new Vercel environment variable is required. Existing Resend and cron configuration is reused. Notifications remain queued if the provider credentials are not configured. The current daily cron means delivery is not immediate; Operations can process the queue manually.
 
 ## Validation
-- Added `test-rnx-v260-customer-offer-comparison.mjs` for selection limits, comparison contents, currency and availability disclaimers, responsive styling and version integration.
-- Existing v2.0.0–v2.5.0 regression scripts are retained.
-- Full TypeScript semantic checking and Next.js production build were not executed in this environment because the project's npm dependencies are not installed locally. Confirm both with Vercel after deployment.
+- Added `test-rnx-v270-saved-offer-alerts.mjs` covering dashboard opt-in controls, same-origin API update, service-role RPC, verified-email filtering, trigger coverage and version integration.
+- Prior cumulative regression scripts are retained.
+- TypeScript/TSX syntax transpilation passed for the two changed application files using the installed TypeScript compiler. Full semantic TypeScript checking and Next.js production build require project dependencies; Vercel must confirm both after deployment. Live Supabase trigger and real-email tests remain required.
 
 ## Deployment
-- No new SQL is required. Confirm migration 018 is already applied in the existing RuffNeck Entertainment Supabase project.
-- Keep the existing production Vercel environment variables and Root Directory `./`.
+- Apply only migration 019 after confirming migrations 001–018 are present in RuffNeck Entertainment.
+- Keep existing Vercel environment variables and Root Directory `./`.
