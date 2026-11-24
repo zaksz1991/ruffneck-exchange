@@ -132,12 +132,17 @@ Do not paste, commit or expose actual secret values.
 
 ## Supabase migrations
 
-The cumulative project includes RNX migrations 001–015. v2.2.1 adds no migration; keep the existing migration state unchanged. For deployments upgrading from before v2.2.0, apply migration 015 only if it has not already succeeded. Never rerun a migration recorded as completed. For an older deployment, apply only missing RNX migrations in numerical order. Do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects.
+The cumulative project includes RNX migrations 001–015. v2.2.2 adds no migration; keep the existing migration state unchanged. For deployments upgrading from before v2.2.0, apply migration 015 only if it has not already succeeded. Never rerun a migration recorded as completed. For an older deployment, apply only missing RNX migrations in numerical order. Do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects.
 
 ## Verification boundary
 
-The account recovery, email verification, supplier form/listing controls, v1.8 operations, v1.9 marketplace search, v2.0 listing enquiry, v2.1 supplier catalogue edit, v2.2 listing-image and v2.2.1 PromiseLike audit-fix static regression tests passed in this packaging run. TypeScript syntax transpilation passed for the eight changed TypeScript/TSX files. The Vercel log supplied for v2.2.0 confirms compilation passed but TypeScript checking stopped at the unsupported PromiseLike `.catch()` call; v2.2.1 removes that error. Full TypeScript checking and the Next.js production build still require a fresh Vercel build after deployment. Static checks do not prove live Supabase Storage or Vercel behaviour; confirm the production build and image upload flow after deployment.
+The account recovery, email verification, supplier form/listing controls, v1.8 operations, v1.9 marketplace search, v2.0 listing enquiry, v2.1 supplier catalogue edit, v2.2 listing-image and v2.2.1 image-audit and v2.2.2 supplier-listing PromiseLike audit-fix static regression tests passed in this packaging run. TypeScript syntax transpilation passed for the eight changed TypeScript/TSX files. The Vercel log supplied for v2.2.0 confirms compilation passed but TypeScript checking stopped at the unsupported PromiseLike `.catch()` call; v2.2.1 removes that error. Full TypeScript checking and the Next.js production build still require a fresh Vercel build after deployment. Static checks do not prove live Supabase Storage or Vercel behaviour; confirm the production build and image upload flow after deployment.
 
 ## Commercial deployment
 
 Review Vercel plan terms for commercial use before monetised production operation. Do not assume a personal-use plan permits commercial marketplace operations.
+
+
+## Latest repair release
+
+Version 2.2.2 fixes Supabase `PromiseLike` audit error handling in supplier listing edits, pauses and resubmissions. See `RELEASE-NOTES-v2.2.2.md`.

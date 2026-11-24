@@ -1,0 +1,12 @@
+RUFFNECK EXCHANGE v2.2.2 — COMPLETE CUMULATIVE REPLACEMENT
+
+1. Extract this ZIP.
+2. Replace the repository contents with the contents of the `ruffneck exchange` folder, preserving paths.
+3. Commit the complete replacement to the `main` branch of github.com/zaksz1991/ruffneck-exchange.
+4. Allow the existing Vercel project to build from `main`.
+5. Do not run a new Supabase migration for v2.2.2. Keep the existing RNX migrations 001–015 applied; do not rerun them.
+6. Do not change existing Vercel environment variables for this patch.
+
+This is a complete cumulative source archive. It includes the v2.2.0 marketplace image feature, the v2.2.1 image-audit build correction, and the v2.2.2 supplier-listing audit correction.
+
+After deployment, confirm that Vercel completes TypeScript checking and the Next.js production build. Then test supplier listing edits, pause/resubmit actions and the image upload/moderation flow with a non-production listing.

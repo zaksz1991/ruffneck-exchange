@@ -79,9 +79,18 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         throw new Error('Listing update failed.');
       }
       if (!updated) return NextResponse.json({ error: 'The listing changed while you were editing it. Refresh the portal and try again.' }, { status: 409 });
-      await db.from('rnx_admin_audit_log').insert({ action: 'supplier_listing_edited', entity_type: 'listing', entity_id: id, details: { supplier_application_id: supplier.id, previous_status: listing.status, new_status: 'pending', title: values.title } }).then(({ error: auditError }) => {
+      try {
+        const { error: auditError } = await db.from('rnx_admin_audit_log').insert({
+          action: 'supplier_listing_edited',
+          entity_type: 'listing',
+          entity_id: id,
+          details: { supplier_application_id: supplier.id, previous_status: listing.status, new_status: 'pending', title: values.title },
+        });
         if (auditError) console.error('[RNX supplier listing audit]', auditError.message);
-      }).catch((auditError) => console.error('[RNX supplier listing audit]', auditError instanceof Error ? auditError.message : 'Audit insert failed'));
+      } catch (auditError) {
+        // Audit logging is best-effort; the supplier's listing update has already succeeded.
+        console.error('[RNX supplier listing audit]', auditError instanceof Error ? auditError.message : 'Audit insert failed');
+      }
       return NextResponse.json({ ok: true, listing: updated, message: 'Listing changes saved and submitted for RNX review. The offer remains hidden until it is approved.' });
     }
 
@@ -98,9 +107,18 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       .select('id,status').maybeSingle();
     if (error) throw new Error('Listing status update failed.');
     if (!updated) return NextResponse.json({ error: 'The listing status changed. Refresh the portal and try again.' }, { status: 409 });
-    await db.from('rnx_admin_audit_log').insert({ action: parsedAction.data.action === 'pause' ? 'supplier_listing_paused' : 'supplier_listing_resubmitted', entity_type: 'listing', entity_id: id, details: { supplier_application_id: supplier.id, previous_status: listing.status, new_status: nextStatus } }).then(({ error: auditError }) => {
+    try {
+      const { error: auditError } = await db.from('rnx_admin_audit_log').insert({
+        action: parsedAction.data.action === 'pause' ? 'supplier_listing_paused' : 'supplier_listing_resubmitted',
+        entity_type: 'listing',
+        entity_id: id,
+        details: { supplier_application_id: supplier.id, previous_status: listing.status, new_status: nextStatus },
+      });
       if (auditError) console.error('[RNX supplier listing audit]', auditError.message);
-    }).catch((auditError) => console.error('[RNX supplier listing audit]', auditError instanceof Error ? auditError.message : 'Audit insert failed'));
+    } catch (auditError) {
+      // Audit logging is best-effort; the listing status change has already succeeded.
+      console.error('[RNX supplier listing audit]', auditError instanceof Error ? auditError.message : 'Audit insert failed');
+    }
     return NextResponse.json({ ok: true, status: nextStatus, message: nextStatus === 'paused'
       ? 'Listing paused and removed from public marketplace results.'
       : 'Listing submitted for review. It will remain hidden until RNX approves it again.' });

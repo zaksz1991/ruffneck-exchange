@@ -9,7 +9,7 @@ const dashboardRoute = await read('app/api/supplier/dashboard/route.ts');
 const dashboardUi = await read('components/supplier-dashboard.tsx');
 const css = await read('app/globals.css');
 
-assert.equal(pkg.version, '2.2.1');
+assert.equal(pkg.version, '2.2.2');
 assert.match(pkg.scripts['test:rnx-v210'], /test-rnx-v210-supplier-listing-edit/);
 assert.match(pkg.scripts.check, /test:rnx-v210/);
 assert.match(listingRoute, /getAuthenticatedSupplier\(\)/);

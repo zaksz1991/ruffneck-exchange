@@ -1,6 +1,6 @@
 {
   "name": "ruffneck-exchange",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "private": true,
   "engines": {
     "node": ">=20.9.0"
@@ -16,11 +16,12 @@
     "test:supplier-listing-controls": "node scripts/test-supplier-listing-controls.mjs",
     "test:rnx-v180": "node scripts/test-rnx-v180-operations-upgrade.mjs",
     "test:rnx-v190": "node scripts/test-rnx-v190-marketplace-search.mjs",
-    "check": "npm run test:account-recovery && npm run test:email-verification && npm run test:supplier-form-build-fix && npm run test:supplier-listing-controls && npm run test:rnx-v180 && npm run test:rnx-v190 && npm run test:rnx-v200 && npm run test:rnx-v210 && npm run test:rnx-v220 && npm run test:rnx-v221 && npm run typecheck && npm run build",
+    "check": "npm run test:account-recovery && npm run test:email-verification && npm run test:supplier-form-build-fix && npm run test:supplier-listing-controls && npm run test:rnx-v180 && npm run test:rnx-v190 && npm run test:rnx-v200 && npm run test:rnx-v210 && npm run test:rnx-v220 && npm run test:rnx-v221 && npm run test:rnx-v222 && npm run typecheck && npm run build",
     "test:rnx-v200": "node scripts/test-rnx-v200-listing-enquiry.mjs",
     "test:rnx-v210": "node scripts/test-rnx-v210-supplier-listing-edit.mjs",
     "test:rnx-v220": "node scripts/test-rnx-v220-listing-images.mjs",
-    "test:rnx-v221": "node scripts/test-rnx-v221-audit-promise-fix.mjs"
+    "test:rnx-v221": "node scripts/test-rnx-v221-audit-promise-fix.mjs",
+    "test:rnx-v222": "node scripts/test-rnx-v222-supplier-listing-audit-fix.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",
