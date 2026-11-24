@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+const root = process.cwd();
+const component = readFileSync(join(root, 'components/customer-dashboard.tsx'), 'utf8');
+const css = readFileSync(join(root, 'app/globals.css'), 'utf8');
+const packageJson = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+
+assert.match(component, /quoteCompareIdsByRequest/, 'Quote comparisons must be scoped by sourcing request');
+assert.match(component, /selected\.length < 3/, 'Customers must be limited to three quotations per comparison');
+assert.match(component, /introductions\.filter\(\(offer\) => offer\.lead_id === item\.id\)/, 'Only quotations for the current request may enter its comparison');
+assert.match(component, /Add to comparison/, 'Submitted and selected quotations must expose a comparison action');
+assert.match(component, /Remove from comparison/, 'Customers must be able to remove quotations from comparison');
+assert.match(component, /different currencies.*not converted/i, 'Currency mismatches must be clearly disclosed without fabricated conversion');
+assert.match(component, /Scope \/ specification/, 'Comparison must expose scope');
+assert.match(component, /Delivery and payment terms/, 'Comparison must expose delivery terms');
+assert.match(component, /Estimated fulfilment/, 'Comparison must expose fulfilment estimate');
+assert.match(component, /Valid until/, 'Comparison must expose quote validity');
+assert.match(css, /\.rnx-commercial-quote-comparison-grid/, 'Comparison must have dedicated styling');
+assert.match(css, /@media\(max-width:620px\).*?\.rnx-commercial-quote-comparison-grid\{grid-template-columns:1fr\}/s, 'Comparison must stack on mobile');
+assert.equal(packageJson.version, '3.5.0', 'Package version must be updated');
+assert.ok(!Object.keys(packageJson.scripts).some((key) => key.includes('migration')), 'This UI-only upgrade must not add a database migration command');
+console.log('RNX v3.5.0 commercial quotation comparison regression checks passed.');

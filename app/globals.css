@@ -308,3 +308,26 @@
 .supplier-notification-actions a{font-size:11px;font-weight:800;color:var(--green-dark);text-decoration:underline}
 .supplier-notifications-empty{padding:16px;border:1px dashed #d2ddd0;border-radius:11px;color:var(--muted);font-size:12px;line-height:1.6}
 @media(max-width:620px){.supplier-notification-heading-actions{width:100%;justify-content:space-between}.supplier-notification-topline{flex-direction:column;gap:3px}.supplier-notification-topline time{white-space:normal}}
+
+
+/* v3.5.0 — customer commercial quotation comparison, scoped to one sourcing request */
+.rnx-quote-compare-toggle{justify-self:start}
+.rnx-commercial-quote-comparison{display:grid;gap:12px;margin-top:15px;padding:15px;border:1px solid #bdcfb7;border-radius:12px;background:#f2f7ef;min-width:0}
+.rnx-commercial-quote-comparison-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.rnx-commercial-quote-comparison-heading h5{margin:2px 0;font-size:15px}
+.rnx-commercial-quote-comparison-heading p:not(.eyebrow){margin:4px 0 0;color:var(--muted);font-size:11px;line-height:1.6}
+.rnx-quote-comparison-hint,.rnx-quote-comparison-currency-note{margin:0;color:#566452;font-size:11px;line-height:1.65}
+.rnx-commercial-quote-comparison-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:start}
+.rnx-commercial-quote-comparison-card{display:grid;gap:10px;min-width:0;padding:12px;border:1px solid #dce5d7;border-radius:10px;background:#fff}
+.rnx-commercial-quote-comparison-card>div:first-child{display:grid;gap:4px}
+.rnx-commercial-quote-comparison-card>div:first-child .eyebrow{margin:0;color:#476b40;font-size:9px}
+.rnx-commercial-quote-comparison-card>div:first-child strong{font-size:12px;overflow-wrap:anywhere}
+.rnx-commercial-quote-comparison-card>div:first-child small{color:var(--muted);font-size:10px;line-height:1.5}
+.rnx-commercial-quote-comparison-amount{color:#315d35;font-size:19px;overflow-wrap:anywhere}
+.rnx-commercial-quote-comparison-card dl{display:grid;gap:8px;margin:0}
+.rnx-commercial-quote-comparison-card dl>div{min-width:0;padding-top:7px;border-top:1px solid #edf0eb}
+.rnx-commercial-quote-comparison-card dt{color:var(--muted);font-size:9px;font-weight:900;letter-spacing:.04em;text-transform:uppercase}
+.rnx-commercial-quote-comparison-card dd{margin:3px 0 0;color:#3f4b41;font-size:10px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.rnx-commercial-quote-comparison-card .button{justify-self:start}
+@media(max-width:850px){.rnx-commercial-quote-comparison-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.rnx-commercial-quote-comparison{padding:11px}.rnx-commercial-quote-comparison-grid{grid-template-columns:1fr}.rnx-commercial-quote-comparison-heading{align-items:stretch}.rnx-commercial-quote-comparison-heading>.button{align-self:flex-start}}

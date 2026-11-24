@@ -1,0 +1,24 @@
+RUFFNECK EXCHANGE v3.5.0 — DEPLOYMENT INSTRUCTIONS
+
+Repository: https://github.com/zaksz1991/ruffneck-exchange
+Branch: main
+Production: https://ruffneck-exchange.vercel.app/
+Supabase project: RuffNeck Entertainment
+Vercel Root Directory: ./
+
+1. Extract the complete replacement ZIP and open the `ruffneck exchange` folder.
+2. Replace the existing GitHub repository contents with the complete folder contents.
+3. Commit to the existing `main` branch and allow Vercel to deploy.
+4. Sign in to a customer account that has at least two supplier quotations attached to one sourcing request.
+5. In that request's Supplier transaction follow-up section, add up to three submitted or selected quotations to the comparison.
+6. Confirm the comparison includes supplier, amount/currency, scope, delivery/payment terms, fulfilment estimate, validity and status.
+7. Test a request containing quotes in different currencies and confirm the dashboard warns that values are not converted.
+
+SUPABASE
+No new SQL migration. Keep existing migrations 001–025 unchanged. No new Vercel environment variables or external providers are required.
+
+IMPORTANT
+- This is a complete cumulative repository replacement based on the v3.4.0 project, not an incremental overlay.
+- The comparison is limited to quotations belonging to the same customer sourcing request.
+- It does not alter quote status, accept proposals, create purchase orders or process commercial payments.
+- Currency amounts are shown as suppliers submitted them; RNX does not apply an unconfigured exchange rate.

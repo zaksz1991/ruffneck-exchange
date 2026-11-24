@@ -187,6 +187,7 @@ export function CustomerDashboard() {
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
+  const [quoteCompareIdsByRequest, setQuoteCompareIdsByRequest] = useState<Record<string, string[]>>({});
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -218,7 +219,19 @@ export function CustomerDashboard() {
       setCustomer(meData.customer);
       setRequests(requestData.requests || []);
       setSavedListings(nextSavedListings);
-      setIntroductions((introductionData.offers || []) as IntroducedOffer[]);
+      const nextIntroductions = (introductionData.offers || []) as IntroducedOffer[];
+      setIntroductions(nextIntroductions);
+      const comparableQuoteIds = new Set(nextIntroductions.flatMap((offer) => (offer.quotes || [])
+        .filter((quote) => quote.status === 'submitted' || quote.status === 'selected')
+        .map((quote) => quote.id)));
+      setQuoteCompareIdsByRequest((current) => {
+        const next: Record<string, string[]> = {};
+        for (const [requestId, ids] of Object.entries(current)) {
+          const retained = ids.filter((id) => comparableQuoteIds.has(id)).slice(0, 3);
+          if (retained.length) next[requestId] = retained;
+        }
+        return next;
+      });
       setNotifications(notificationData.notifications || []);
       setUnreadNotificationCount(Number(notificationData.unreadCount || 0));
       setCompareIds((current) => current.filter((id) => nextSavedIds.has(id)));
@@ -310,6 +323,19 @@ export function CustomerDashboard() {
       if (current.includes(listingId)) return current.filter((id) => id !== listingId);
       if (current.length >= MAX_COMPARE_LISTINGS) return current;
       return [...current, listingId];
+    });
+  }
+
+  function toggleCommercialQuoteCompare(requestId: string, quoteId: string) {
+    setQuoteCompareIdsByRequest((current) => {
+      const selected = current[requestId] || [];
+      const next = selected.includes(quoteId)
+        ? selected.filter((id) => id !== quoteId)
+        : selected.length < 3 ? [...selected, quoteId] : selected;
+      const updated = { ...current };
+      if (next.length) updated[requestId] = next;
+      else delete updated[requestId];
+      return updated;
     });
   }
 
@@ -440,7 +466,17 @@ export function CustomerDashboard() {
           <p>When you submit a request while signed in, it will appear here. Guest requests can still be followed through their private tracking links.</p>
           <a className="button" href="/request">Submit a request</a>
         </div>
-      ) : requests.map((item) => (
+      ) : requests.map((item) => {
+        const requestOffers = introductions.filter((offer) => offer.lead_id === item.id);
+        const requestQuotes = requestOffers.flatMap((offer) => offer.quotes.map((quote) => ({
+          ...quote,
+          supplierName: offer.supplier?.business_name || 'Introduced supplier',
+          supplierProfileUrl: offer.supplier?.profile_url || null,
+        })));
+        const selectedQuoteIds = quoteCompareIdsByRequest[item.id] || [];
+        const selectedQuotes = requestQuotes.filter((quote) => selectedQuoteIds.includes(quote.id));
+        const comparisonCurrencies = [...new Set(selectedQuotes.map((quote) => quote.currency))];
+        return (
         <article className="customer-request-card" key={item.id}>
           <div className="customer-request-heading">
             <div>
@@ -477,9 +513,9 @@ export function CustomerDashboard() {
               <p className="customer-request-activity-empty">No progress events have been recorded yet. Refresh this page to check for updates.</p>
             )}
           </section>
-          {introductions.filter((offer) => offer.lead_id === item.id).length > 0 && <section className="customer-introductions" aria-label="Supplier introductions and transaction confirmations">
-            <div className="customer-introductions-heading"><div><p className="eyebrow">AUTHORISED INTRODUCTIONS</p><h4>Supplier transaction follow-up</h4></div><span>{introductions.filter((offer) => offer.lead_id === item.id).length} introductions</span></div>
-            {introductions.filter((offer) => offer.lead_id === item.id).map((offer) => <article className="customer-introduction-card" key={offer.id}>
+          {requestOffers.length > 0 && <section className="customer-introductions" aria-label="Supplier introductions and transaction confirmations">
+            <div className="customer-introductions-heading"><div><p className="eyebrow">AUTHORISED INTRODUCTIONS</p><h4>Supplier transaction follow-up</h4></div><span>{requestOffers.length} introductions</span></div>
+            {requestOffers.map((offer) => <article className="customer-introduction-card" key={offer.id}>
               <div className="customer-introduction-top"><strong>{offer.supplier?.business_name || 'Supplier introduction'}</strong><span className={`customer-status ${offer.outcome?.status === 'completed' ? 'status-qualified' : offer.outcome?.status === 'disputed' ? 'status-invalid' : ''}`}>{offer.outcome?.status?.replaceAll('_', ' ') || 'Awaiting transaction confirmation'}</span></div>
               <p>{offer.anonymised_summary}</p>
               {offer.supplier?.profile_url && <a className="text-link" href={offer.supplier.profile_url}>View introduced supplier ↗</a>}
@@ -491,6 +527,7 @@ export function CustomerDashboard() {
                   <p>{quote.scope_description}</p>
                   <dl><div><dt>Estimated fulfilment</dt><dd>{quote.estimated_fulfilment || 'Not stated'}</dd></div><div><dt>Valid until</dt><dd>{date(quote.valid_until)}</dd></div></dl>
                   <p className="rnx-customer-quote-terms">{quote.delivery_terms}</p>
+                  {(quote.status === 'submitted' || quote.status === 'selected') && <button className="button button-small button-secondary rnx-quote-compare-toggle" type="button" onClick={() => toggleCommercialQuoteCompare(item.id, quote.id)} disabled={!(selectedQuoteIds.includes(quote.id)) && selectedQuoteIds.length >= 3}>{selectedQuoteIds.includes(quote.id) ? 'Remove from comparison' : selectedQuoteIds.length >= 3 ? 'Comparison limit reached' : 'Add to comparison'}</button>}
                   {quote.status === 'submitted' && <div className="customer-outcome-actions"><button className="button button-small" type="button" disabled={busy === quote.id} onClick={() => void respondToCommercialQuote(quote, 'select')}>Mark as preferred</button><button className="button button-small button-secondary" type="button" disabled={busy === quote.id} onClick={() => void respondToCommercialQuote(quote, 'decline')}>Decline quotation</button></div>}
                   {quote.status === 'selected' && <p className="form-status">You marked this as your preferred proposal. Confirm the final agreement and payment directly with the supplier.</p>}
                   {quote.status === 'not_selected' && <small>This quotation was not selected because you marked another proposal as preferred.</small>}
@@ -512,6 +549,29 @@ export function CustomerDashboard() {
               </form>}
               {offer.review && <div className="customer-review-submitted"><strong>Your review · {offer.review.rating}/5</strong><span>{offer.review.moderation_status === 'approved' ? 'Published on the supplier profile' : offer.review.moderation_status === 'rejected' ? 'Not approved for publication' : offer.review.moderation_status === 'hidden' ? 'Hidden by RNX moderation' : 'Submitted · awaiting RNX moderation'}</span><h5>{offer.review.title}</h5><p>{offer.review.body}</p></div>}
             </article>)}
+            {selectedQuotes.length > 0 && <section className="rnx-commercial-quote-comparison" aria-label="Commercial quotation comparison">
+              <div className="rnx-commercial-quote-comparison-heading">
+                <div><p className="eyebrow">DECISION SUPPORT</p><h5>Compare commercial quotations</h5><p>{selectedQuotes.length} of 3 quotations selected for this request. You can compare only proposals attached to this same sourcing request.</p></div>
+                <button className="button button-small button-secondary" type="button" onClick={() => setQuoteCompareIdsByRequest((current) => { const next = { ...current }; delete next[item.id]; return next; })}>Clear comparison</button>
+              </div>
+              {selectedQuotes.length < 2 && <p className="rnx-quote-comparison-hint">Add at least one more quotation to see the side-by-side comparison.</p>}
+              <div className="rnx-commercial-quote-comparison-grid">
+                {selectedQuotes.map((quote) => <article className="rnx-commercial-quote-comparison-card" key={quote.id}>
+                  <div><span className="eyebrow">{quote.quote_reference}</span><strong>{quote.supplierName}</strong><small>{quote.title}</small></div>
+                  <strong className="rnx-commercial-quote-comparison-amount">{quoteMoney(quote.total_amount, quote.currency)}</strong>
+                  <dl>
+                    <div><dt>Status</dt><dd>{quote.status.replaceAll('_', ' ')}</dd></div>
+                    <div><dt>Scope / specification</dt><dd>{quote.scope_description}</dd></div>
+                    <div><dt>Delivery and payment terms</dt><dd>{quote.delivery_terms}</dd></div>
+                    <div><dt>Estimated fulfilment</dt><dd>{quote.estimated_fulfilment || 'Not stated'}</dd></div>
+                    <div><dt>Valid until</dt><dd>{date(quote.valid_until)}</dd></div>
+                  </dl>
+                  {quote.supplierProfileUrl && <a className="text-link" href={quote.supplierProfileUrl}>View supplier profile ↗</a>}
+                  <button className="button button-small button-secondary" type="button" onClick={() => toggleCommercialQuoteCompare(item.id, quote.id)}>Remove</button>
+                </article>)}
+              </div>
+              <p className="rnx-quote-comparison-currency-note">{comparisonCurrencies.length === 1 ? `All displayed amounts are in ${comparisonCurrencies[0]}. Compare the scope and terms as well as the amount.` : 'These quotations use different currencies. Amounts are displayed as submitted and are not converted; do not compare their numeric values directly.'} Supplier proposals are not independently verified by RNX.</p>
+            </section>}
           </section>}
           <div className="customer-thread">
             <h4>Conversation with RNX</h4>
@@ -535,7 +595,8 @@ export function CustomerDashboard() {
             </div>
           </div>
         </article>
-      ))}
+        );
+      })}
 
       {!loading && (
         <section className="customer-notifications-section" aria-labelledby="customer-notifications-title">

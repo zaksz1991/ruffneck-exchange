@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v3.4.0
+# RuffNeck Exchange (RNX) — v3.5.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,15 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.5.0 — customer commercial quotation comparison
+
+- Signed-in customers can select up to three supplier quotations for side-by-side comparison within the same sourcing request.
+- Compares supplier, quotation reference, amount/currency, scope, delivery/payment terms, estimated fulfilment, validity and current status.
+- Comparison selections are request-scoped; quotations from unrelated requests cannot be mixed in one comparison.
+- Currency amounts are not converted or ranked. Different currencies trigger a clear warning that the submitted numeric amounts are not directly comparable.
+- This is a customer decision-support view only: it does not change quote statuses, create a contract, accept a proposal or process payment.
+- No database migration, new environment variable or external provider is required. Existing migrations 001–025 remain unchanged.
 
 ## v3.4.0 — supplier commercial quotation notifications
 

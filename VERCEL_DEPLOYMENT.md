@@ -140,3 +140,10 @@ After Vercel deploys, sign in with a test customer, open a request in the dashbo
 Confirm migrations 001–024 are applied, then apply only `supabase/migrations/025_rnx_supplier_quote_notifications.sql` in the existing RuffNeck Entertainment project. The migration creates a private supplier notification table and a trigger that records notices when a quote becomes selected, not selected, declined or expired. The supplier dashboard reads the latest 40 notifications and unread count; read-state updates are authenticated and scoped to the current supplier.
 
 No new environment variables or external services are required. The supplier notification API does not return customer names, email addresses or phone numbers. Test using a test introduction and quotation: change the quotation status through the customer account, then verify the supplier sees the correct notice and can mark it read.
+
+## v3.5.0 customer commercial quotation comparison
+
+No SQL migration is required. Keep existing Supabase migrations 001–025 unchanged in the RuffNeck Entertainment project. The customer dashboard compares up to three submitted or selected commercial quotations attached to the same sourcing request. Comparison data is already returned by the authenticated customer introductions API; the feature is a request-scoped dashboard view and does not add database writes or change quotation status.
+
+After deployment, sign in as a customer with at least two supplier quotations for one request. Add each quotation to comparison and verify supplier, quote reference/title, submitted amount/currency, scope, delivery/payment terms, fulfilment estimate, validity and status. Test a multi-currency set and confirm the interface warns that amounts are not converted. This decision-support view does not select or accept a quotation, create an order or process a payment.
+
