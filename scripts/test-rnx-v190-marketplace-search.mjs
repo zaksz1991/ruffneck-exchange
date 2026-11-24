@@ -7,7 +7,8 @@ const marketplace = await readFile(new URL('app/marketplace/page.tsx', root), 'u
 const requestPage = await readFile(new URL('app/request/page.tsx', root), 'utf8');
 const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 
-assert.equal(pkg.version, '2.2.2');
+const currentVersion = pkg.version.split('.').map(Number);
+assert.ok(currentVersion[0] > 2 || (currentVersion[0] === 2 && currentVersion[1] > 2) || (currentVersion[0] === 2 && currentVersion[1] === 2 && currentVersion[2] >= 2), 'the cumulative release must be v2.2.2 or later');
 assert.match(pkg.scripts['test:rnx-v190'], /test-rnx-v190-marketplace-search\.mjs/);
 assert.match(pkg.scripts.check, /test:rnx-v180/);
 assert.match(pkg.scripts.check, /test:rnx-v190/);

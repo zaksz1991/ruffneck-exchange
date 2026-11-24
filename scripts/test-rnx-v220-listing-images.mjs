@@ -14,9 +14,11 @@ const adminOverview = await read('app/api/admin/overview/route.ts');
 const adminUi = await read('components/admin-console.tsx');
 const card = await read('components/listing-card.tsx');
 const detail = await read('app/marketplace/listing/[slug]/page.tsx');
+const gallery = await read('components/listing-gallery.tsx');
 const css = await read('app/globals.css');
 
-assert.equal(pkg.version, '2.2.2');
+const currentVersion = pkg.version.split('.').map(Number);
+assert.ok(currentVersion[0] > 2 || (currentVersion[0] === 2 && currentVersion[1] > 2) || (currentVersion[0] === 2 && currentVersion[1] === 2 && currentVersion[2] >= 2), 'the cumulative release must be v2.2.2 or later');
 assert.match(pkg.scripts['test:rnx-v220'], /test-rnx-v220-listing-images/);
 assert.match(pkg.scripts.check, /test:rnx-v220/);
 assert.match(migration, /add column if not exists image_path text/i);
@@ -48,7 +50,8 @@ assert.match(dashboardUi, /name="image" type="file" accept="image\/jpeg,image\/p
 assert.match(dashboardUi, /supplier-listing-thumb/);
 assert.match(dashboardUi, /cover image was not uploaded/);
 assert.match(card, /listing-card-image/);
-assert.match(detail, /listing-detail-image/);
+assert.match(detail, /<ListingGallery/);
+assert.match(gallery, /listing-detail-image/);
 assert.match(css, /supplier-image-preview/);
 
 console.log('RNX v2.2.0 listing image contract: PASS');

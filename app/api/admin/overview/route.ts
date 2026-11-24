@@ -24,9 +24,38 @@ export async function GET() {
       console.error('[RNX admin] Overview query failed:', { code: error.code, message: error.message });
       return NextResponse.json({ error: 'Operations data could not be loaded. Confirm the cumulative RNX migrations 001–015 and Supabase server credentials.' }, { status: 503 });
     }
-    const listings = await Promise.all((listingsResult.data ?? []).map(async (row: any) => ({
+    const listingRows = listingsResult.data ?? [];
+    const listingIds = listingRows.map((row: any) => row.id);
+    let galleryRows: any[] = [];
+    if (listingIds.length) {
+      const { data: photos, error: galleryError } = await db.from('rnx_listing_gallery_images')
+        .select('id,listing_id,image_path,sort_order,created_at')
+        .in('listing_id', listingIds)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: true });
+      if (galleryError) {
+        console.error('[RNX admin] Listing gallery query failed:', { code: galleryError.code, message: galleryError.message });
+        if (!['42P01', 'PGRST205'].includes(galleryError.code || '')) {
+          return NextResponse.json({ error: 'Operations data could not be loaded. Check the RNX gallery migration and Supabase server permissions.' }, { status: 503 });
+        }
+      } else {
+        galleryRows = photos ?? [];
+      }
+    }
+    const galleryByListing = new Map<string, any[]>();
+    for (const photo of galleryRows) {
+      const bucket = galleryByListing.get(photo.listing_id) ?? [];
+      bucket.push(photo);
+      galleryByListing.set(photo.listing_id, bucket);
+    }
+    const listings = await Promise.all(listingRows.map(async (row: any) => ({
       ...row,
       image_url: await signedListingImageUrl(db, row.image_path),
+      gallery_images: await Promise.all((galleryByListing.get(row.id) ?? []).map(async (photo: any) => ({
+        id: photo.id,
+        sort_order: photo.sort_order,
+        image_url: await signedListingImageUrl(db, photo.image_path),
+      }))),
     })));
     return NextResponse.json({
       suppliers: suppliersResult.data ?? [], approvedSuppliers: approvedResult.data ?? [],

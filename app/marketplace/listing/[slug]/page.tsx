@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getApprovedListingBySlug } from '@/lib/catalog';
+import { ListingGallery } from '@/components/listing-gallery';
 
 export const dynamic = 'force-dynamic';
 type Props = { params: Promise<{ slug: string }> };
@@ -23,7 +24,7 @@ export default async function ListingDetailPage({ params }: Props) {
   return <main className="page-shell container narrow-shell">
     <div className="breadcrumbs"><Link href="/marketplace">Marketplace</Link><span>/</span><span>{listing.category}</span></div>
     <article className="listing-detail-card">
-      {listing.image_url ? <img className="listing-detail-image" src={listing.image_url} alt={listing.title} decoding="async" /> : <div className="listing-detail-image listing-image-placeholder" aria-hidden="true"><span>{listing.category}</span><strong>RUFFNECK EXCHANGE</strong></div>}
+      <ListingGallery title={listing.title} category={listing.category} coverUrl={listing.image_url} galleryImages={listing.gallery_images || []} />
       <span className="listing-type">{listing.listing_type}</span>
       <h1>{listing.title}</h1>
       <div className="listing-meta"><span>{listing.category}</span><span>{[listing.city, listing.state].filter(Boolean).join(', ')}</span></div>

@@ -6,7 +6,8 @@ const read = (path) => readFile(new URL(path, root), 'utf8');
 const pkg = JSON.parse(await read('package.json'));
 const route = await read('app/api/supplier/listings/[id]/route.ts');
 
-assert.equal(pkg.version, '2.2.2');
+const currentVersion = pkg.version.split('.').map(Number);
+assert.ok(currentVersion[0] > 2 || (currentVersion[0] === 2 && currentVersion[1] > 2) || (currentVersion[0] === 2 && currentVersion[1] === 2 && currentVersion[2] >= 2), 'the cumulative release must be v2.2.2 or later');
 assert.equal((route.match(/\.from\('rnx_admin_audit_log'\)\.insert\(/g) || []).length, 2, 'both supplier audit writes must remain present');
 assert.equal((route.match(/const \{ error: auditError \} = await db\.from\('rnx_admin_audit_log'\)\.insert\(/g) || []).length, 2, 'both audit writes must await the Supabase thenable');
 assert.equal((route.match(/catch \(auditError\)/g) || []).length, 2, 'both audit writes must safely catch rejected thenables');

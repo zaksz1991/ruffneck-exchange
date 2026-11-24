@@ -15,6 +15,8 @@ export type PublicSupplier = {
   verification_expires_at: string | null;
 };
 
+export type ListingGalleryImage = { id: string; image_url: string; sort_order: number };
+
 export type PublicListing = {
   id: string;
   slug: string;
@@ -31,6 +33,7 @@ export type PublicListing = {
   keywords: string[] | null;
   created_at: string;
   image_url: string | null;
+  gallery_images?: ListingGalleryImage[];
   supplier: PublicSupplier;
 };
 
@@ -110,7 +113,7 @@ export async function getApprovedListingBySlug(slug: string, options: { includeI
     const db = supabaseAdmin();
     const { data, error } = await db
       .from('rnx_listings')
-      .select('id,slug,title,listing_type,category,description,state,city,price_type,price,currency,condition,keywords,created_at,image_path,supplier:rnx_supplier_applications!inner(id,public_slug,business_name,business_type,category,state,website,description,status)')
+      .select('id,supplier_application_id,slug,title,listing_type,category,description,state,city,price_type,price,currency,condition,keywords,created_at,image_path,supplier:rnx_supplier_applications!inner(id,public_slug,business_name,business_type,category,state,website,description,status)')
       .eq('slug', slug)
       .eq('status', 'approved')
       .eq('supplier.status', 'approved')
@@ -122,7 +125,26 @@ export async function getApprovedListingBySlug(slug: string, options: { includeI
     }
     if (!data) return null;
     const row = data as any;
-    return { ...row, image_url: options.includeImage === false ? null : await signedListingImageUrl(db, row.image_path) } as PublicListing;
+    if (options.includeImage === false) return { ...row, image_url: null, gallery_images: [] } as PublicListing;
+
+    const [coverUrl, galleryResult] = await Promise.all([
+      signedListingImageUrl(db, row.image_path),
+      db.from('rnx_listing_gallery_images')
+        .select('id,image_path,sort_order')
+        .eq('listing_id', row.id)
+        .eq('supplier_application_id', row.supplier_application_id)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: true }),
+    ]);
+    if (galleryResult.error) {
+      console.error('[RNX] Listing gallery query failed:', { code: galleryResult.error.code, message: galleryResult.error.message });
+    }
+    const galleryImages = await Promise.all((galleryResult.data ?? []).map(async (photo: any) => ({
+      id: photo.id,
+      sort_order: photo.sort_order,
+      image_url: await signedListingImageUrl(db, photo.image_path),
+    })));
+    return { ...row, image_url: coverUrl, gallery_images: galleryImages.filter((photo) => photo.image_url) } as PublicListing;
   } catch (error) {
     console.error('[RNX] Listing detail unavailable:', error instanceof Error ? error.message : 'Unknown error');
     return null;

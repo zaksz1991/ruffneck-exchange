@@ -14,7 +14,8 @@ const trackingRoute = await read('app/api/track/[token]/route.ts');
 const trackingUi = await read('components/tracking-page.tsx');
 const pkg = JSON.parse(await read('package.json'));
 
-assert.equal(pkg.version, '2.2.2');
+const currentVersion = pkg.version.split('.').map(Number);
+assert.ok(currentVersion[0] > 2 || (currentVersion[0] === 2 && currentVersion[1] > 2) || (currentVersion[0] === 2 && currentVersion[1] === 2 && currentVersion[2] >= 2), 'the cumulative release must be v2.2.2 or later');
 assert.match(pkg.scripts['test:rnx-v200'], /test-rnx-v200-listing-enquiry/);
 assert.match(pkg.scripts.check, /test:rnx-v200/);
 assert.match(migration, /referenced_listing_id uuid[\s\S]*references public\.rnx_listings\(id\) on delete set null/i);

@@ -1,11 +1,12 @@
 'use client';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { SupplierVerificationPanel } from '@/components/supplier-verification-panel';
 
 type Plan = { id: string; code: string; name: string; description: string; listing_limit: number; display_price: string; features: string[] };
 type Payment = { id: string; amount: number; currency: string; payment_method: string; transaction_reference: string; status: string; supplier_note?: string | null; verified_at?: string | null; created_at: string };
 type Membership = { id: string; status: string; quoted_amount: number | null; currency: string; billing_interval: string; quote_expires_at: string | null; period_start: string | null; period_end: string | null; created_at: string; plan: Plan | Plan[]; payments: Payment[] };
-type Listing = { id: string; title: string; slug: string; listing_type: string; category: string; description: string; state: string; city: string | null; price_type: string; price: number | null; currency: string; keywords: string[]; status: string; image_url: string | null; created_at: string; updated_at: string };
+type GalleryImage = { id: string; image_url: string | null; sort_order: number };
+type Listing = { id: string; title: string; slug: string; listing_type: string; category: string; description: string; state: string; city: string | null; price_type: string; price: number | null; currency: string; keywords: string[]; status: string; image_url: string | null; gallery_images: GalleryImage[]; created_at: string; updated_at: string };
 type Offer = { id: string; anonymised_summary: string; quoted_fee: number; currency: string; payment_status: string; supplier_accepted_at: string | null; supplier_declined_at: string | null; supplier_response_note: string | null; payment_verified_at: string | null; customer_approved_at: string | null; customer_declined_at: string | null; contact_released_at: string | null; created_at: string; customer: { category: string; state: string; city: string | null; contact_released: boolean; name: string | null; email: string | null; phone: string | null; preferred_contact: string | null; request_details: string | null } };
 type DashboardData = { supplier: { business_name: string; contact_name: string; email: string; phone: string; category: string; state: string }; listings: Listing[]; memberships: Membership[]; offers: Offer[]; plans: Plan[]; paymentInstructions: string };
 
@@ -21,6 +22,7 @@ export function SupplierDashboard() {
   const [busy, setBusy] = useState(false);
   const [paymentSubscriptionId, setPaymentSubscriptionId] = useState('');
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
+  const [galleryListingId, setGalleryListingId] = useState('');
 
   const refresh = useCallback(async () => {
     setLoading(true); setError('');
@@ -116,6 +118,47 @@ export function SupplierDashboard() {
       setNotice(result.message || 'Listing status updated.');
       await refresh();
     } catch (err) { setError(err instanceof Error ? err.message : 'Listing status could not be changed.'); }
+    finally { setBusy(false); }
+  }
+
+  async function uploadGalleryImages(event: React.FormEvent<HTMLFormElement>, listing: Listing) {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const selected = new FormData(formElement).getAll('images');
+    const files = selected.filter((entry): entry is File => entry instanceof File && entry.size > 0);
+    if (!files.length) { setError('Choose at least one additional photo.'); return; }
+    if (files.length > 4 || files.some((file) => file.size > 4 * 1024 * 1024)) {
+      setError('Choose up to four photos. Each photo must be 4 MB or smaller.');
+      return;
+    }
+    setBusy(true); setError(''); setNotice('');
+    const payload = new FormData();
+    files.forEach((file) => payload.append('images', file));
+    try {
+      const response = await fetch(`/api/supplier/listings/${listing.id}/gallery`, { method: 'POST', body: payload });
+      const result = await response.json().catch(() => ({}));
+      if (response.status === 401) { window.location.assign('/supplier/login'); return; }
+      if (!response.ok) throw new Error(result.error || 'Gallery photos could not be uploaded.');
+      formElement.reset();
+      setNotice(result.message || 'Gallery photos uploaded.');
+      await refresh();
+    } catch (err) { setError(err instanceof Error ? err.message : 'Gallery photos could not be uploaded.'); }
+    finally { setBusy(false); }
+  }
+
+  async function removeGalleryImage(listing: Listing, photo: GalleryImage) {
+    if (!window.confirm('Remove this additional photo from the listing?')) return;
+    setBusy(true); setError(''); setNotice('');
+    try {
+      const response = await fetch(`/api/supplier/listings/${listing.id}/gallery`, {
+        method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ imageId: photo.id }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (response.status === 401) { window.location.assign('/supplier/login'); return; }
+      if (!response.ok) throw new Error(result.error || 'Gallery photo could not be removed.');
+      setNotice(result.message || 'Gallery photo removed.');
+      await refresh();
+    } catch (err) { setError(err instanceof Error ? err.message : 'Gallery photo could not be removed.'); }
     finally { setBusy(false); }
   }
 
@@ -216,7 +259,31 @@ export function SupplierDashboard() {
         <label className="full-field">Description<textarea name="description" rows={4} required minLength={30} maxLength={3000} placeholder="Specifications, coverage, availability, terms and important limitations." /></label>
         <div className="full-field"><button className="button" type="submit" disabled={busy}>{busy ? 'Submitting…' : 'Submit new listing for review'}</button></div>
       </form>
-      {data.listings.length ? <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Image</th><th>Offer</th><th>Category / location</th><th>Price</th><th>Status / actions</th><th>Submitted</th></tr></thead><tbody>{data.listings.map((listing) => <tr key={listing.id}><td>{listing.image_url ? <img className="supplier-listing-thumb" src={listing.image_url} alt={listing.title} /> : <span className="admin-footnote">No image</span>}</td><td><strong>{listing.title}</strong><small>{listing.listing_type}</small></td><td>{listing.category}<small>{[listing.city, listing.state].filter(Boolean).join(', ')}</small></td><td>{listing.price_type === 'enquiry' ? 'Enquiry' : money(listing.price, listing.currency)}</td><td><span className={`admin-state-${listing.status === 'approved' ? 'good' : listing.status === 'rejected' ? 'bad' : 'wait'}`}>{listing.status}</span>{listing.status === 'approved' ? <button className="button button-small button-dark" type="button" disabled={busy} onClick={() => void changeListingStatus(listing.id, 'pause')}>Pause to edit</button> : <button className="button button-small" type="button" disabled={busy} onClick={() => setEditingListing(listing)}>{listing.status === 'rejected' ? 'Correct & resubmit' : 'Edit offer'}</button>}{listing.status === 'paused' && <button className="button button-small button-secondary" type="button" disabled={busy} onClick={() => void changeListingStatus(listing.id, 'reactivate')}>Submit unchanged</button>}</td><td>{dateText(listing.created_at)}</td></tr>)}</tbody></table></div> : <div className="admin-empty">No catalogue listings submitted yet.</div>}
+      {data.listings.length ? <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Image</th><th>Offer</th><th>Category / location</th><th>Price</th><th>Status / actions</th><th>Submitted</th></tr></thead><tbody>{data.listings.map((listing) => <Fragment key={listing.id}>
+        <tr key={listing.id}>
+          <td><div className="supplier-photo-stack">{listing.image_url ? <img className="supplier-listing-thumb" src={listing.image_url} alt={listing.title} /> : <span className="admin-footnote">No cover</span>}<small>{listing.gallery_images?.length || 0}/4 gallery photos</small></div></td>
+          <td><strong>{listing.title}</strong><small>{listing.listing_type}</small></td>
+          <td>{listing.category}<small>{[listing.city, listing.state].filter(Boolean).join(', ')}</small></td>
+          <td>{listing.price_type === 'enquiry' ? 'Enquiry' : money(listing.price, listing.currency)}</td>
+          <td>
+            <span className={`admin-state-${listing.status === 'approved' ? 'good' : listing.status === 'rejected' ? 'bad' : 'wait'}`}>{listing.status}</span>
+            {listing.status === 'approved' ? <button className="button button-small button-dark" type="button" disabled={busy} onClick={() => void changeListingStatus(listing.id, 'pause')}>Pause to edit</button> : <button className="button button-small" type="button" disabled={busy} onClick={() => setEditingListing(listing)}>{listing.status === 'rejected' ? 'Correct & resubmit' : 'Edit offer'}</button>}
+            {listing.status === 'paused' && <button className="button button-small button-secondary" type="button" disabled={busy} onClick={() => void changeListingStatus(listing.id, 'reactivate')}>Submit unchanged</button>}
+            <button className="button button-small" type="button" disabled={busy || listing.status === 'approved'} title={listing.status === 'approved' ? 'Pause this approved listing before managing gallery photos.' : 'Manage additional listing photos'} onClick={() => setGalleryListingId((current) => current === listing.id ? '' : listing.id)}>{galleryListingId === listing.id ? 'Close photos' : `Manage photos (${listing.gallery_images?.length || 0}/4)`}</button>
+          </td>
+          <td>{dateText(listing.created_at)}</td>
+        </tr>
+        {galleryListingId === listing.id && <tr key={`${listing.id}-gallery`}><td colSpan={6}>
+          <div className="supplier-gallery-manager">
+            <div><strong>Additional listing photos</strong><p>Upload up to four extra photos. JPEG, PNG or WebP only; maximum 4 MB per photo. Approved listings must be paused first.</p></div>
+            {listing.gallery_images?.length ? <div className="supplier-gallery-thumbnails">{listing.gallery_images.map((photo) => <div className="supplier-gallery-photo" key={photo.id}>{photo.image_url ? <img src={photo.image_url} alt={`${listing.title} gallery photo`} /> : <span>Preview unavailable</span>}<button type="button" className="button button-small button-secondary" disabled={busy} onClick={() => void removeGalleryImage(listing, photo)}>Remove</button></div>)}</div> : <p className="admin-footnote">No additional photos added.</p>}
+            {listing.status !== 'approved' && (listing.gallery_images?.length || 0) < 4 && <form className="supplier-gallery-upload" onSubmit={(event) => void uploadGalleryImages(event, listing)}>
+              <label>Choose additional photos<input type="file" name="images" multiple required accept="image/jpeg,image/png,image/webp" /></label>
+              <button className="button button-small" type="submit" disabled={busy}>{busy ? 'Uploading…' : 'Upload photos'}</button>
+            </form>}
+          </div>
+        </td></tr>}
+      </Fragment>)}</tbody></table></div> : <div className="admin-empty">No catalogue listings submitted yet.</div>}
     </section>
 
     <section className="supplier-panel">

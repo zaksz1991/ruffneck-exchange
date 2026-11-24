@@ -8,7 +8,8 @@ const requestPage = await readFile(new URL('../app/request/page.tsx', import.met
 const requestForm = await readFile(new URL('../components/request-form.tsx', import.meta.url), 'utf8');
 const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 
-assert.equal(pkg.version, '2.2.2');
+const currentVersion = pkg.version.split('.').map(Number);
+assert.ok(currentVersion[0] > 2 || (currentVersion[0] === 2 && currentVersion[1] > 2) || (currentVersion[0] === 2 && currentVersion[1] === 2 && currentVersion[2] >= 2), 'the cumulative release must be v2.2.2 or later');
 assert.match(action, /SUPPLIER_EMAIL_CONFIRMATION_REQUIRED/);
 assert.match(action, /Supplier email must be confirmed before approval/i);
 assert.match(action, /RNX_SCHEMA_MISMATCH/);

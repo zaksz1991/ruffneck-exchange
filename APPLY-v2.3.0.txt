@@ -1,0 +1,18 @@
+RUFFNECK EXCHANGE v2.3.0 — COMPLETE CUMULATIVE REPLACEMENT
+
+1. In the existing RuffNeck Entertainment Supabase project, confirm migrations 001–015 are already applied, then run `supabase/migrations/016_rnx_listing_gallery.sql` in the Supabase SQL Editor.
+2. Extract this ZIP.
+3. Replace the GitHub repository contents with the contents of the `ruffneck exchange` folder, preserving paths.
+4. Commit the complete replacement to the `main` branch of github.com/zaksz1991/ruffneck-exchange.
+5. Keep the existing Vercel environment variables unchanged. No new variable is required.
+6. Allow the existing Vercel project to deploy from `main` and inspect the TypeScript check and Next.js production build.
+
+The archive is a complete cumulative source replacement. It retains the v2.2.0 cover-image feature and v2.2.1/v2.2.2 Vercel build corrections, and adds the supplier gallery workflow.
+
+After deployment, test with a non-production supplier listing:
+- Upload one to four additional images while the listing is pending.
+- Confirm that an attempt to add more than four is rejected.
+- Confirm that the RNX moderation queue previews the uploaded photos.
+- Approve a test listing and confirm the public detail page shows the interactive gallery.
+- Confirm that gallery edits are blocked while approved, then work after pausing the listing.
+- Remove an additional photo and confirm it disappears from the supplier dashboard and public detail page after approval.

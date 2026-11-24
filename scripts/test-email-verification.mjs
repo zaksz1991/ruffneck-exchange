@@ -16,7 +16,8 @@ const verifyForm = await read('components/email-verification-form.tsx');
 const migration = await read('supabase/migrations/013_rnx_email_verification.sql');
 const pkg = JSON.parse(await read('package.json'));
 
-assert.equal(pkg.version, '2.2.2');
+const currentVersion = pkg.version.split('.').map(Number);
+assert.ok(currentVersion[0] > 2 || (currentVersion[0] === 2 && currentVersion[1] > 2) || (currentVersion[0] === 2 && currentVersion[1] === 2 && currentVersion[2] >= 2), 'the cumulative release must be v2.2.2 or later');
 assert.match(helper, /randomBytes\(32\)/, 'Verification tokens must be cryptographically random.');
 assert.match(helper, /createHash\('sha256'\)/, 'Only SHA-256 token hashes may be stored.');
 assert.match(helper, /createHmac\('sha256'/, 'Rate-limit bucket identifiers must be keyed.');

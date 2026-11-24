@@ -1,18 +1,25 @@
-# RuffNeck Exchange v2.2.2 — build and validation status
+# RuffNeck Exchange v2.3.0 — build and validation status
 
 ## Included functionality
-- Retains the cumulative RNX application through v2.2.1, including marketplace discovery, enquiries, supplier listing editing, moderation and listing-image uploads.
-- Retains v2.2.1's fix for Supabase PromiseLike audit handling in the supplier listing image upload route.
-- Fixes the new Vercel TypeScript error reported at `app/api/supplier/listings/[id]/route.ts:84`. Both audit inserts in this route (listing edits and pause/resubmit actions) now use awaited Supabase inserts within local `try`/`catch` blocks.
-- Supplier listing audit logging remains best-effort. An audit insert failure does not turn an already completed listing change into a failed API response.
+- Complete cumulative RNX application retained through v2.2.2.
+- Suppliers can add and remove up to four additional listing photos alongside the existing cover image.
+- Gallery photos use the existing private Supabase Storage bucket. Uploads accept genuine JPEG, PNG and WebP files up to 4 MB each.
+- The private supplier dashboard manages extra photos. Listing approval state controls when photos can be changed.
+- Approved public listing detail pages show an interactive photo gallery. Marketplace cards continue to use the single cover image.
+- RNX moderators can preview cover and gallery photos before approving a pending listing.
+
+## Security and database
+- Migration 016 adds `rnx_listing_gallery_images`, enables RLS and revokes browser-role privileges.
+- Database triggers enforce supplier ownership and allowed moderation states for uploads and deletions, plus a hard maximum of four additional photos per listing while serialising concurrent inserts on the listing row.
+- Upload and delete APIs require same-origin requests and the authenticated supplier session, and scope records to the supplier and listing.
+- Failed batch uploads clean up already uploaded Storage objects. Audit events are best-effort and do not invalidate a completed action.
+- No new Vercel environment variables or external providers.
 
 ## Validation
-- The supplied Vercel log confirms Next.js compilation succeeded, then TypeScript checking stopped at the unsupported `.catch()` chained to a Supabase `PromiseLike<void>`. The same invalid pattern was present in the second audit insert in that route and has also been removed.
-- Added `test-rnx-v222-supplier-listing-audit-fix.mjs` to assert both audit insert paths remain, are awaited and use safe error handling.
-- The cumulative static regression suite is included in `npm run check`.
-- Full TypeScript checking and a fresh Next.js production build have not been executed in this environment. The next Vercel build must verify the complete production build.
+- Added `test-rnx-v230-listing-gallery.mjs` to check migration controls, upload/delete security, database enforcement, signed URLs, supplier portal management, public gallery rendering and admin preview integration.
+- The static regression suite must be run in the project environment.
+- Full TypeScript typechecking, the Next.js production build, live Supabase migration execution and live Storage upload testing have not yet been executed in this environment. Vercel and the existing Supabase project must confirm them after deployment.
 
-## Database and deployment
-- No new Supabase migration. Existing migrations 001–015 remain unchanged.
-- No new or modified Vercel environment variables.
-- Deploy this complete source archive to the existing `main` branch and let the existing Vercel project build.
+## Deployment
+- Apply migration 016 only after confirming RNX migrations 001–015 are present in the RuffNeck Entertainment Supabase project.
+- No new environment variables. Retain the existing `SUPABASE_URL` and server-side secret configuration.

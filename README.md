@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v2.2.1
+# RuffNeck Exchange (RNX) — v2.3.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -8,10 +8,28 @@ Production: https://ruffneck-exchange.vercel.app/
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
 
+## v2.3.0 — supplier listing photo galleries
+
+- Suppliers can add up to four extra listing photographs in addition to the existing cover image, and remove photos from the supplier portal.
+- Each photo is limited to 4 MB and accepted only when its real file signature matches JPEG, PNG or WebP.
+- Extra photos can be changed only while a listing is pending, rejected or paused. Approved listings must first be paused and all changed listing content remains subject to RNX review.
+- Approved listing detail pages provide selectable photo thumbnails. Marketplace cards continue to use the cover photo to avoid adding gallery-query cost to discovery pages.
+- The private RNX moderation queue previews extra gallery photos alongside the cover image.
+- Adds migration 016, private gallery metadata with RLS and revoked browser-role privileges, plus a database trigger enforcing supplier ownership, allowed moderation state and a hard four-photo limit under concurrent uploads.
+- Reuses the existing private `rnx-listing-images` Storage bucket. No new environment variable or external image service is required.
+
+Apply `supabase/migrations/016_rnx_listing_gallery.sql` in the existing RuffNeck Entertainment Supabase project after confirming RNX migrations 001–015 are already applied.
+
 ## v2.2.1 — Vercel TypeScript build correction
 
 - Fixes the TypeScript error caused by calling `.catch()` on the Supabase query builder's `PromiseLike<void>` result in the listing-image audit path.
 - Uses awaited audit insertion with local error handling so audit failure does not misreport a successful image upload.
+- No database migration or environment-variable change.
+
+## v2.2.2 — supplier listing audit correction
+
+- Removes unsupported native `.catch()` chaining from both audit insert paths in the supplier listing update/status API.
+- Keeps audit writes awaited and best-effort so successful listing changes are not reported as failed when audit logging is unavailable.
 - No database migration or environment-variable change.
 
 ## v2.2.0 — supplier listing cover images

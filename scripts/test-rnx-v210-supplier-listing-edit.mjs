@@ -9,7 +9,8 @@ const dashboardRoute = await read('app/api/supplier/dashboard/route.ts');
 const dashboardUi = await read('components/supplier-dashboard.tsx');
 const css = await read('app/globals.css');
 
-assert.equal(pkg.version, '2.2.2');
+const currentVersion = pkg.version.split('.').map(Number);
+assert.ok(currentVersion[0] > 2 || (currentVersion[0] === 2 && currentVersion[1] > 2) || (currentVersion[0] === 2 && currentVersion[1] === 2 && currentVersion[2] >= 2), 'the cumulative release must be v2.2.2 or later');
 assert.match(pkg.scripts['test:rnx-v210'], /test-rnx-v210-supplier-listing-edit/);
 assert.match(pkg.scripts.check, /test:rnx-v210/);
 assert.match(listingRoute, /getAuthenticatedSupplier\(\)/);

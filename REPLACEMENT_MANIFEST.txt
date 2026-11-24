@@ -1,14 +1,15 @@
-RUFFNECK EXCHANGE v2.2.2 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v2.3.0 — COMPLETE CUMULATIVE REPLACEMENT
 
-Includes the complete RNX Next.js source project, all existing application pages and APIs, components, libraries, public assets, deployment configuration, documentation, regression tests and Supabase migrations 001–015.
+This archive includes the complete RNX Next.js source project, all existing application pages and APIs, components, libraries, public assets, deployment configuration, documentation, regression tests and Supabase migrations 001–016.
 
 Retained features:
-- Marketplace discovery and listing enquiries.
-- Supplier catalogue editing and moderation re-review.
-- Supplier cover-image uploads with file-signature validation, private Supabase Storage, signed image URLs and moderation controls.
+- Marketplace discovery, customer enquiries and supplier matching.
+- Supplier catalogue editing, moderation re-review and private cover-image uploads.
+- Supplier photo galleries with up to four additional images per listing.
+- Interactive public listing galleries and private moderation previews.
 
-Cumulative build repairs:
+Cumulative build repairs retained:
 - v2.2.1: Supabase PromiseLike-safe, best-effort audit logging for listing-image uploads.
 - v2.2.2: Supabase PromiseLike-safe, best-effort audit logging for supplier listing edits, pauses and resubmissions.
 
-Database: no new migration. Keep RNX migrations 001–015 as already applied. No new environment variables.
+Database: apply migration 016 after confirming migrations 001–015 are already applied in the existing RuffNeck Entertainment Supabase project. No new environment variables.
