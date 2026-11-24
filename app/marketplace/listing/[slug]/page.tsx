@@ -5,6 +5,7 @@ import { getApprovedListingBySlug } from '@/lib/catalog';
 import { ListingGallery } from '@/components/listing-gallery';
 import { SaveListingButton } from '@/components/save-listing-button';
 import { currentCustomerId } from '@/lib/customer-auth';
+import { ListingViewTracker } from '@/components/listing-view-tracker';
 
 export const dynamic = 'force-dynamic';
 type Props = { params: Promise<{ slug: string }> };
@@ -24,6 +25,7 @@ export default async function ListingDetailPage({ params }: Props) {
   const [listing, customerId] = await Promise.all([getApprovedListingBySlug(slug), currentCustomerId()]);
   if (!listing) notFound();
   return <main className="page-shell container narrow-shell">
+    <ListingViewTracker listingId={listing.id} />
     <div className="breadcrumbs"><Link href="/marketplace">Marketplace</Link><span>/</span><span>{listing.category}</span></div>
     <article className="listing-detail-card">
       <ListingGallery title={listing.title} category={listing.category} coverUrl={listing.image_url} galleryImages={listing.gallery_images || []} />

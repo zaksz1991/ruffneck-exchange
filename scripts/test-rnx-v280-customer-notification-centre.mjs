@@ -10,7 +10,8 @@ const styles = read('app/globals.css');
 const packageJson = JSON.parse(read('package.json'));
 const savedOfferApi = read('app/api/customer/saved-listings/route.ts');
 
-assert.ok(Number(packageJson.version.split('.')[1]) >= 8, 'The cumulative release must retain the v2.8 feature line.');
+const [majorVersion, minorVersion] = packageJson.version.split('.').map(Number);
+assert.ok(majorVersion > 2 || (majorVersion === 2 && minorVersion >= 8), 'The cumulative release must retain the v2.8 feature line.');
 assert.match(packageJson.scripts.check, /test:rnx-v280/);
 assert.match(dashboard, /type CustomerNotification =/);
 assert.match(dashboard, /fetch\('\/api\/customer\/notifications'/);

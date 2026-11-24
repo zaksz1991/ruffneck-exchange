@@ -9,7 +9,8 @@ const migration = read('supabase/migrations/019_rnx_saved_listing_change_alerts.
 const styles = read('app/globals.css');
 const packageJson = JSON.parse(read('package.json'));
 
-assert.ok(Number(packageJson.version.split('.')[1]) >= 7, 'Cumulative package version must retain the v2.7 feature line.');
+const [majorVersion, minorVersion] = packageJson.version.split('.').map(Number);
+assert.ok(majorVersion > 2 || (majorVersion === 2 && minorVersion >= 7), 'Cumulative package version must retain the v2.7 feature line.');
 assert.match(packageJson.scripts.check, /test:rnx-v270/);
 assert.match(dashboard, /alerts_enabled: boolean/);
 assert.match(dashboard, /Get email alerts/);

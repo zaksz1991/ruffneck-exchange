@@ -1,0 +1,52 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+const read = (path) => readFileSync(resolve(process.cwd(), path), 'utf8');
+const migration = read('supabase/migrations/022_rnx_supplier_listing_analytics.sql');
+const trackingApi = read('app/api/analytics/listing-view/route.ts');
+const tracker = read('components/listing-view-tracker.tsx');
+const listingPage = read('app/marketplace/listing/[slug]/page.tsx');
+const supplierApi = read('app/api/supplier/dashboard/route.ts');
+const supplierDashboard = read('components/supplier-dashboard.tsx');
+const consent = read('components/analytics-consent.tsx');
+const privacy = read('app/privacy/page.tsx');
+const packageJson = JSON.parse(read('package.json'));
+
+assert.equal(packageJson.version, '3.0.0');
+assert.match(packageJson.scripts.check, /test:rnx-v300/);
+assert.match(migration, /create table if not exists public\.rnx_listing_view_events/);
+assert.match(migration, /alter table public\.rnx_listing_view_events enable row level security/);
+assert.match(migration, /revoke all on public\.rnx_listing_view_events from public, anon, authenticated/);
+assert.match(migration, /before insert on public\.rnx_listing_view_events/);
+assert.match(migration, /listing\.status = 'approved'/);
+assert.match(migration, /supplier\.status = 'approved'/);
+assert.match(migration, /grant execute on function public\.rnx_supplier_listing_metrics\(uuid\) to service_role/);
+assert.match(migration, /views_7d/);
+assert.match(migration, /views_30d/);
+assert.match(migration, /saves_total/);
+assert.match(migration, /enquiries_total/);
+assert.doesNotMatch(migration, /availability_status|customer_id|visitor_id|ip_address|user_agent|device_id/);
+
+assert.match(trackingApi, /isSameOriginRequest\(request\)/);
+assert.match(trackingApi, /hasAnalyticsConsent\(\)/);
+assert.match(trackingApi, /rnx_listing_view_events/);
+assert.match(trackingApi, /eq\('status', 'approved'\)/);
+assert.match(trackingApi, /eq\('supplier\.status', 'approved'\)/);
+assert.match(tracker, /sessionStorage/);
+assert.match(tracker, /pendingListingViews/);
+assert.match(tracker, /rnx-analytics-consent-changed/);
+assert.match(consent, /rnx-analytics-consent-changed/);
+assert.match(listingPage, /ListingViewTracker listingId=\{listing\.id\}/);
+assert.match(supplierApi, /rnx_supplier_listing_metrics/);
+assert.match(supplierApi, /listingAnalyticsAvailable: !analyticsResult\.error/);
+assert.match(supplierDashboard, /Listing performance/);
+assert.match(supplierDashboard, /views_7d/);
+assert.match(supplierDashboard, /views_30d/);
+assert.match(supplierDashboard, /saves_total/);
+assert.match(supplierDashboard, /enquiries_total/);
+assert.match(supplierDashboard, /not unique-person counts/);
+assert.match(consent, /aggregate detail-view events/);
+assert.match(privacy, /detail-view event when a published marketplace listing is opened/);
+
+console.log('RNX v3.0.0 supplier listing insights regression checks passed.');

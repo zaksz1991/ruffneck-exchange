@@ -27,6 +27,16 @@ export async function GET() {
     }
     const listingRows = listingsResult.data ?? [];
     const listingIds = listingRows.map((row: any) => row.id);
+    const analyticsResult = await db.rpc('rnx_supplier_listing_metrics', {
+      p_supplier_application_id: supplier.id,
+    });
+    if (analyticsResult.error) {
+      // Keep the supplier portal usable while the additive insights migration is being applied.
+      console.error('[RNX supplier listing analytics]', { code: analyticsResult.error.code, message: analyticsResult.error.message });
+    }
+    const analyticsByListing = new Map<string, any>(
+      (analyticsResult.data ?? []).map((row: any) => [row.listing_id, row]),
+    );
     let galleryRows: any[] = [];
     if (listingIds.length) {
       const { data: photos, error: galleryError } = await db.from('rnx_listing_gallery_images')
@@ -50,15 +60,24 @@ export async function GET() {
       bucket.push(photo);
       galleryByListing.set(photo.listing_id, bucket);
     }
-    const listings = await Promise.all(listingRows.map(async (row: any) => ({
-      ...row,
-      image_url: await signedListingImageUrl(db, row.image_path),
-      gallery_images: await Promise.all((galleryByListing.get(row.id) ?? []).map(async (photo: any) => ({
-        id: photo.id,
-        sort_order: photo.sort_order,
-        image_url: await signedListingImageUrl(db, photo.image_path),
-      }))),
-    })));
+    const listings = await Promise.all(listingRows.map(async (row: any) => {
+      const metrics = analyticsByListing.get(row.id);
+      return {
+        ...row,
+        analytics: {
+          views_7d: Number(metrics?.views_7d ?? 0),
+          views_30d: Number(metrics?.views_30d ?? 0),
+          saves_total: Number(metrics?.saves_total ?? 0),
+          enquiries_total: Number(metrics?.enquiries_total ?? 0),
+        },
+        image_url: await signedListingImageUrl(db, row.image_path),
+        gallery_images: await Promise.all((galleryByListing.get(row.id) ?? []).map(async (photo: any) => ({
+          id: photo.id,
+          sort_order: photo.sort_order,
+          image_url: await signedListingImageUrl(db, photo.image_path),
+        }))),
+      };
+    }));
     const offers = (offersResult.data ?? []).map((row: any) => {
       const lead = Array.isArray(row.lead) ? row.lead[0] : row.lead;
       const released = Boolean(row.contact_released_at && row.payment_status === 'paid' && row.payment_verified_at && row.customer_approved_at);
@@ -92,6 +111,7 @@ export async function GET() {
     return NextResponse.json({
       supplier,
       listings,
+      listingAnalyticsAvailable: !analyticsResult.error,
       memberships: membershipsResult.data ?? [],
       offers,
       plans: plansResult.data ?? [],

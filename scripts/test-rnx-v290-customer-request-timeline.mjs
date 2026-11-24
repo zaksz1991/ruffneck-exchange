@@ -10,7 +10,7 @@ const styles = read('app/globals.css');
 const packageJson = JSON.parse(read('package.json'));
 const readme = read('README.md');
 
-assert.equal(packageJson.version, '2.9.0');
+assert.equal(packageJson.version, '3.0.0');
 assert.match(packageJson.scripts.check, /test:rnx-v290/);
 assert.match(migration, /create table if not exists public\.rnx_customer_request_activity/);
 assert.match(migration, /alter table public\.rnx_customer_request_activity enable row level security/);

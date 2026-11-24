@@ -36,6 +36,7 @@ export function AnalyticsConsent() {
       setChoice(next);
       if (next === 'accepted') saveFirstTouchAttribution();
       else clearStoredAttribution();
+      window.dispatchEvent(new Event('rnx-analytics-consent-changed'));
       setOpen(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Your preference could not be saved.');
@@ -49,7 +50,7 @@ export function AnalyticsConsent() {
       <div className="analytics-consent-copy">
         <p className="eyebrow">YOUR PRIVACY</p>
         <h2 id="analytics-consent-title">Optional analytics</h2>
-        <p>RuffNeck Exchange can record limited, non-identifying campaign information when a customer request or business application is submitted. This helps measure which channels bring enquiries. We do not record optional attribution unless you accept. Referrer URLs are reduced to the referring website name; personal details and full query strings are not collected.</p>
+        <p>RuffNeck Exchange can record limited campaign attribution when a customer request or business application is submitted, and aggregate detail-view events for published marketplace listings. Listing-view records contain the listing and supplier references and event time; they do not include customer account or contact fields. Supplier reports show aggregate counts, not customer identities. These optional analytics run only after you accept. Referrer URLs are reduced to the referring website name; personal details and full query strings are not collected.</p>
         <p>Essential functions do not depend on analytics consent. You can change this choice later from Privacy settings.</p>
         {error && <p className="admin-error" role="alert">{error}</p>}
       </div>

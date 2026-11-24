@@ -6,9 +6,10 @@ type Plan = { id: string; code: string; name: string; description: string; listi
 type Payment = { id: string; amount: number; currency: string; payment_method: string; transaction_reference: string; status: string; supplier_note?: string | null; verified_at?: string | null; created_at: string };
 type Membership = { id: string; status: string; quoted_amount: number | null; currency: string; billing_interval: string; quote_expires_at: string | null; period_start: string | null; period_end: string | null; created_at: string; plan: Plan | Plan[]; payments: Payment[] };
 type GalleryImage = { id: string; image_url: string | null; sort_order: number };
-type Listing = { id: string; title: string; slug: string; listing_type: string; category: string; description: string; state: string; city: string | null; price_type: string; price: number | null; currency: string; keywords: string[]; status: string; availability_status: 'unconfirmed' | 'available' | 'limited' | 'on_request' | 'out_of_stock'; availability_note: string | null; availability_updated_at: string | null; image_url: string | null; gallery_images: GalleryImage[]; created_at: string; updated_at: string };
+type ListingAnalytics = { views_7d: number; views_30d: number; saves_total: number; enquiries_total: number };
+type Listing = { id: string; title: string; slug: string; listing_type: string; category: string; description: string; state: string; city: string | null; price_type: string; price: number | null; currency: string; keywords: string[]; status: string; availability_status: 'unconfirmed' | 'available' | 'limited' | 'on_request' | 'out_of_stock'; availability_note: string | null; availability_updated_at: string | null; image_url: string | null; gallery_images: GalleryImage[]; analytics: ListingAnalytics; created_at: string; updated_at: string };
 type Offer = { id: string; anonymised_summary: string; quoted_fee: number; currency: string; payment_status: string; supplier_accepted_at: string | null; supplier_declined_at: string | null; supplier_response_note: string | null; payment_verified_at: string | null; customer_approved_at: string | null; customer_declined_at: string | null; contact_released_at: string | null; created_at: string; customer: { category: string; state: string; city: string | null; contact_released: boolean; name: string | null; email: string | null; phone: string | null; preferred_contact: string | null; request_details: string | null } };
-type DashboardData = { supplier: { business_name: string; contact_name: string; email: string; phone: string; category: string; state: string }; listings: Listing[]; memberships: Membership[]; offers: Offer[]; plans: Plan[]; paymentInstructions: string };
+type DashboardData = { supplier: { business_name: string; contact_name: string; email: string; phone: string; category: string; state: string }; listings: Listing[]; listingAnalyticsAvailable: boolean; memberships: Membership[]; offers: Offer[]; plans: Plan[]; paymentInstructions: string };
 
 function planOf(membership: Membership) { return Array.isArray(membership.plan) ? membership.plan[0] : membership.plan; }
 function dateText(value?: string | null) { return value ? new Date(value).toLocaleDateString('en-NG', { dateStyle: 'medium' }) : '—'; }
@@ -213,6 +214,8 @@ export function SupplierDashboard() {
   }, [data]);
   const activePlan = useMemo(() => data?.memberships.find((m) => m.status === 'active') || null, [data]);
   const plan = currentMembership ? planOf(currentMembership) : activePlan ? planOf(activePlan) : null;
+  const publishedListings = data?.listings.filter((listing) => listing.status === 'approved')
+    .sort((left, right) => right.analytics.views_30d - left.analytics.views_30d) ?? [];
 
   if (loading && !data) return <div className="empty-state">Loading supplier portal…</div>;
   if (!data) return <div className="form-card"><p className="form-error">{error || 'Supplier dashboard unavailable.'}</p><button className="button" type="button" onClick={() => void refresh()}>Try again</button></div>;
@@ -229,6 +232,29 @@ export function SupplierDashboard() {
     </div>
 
     <SupplierVerificationPanel />
+
+    <section className="supplier-panel supplier-insights-panel">
+      <div className="supplier-section-heading">
+        <div><p className="eyebrow">SUPPLIER INSIGHTS</p><h2>Listing performance</h2><p>Understand which published offers are attracting interest.</p></div>
+        <span>{publishedListings.length} published</span>
+      </div>
+      {!data.listingAnalyticsAvailable ? <div className="supplier-insights-unavailable">
+        <strong>Performance insights are not active yet.</strong>
+        <p>Apply Supabase migration 022 to enable listing performance reports. Your catalogue and supplier portal continue to work without this optional report.</p>
+      </div> : publishedListings.length ? <div className="admin-table-wrap supplier-insights-table-wrap">
+        <table className="admin-table supplier-insights-table">
+          <thead><tr><th>Published offer</th><th>Views · 7 days</th><th>Views · 30 days</th><th>Saves · all time</th><th>Enquiries · all time</th></tr></thead>
+          <tbody>{publishedListings.map((listing) => <tr key={listing.id}>
+            <td><a href={`/marketplace/listing/${encodeURIComponent(listing.slug)}`} target="_blank" rel="noreferrer">{listing.title}</a><small>{listing.category} · {[listing.city, listing.state].filter(Boolean).join(', ')}</small></td>
+            <td>{listing.analytics.views_7d.toLocaleString('en-NG')}</td>
+            <td><strong>{listing.analytics.views_30d.toLocaleString('en-NG')}</strong></td>
+            <td>{listing.analytics.saves_total.toLocaleString('en-NG')}</td>
+            <td>{listing.analytics.enquiries_total.toLocaleString('en-NG')}</td>
+          </tr>)}</tbody>
+        </table>
+      </div> : <div className="supplier-insights-unavailable"><strong>No published listings to report.</strong><p>Once RNX approves a listing, its performance will appear here.</p></div>}
+      <p className="admin-footnote supplier-insights-footnote">View counts include one recorded detail view per listing per browser tab session, and only when the visitor has accepted optional analytics. They are not unique-person counts and exclude visitors who decline analytics. Saves and enquiries are aggregate counts for the listing; customer identities and contact details are never shown in this report.</p>
+    </section>
 
     <section className="supplier-panel">
       <div className="supplier-section-heading"><div><p className="eyebrow">ACCOUNT AND BILLING</p><h2>Membership</h2></div><span className={`admin-state-${currentMembership?.status === 'active' ? 'good' : 'wait'}`}>{currentMembership?.status || 'No active plan'}</span></div>
