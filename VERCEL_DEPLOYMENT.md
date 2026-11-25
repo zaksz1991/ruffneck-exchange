@@ -155,3 +155,8 @@ After deployment, sign in as a customer with at least two supplier quotations fo
 - Both participants receive generic in-app notifications. Message bodies are not copied into notifications.
 - New migration: `supabase/migrations/026_rnx_commercial_quote_conversations.sql`. Apply after migrations 001–025 in the existing RuffNeck Entertainment Supabase project.
 - No new environment variables or external providers. Full typechecking and the Next.js production build must be confirmed by Vercel.
+
+
+## v3.8.0 commercial quotation documents
+
+No Supabase migration or new environment variable is required. Existing migrations 001–027 remain unchanged. After deployment, test the document links from both a customer account and the supplier account recorded on a released introduction. Confirm a different customer/supplier cannot open the same quote URL, and verify the Print / Save as PDF button opens the browser print dialog. The page uses browser-native PDF saving; no server-side PDF generation or third-party service is used.

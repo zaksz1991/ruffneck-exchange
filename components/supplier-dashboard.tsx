@@ -469,6 +469,7 @@ export function SupplierDashboard() {
             <p>{quote.scope_description}</p>
             <small>Fulfilment: {quote.estimated_fulfilment || 'Not stated'} · Valid until {dateText(quote.valid_until)}</small>
             <p className="rnx-quote-terms">{quote.delivery_terms}</p>
+            <a className="button button-small button-secondary rnx-quote-document-link" href={`/supplier/quotes/${quote.id}/document`} target="_blank" rel="noreferrer">Open print-ready quotation ↗</a>
             <CommercialQuoteConversation quoteId={quote.id} quoteReference={quote.quote_reference} audience="supplier" canSend={quote.status === 'submitted' || quote.status === 'selected'} />
             {quote.status === 'submitted' && <button className="button button-small button-secondary" type="button" disabled={busy} onClick={() => void withdrawCommercialQuote(quote.id)}>Withdraw quotation</button>}
             {quote.status === 'selected' && <p className="form-status">The customer marked this proposal as preferred. Confirm the final agreement and payment directly with the customer.</p>}

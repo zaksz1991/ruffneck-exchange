@@ -1,23 +1,26 @@
-# v3.7.0 build and validation status
+# v3.8.0 build and validation status
 
-- Source base: complete cumulative v3.6.0 project archive.
-- Version: 3.7.0.
-- Added private PDF/JPEG/PNG/WebP attachments to customer/supplier commercial quotation conversations.
-- New Supabase migration: `027_rnx_commercial_quote_attachments.sql` (requires migrations 001–026).
-- Private Supabase Storage bucket: `rnx-commercial-quote-attachments`, automatically created/configured by the first valid upload.
-- No new Vercel environment variables, third-party services or payment integrations.
-- Complete source project: 325 files, including 27 Supabase migrations.
+- Source base: complete cumulative RuffNeck Exchange v3.7.0 project archive.
+- Version: 3.8.0.
+- Added authenticated, print-ready commercial quotation documents for customers and suppliers.
+- Complete project archive: 332 files, including 27 Supabase migrations and 27 regression scripts.
+- New Supabase migration: none. Existing migrations 001–027 remain unchanged.
+- No new Vercel environment variables, storage buckets, payment integrations or third-party services.
 
-Validation completed in this workspace:
-- 26 cumulative static regression scripts: passed.
-- TypeScript/TSX syntax transpilation: 172 implementation files checked; no syntax diagnostics. (`next-env.d.ts` is an ambient declaration and is not included in the transpilation count.)
-- Complete cumulative archive structure checked before packaging.
+## Validation completed in this workspace
 
-Not verified in this workspace:
-- Full TypeScript semantic typecheck; project dependencies are not installed here.
+- All 27 cumulative static regression scripts: passed.
+- TypeScript/TSX syntax transpilation: 177 implementation files checked; zero syntax diagnostics. Ambient declaration files are excluded from this syntax-only count.
+- v3.8.0 regression test covers participant-specific ownership, introduction payment/acceptance/approval/contact-release gates, active customer and supplier state, non-indexable document metadata, exclusion of contact/credential fields, quotation contents, disclaimer, print action, print CSS and dashboard links.
+- ZIP structure and archive integrity: checked before packaging.
+
+## Not verified in this workspace
+
+- Full TypeScript semantic typecheck; project dependencies are not installed in this workspace.
 - Next.js production build.
-- Live Supabase migration 027 execution, private Storage bucket creation, and real two-party upload/download.
+- Live Supabase/customer/supplier session access with production data.
+- Browser print output and Save-as-PDF rendering across desktop and mobile browsers.
 
-An npm dependency installation attempt could not reach the npm registry (`EAI_AGAIN` DNS failure), so full typechecking and the Next.js production build could not be run here. Vercel must confirm both after deployment.
+The document pages use the existing customer and supplier signed-session cookies and the existing server-only Supabase credentials. The shared loader refreshes quotation expiry and rechecks the quote owner, linked lead and introduction, customer account status, supplier approval/portal status, supplier acceptance, RNX-verified payment, customer approval and contact-release timestamp. Vercel must confirm the full production build after deployment.
 
-Deployment sequence: confirm migrations 001–026 have succeeded in the existing RuffNeck Entertainment project; apply only migration 027; deploy the complete project to the existing `main` branch and Vercel project. Follow `APPLY-v3.7.0.txt` for the full test workflow.
+Test with a non-production customer and supplier pair whose introduction has passed all existing release gates. Confirm each participant can open the quote document, an unrelated account cannot open it, and the browser's print dialog offers Save as PDF. This release is a document view only; it does not generate or digitally sign a PDF on the server.

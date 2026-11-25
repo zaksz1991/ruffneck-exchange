@@ -373,3 +373,61 @@
 .rnx-quote-attachment-form button{justify-self:start}
 .rnx-quote-selected-file{overflow-wrap:anywhere}
 @media(max-width:620px){.rnx-quote-attachment-form{padding:9px}.rnx-quote-attachment-list li{align-items:flex-start}}
+
+
+/* RNX v3.8.0 — authenticated, print-ready commercial quotation documents */
+.rnx-quote-document-page{max-width:920px;padding-top:34px;padding-bottom:56px}
+.rnx-quote-document-toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:16px}
+.rnx-quote-document-toolbar>div{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+.rnx-quote-document-toolbar>div>span{font-size:10px;color:var(--muted)}
+.rnx-quote-document-sheet{overflow:hidden;border:1px solid #dbe3d8;border-radius:16px;background:#fff;box-shadow:0 16px 42px rgba(23,39,26,.08);color:#202a22}
+.rnx-quote-document-brand{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:28px 32px;background:#101b13;color:#fff}
+.rnx-quote-document-brand-name{margin:0;font-size:19px;font-weight:950;letter-spacing:.12em}
+.rnx-quote-document-brand-name span{color:#c4e3ae}
+.rnx-quote-document-brand>div>p:last-child{margin:5px 0 0;color:#d1ded1;font-size:10px;letter-spacing:.04em}
+.rnx-quote-document-label{padding:7px 10px;border:1px solid #698266;border-radius:5px;color:#d6ebcd;font-size:9px;font-weight:900;letter-spacing:.1em;white-space:nowrap}
+.rnx-quote-document-title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:30px 32px 22px}
+.rnx-quote-document-title-row>div:first-child{min-width:0}
+.rnx-quote-document-title-row .eyebrow{margin:0 0 7px;color:#54754c;font-size:9px;font-weight:900;letter-spacing:.16em}
+.rnx-quote-document-title-row h1{margin:0;color:#17231a;font-size:27px;line-height:1.2;overflow-wrap:anywhere}
+.rnx-quote-document-reference{margin:10px 0 0;color:#637064;font-size:11px}
+.rnx-quote-document-reference strong{color:#1d4a28;letter-spacing:.04em}
+.rnx-quote-document-status{display:grid;gap:4px;min-width:110px;padding:10px 13px;border:1px solid #d7e3d3;border-radius:9px;background:#f5f9f2}
+.rnx-quote-document-status span{color:#637064;font-size:9px;text-transform:uppercase;letter-spacing:.08em;font-weight:900}
+.rnx-quote-document-status strong{font-size:12px;color:#315d35}
+.rnx-quote-document-status.status-declined,.rnx-quote-document-status.status-withdrawn{border-color:#ead1cf;background:#fff7f6}
+.rnx-quote-document-status.status-declined strong,.rnx-quote-document-status.status-withdrawn strong{color:#8b3730}
+.rnx-quote-document-parties{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 32px 22px}
+.rnx-quote-document-parties>div{display:grid;gap:5px;min-width:0;padding:14px;border:1px solid #e2e9df;border-radius:9px;background:#fbfcfa}
+.rnx-quote-document-parties span,.rnx-quote-document-meta span,.rnx-quote-document-price>span,.rnx-quote-document-fulfilment span{color:#69766b;font-size:9px;text-transform:uppercase;letter-spacing:.07em;font-weight:900}
+.rnx-quote-document-parties strong{font-size:13px;overflow-wrap:anywhere}
+.rnx-quote-document-parties small{color:#657066;font-size:10px}
+.rnx-quote-document-meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 32px 18px;padding:15px 0;border-top:1px solid #e5ebe2;border-bottom:1px solid #e5ebe2}
+.rnx-quote-document-meta>div{display:grid;gap:5px;min-width:0}
+.rnx-quote-document-meta strong{font-size:10px;line-height:1.5;overflow-wrap:anywhere}
+.rnx-quote-document-price{display:grid;gap:6px;margin:0 32px 20px;padding:17px 19px;border:1px solid #cfdcc9;border-radius:10px;background:#f1f7ed}
+.rnx-quote-document-price strong{color:#244f2c;font-size:27px;line-height:1.25;overflow-wrap:anywhere}
+.rnx-quote-document-price small{color:#62705f;font-size:10px}
+.rnx-quote-document-section{padding:0 32px 18px}
+.rnx-quote-document-section h2,.rnx-quote-document-disclaimer h2{margin:0 0 7px;color:#243729;font-size:13px}
+.rnx-quote-document-section p{margin:0;color:#39453b;font-size:11px;line-height:1.75;white-space:pre-wrap;overflow-wrap:anywhere}
+.rnx-quote-document-fulfilment{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 32px 20px;padding:11px 13px;border:1px solid #e1e8de;border-radius:8px}
+.rnx-quote-document-fulfilment strong{font-size:11px;text-align:right;overflow-wrap:anywhere}
+.rnx-quote-document-disclaimer{margin:0 32px 24px;padding:14px 15px;border-left:3px solid #8ca77f;background:#f7f9f5}
+.rnx-quote-document-disclaimer h2{font-size:11px}
+.rnx-quote-document-disclaimer p{margin:7px 0 0;color:#566257;font-size:9px;line-height:1.65}
+.rnx-quote-document-footer{display:flex;justify-content:space-between;gap:12px;padding:13px 32px;border-top:1px solid #e5ebe2;color:#7a847b;font-size:9px}
+.rnx-quote-document-link{justify-self:start}
+@media(max-width:620px){.rnx-quote-document-toolbar{align-items:stretch;flex-direction:column}.rnx-quote-document-toolbar>div{justify-content:flex-start}.rnx-quote-document-brand,.rnx-quote-document-title-row{padding-left:18px;padding-right:18px}.rnx-quote-document-brand{align-items:flex-start;flex-direction:column}.rnx-quote-document-title-row{flex-direction:column}.rnx-quote-document-parties{grid-template-columns:1fr;padding-left:18px;padding-right:18px}.rnx-quote-document-meta{grid-template-columns:repeat(2,minmax(0,1fr));margin-left:18px;margin-right:18px}.rnx-quote-document-price{margin-left:18px;margin-right:18px}.rnx-quote-document-section{padding-left:18px;padding-right:18px}.rnx-quote-document-fulfilment{margin-left:18px;margin-right:18px;align-items:flex-start;flex-direction:column}.rnx-quote-document-fulfilment strong{text-align:left}.rnx-quote-document-disclaimer{margin-left:18px;margin-right:18px}.rnx-quote-document-footer{padding-left:18px;padding-right:18px;flex-direction:column}}
+@page{size:A4;margin:12mm}
+@media print{
+  html,body{background:#fff!important;color:#111!important}
+  .site-header,.site-footer,.privacy-settings-trigger,.analytics-consent-panel,.rnx-quote-document-toolbar{display:none!important}
+  .site-main{padding:0!important;margin:0!important}
+  .rnx-quote-document-page{width:100%!important;max-width:none!important;margin:0!important;padding:0!important}
+  .rnx-quote-document-sheet{overflow:visible;border:0!important;border-radius:0!important;box-shadow:none!important}
+  .rnx-quote-document-brand{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .rnx-quote-document-status,.rnx-quote-document-price,.rnx-quote-document-disclaimer,.rnx-quote-document-parties>div{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .rnx-quote-document-section,.rnx-quote-document-parties>div,.rnx-quote-document-price,.rnx-quote-document-disclaimer{break-inside:avoid;page-break-inside:avoid}
+  a{color:inherit!important;text-decoration:none!important}
+}

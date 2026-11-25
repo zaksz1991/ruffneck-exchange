@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v3.7.0
+# RuffNeck Exchange (RNX) — v3.8.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,16 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.8.0 — authenticated, print-ready commercial quotation documents
+
+- Customers and suppliers can open a printable commercial quotation sheet from their respective account dashboards.
+- The document shows the recorded quotation reference, submitted scope, amount/currency, delivery/payment/other terms, estimated fulfilment, status and validity dates, plus the recorded parties and sourcing-request context.
+- Document pages are server-rendered, private, non-indexable and scoped to the customer or supplier recorded on the quote. The loader rechecks supplier acceptance, RNX-verified payment, customer approval and contact release.
+- The sheet contains no customer or supplier email address, phone number, password data, or private conversation messages/attachments.
+- The Print / Save as PDF action uses the browser print dialog; the user can choose “Save as PDF”. RNX does not generate or sign a PDF file server-side.
+- This is a document view of the existing quotation record. It is not an invoice, payment receipt, purchase order, contract, proof of fulfilment or RNX guarantee.
+- No database migration, new environment variable, storage bucket or third-party service is required. Existing migrations 001–027 remain unchanged.
 
 ## v3.7.0 — private commercial quotation attachments
 

@@ -78,7 +78,8 @@ assert.match(component, /message\.attachments/);
 assert.match(component, /target="_blank" rel="noreferrer"/);
 assert.match(component, /private download link/);
 
-assert.equal(pkg.version, '3.7.0');
+const [majorVersion, minorVersion, patchVersion] = pkg.version.split('.').map(Number);
+assert.ok(majorVersion > 3 || (majorVersion === 3 && (minorVersion > 7 || (minorVersion === 7 && patchVersion >= 0))), 'Cumulative package version must retain the v3.7.0 attachment feature line.');
 assert.ok(pkg.scripts['test:rnx-v370']);
 assert.match(pkg.scripts.check, /test:rnx-v370/);
 console.log('RNX v3.7.0 private commercial quotation attachment regression checks passed.');
