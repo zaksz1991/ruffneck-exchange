@@ -355,3 +355,21 @@
 .rnx-quote-message-form small,.rnx-quote-conversation-note{color:var(--muted);font-size:9px;line-height:1.5}
 .rnx-quote-conversation-note{padding-top:8px;border-top:1px solid #e7ece4}
 @media(max-width:620px){.rnx-quote-conversation-body{padding:10px}.rnx-quote-message{max-width:100%}.rnx-quote-conversation-heading{align-items:center}}
+
+/* v3.7.0 — private quotation conversation attachments */
+.rnx-quote-attachment-list{display:grid;gap:7px;list-style:none;margin:5px 0 0;padding:0}
+.rnx-quote-attachment-list li{display:flex;align-items:center;gap:9px;min-width:0;padding:8px 9px;border:1px solid #d7e2d3;border-radius:9px;background:#f7fbf5}
+.rnx-quote-attachment-list li>span{display:grid;place-items:center;flex:0 0 34px;height:34px;border-radius:7px;background:#e5efe1;color:#315d35;font-size:9px;font-weight:900}
+.rnx-quote-attachment-list li>div{display:grid;gap:2px;min-width:0}
+.rnx-quote-attachment-list a{color:#245a32;font-size:11px;font-weight:800;text-decoration:underline;overflow-wrap:anywhere}
+.rnx-quote-attachment-list small,.rnx-quote-attachment-form p,.rnx-quote-selected-file{color:var(--muted);font-size:9px;line-height:1.45}
+.rnx-quote-attachment-form{display:grid;gap:9px;padding:12px;border:1px dashed #b8cbb2;border-radius:10px;background:#f5faf2}
+.rnx-quote-attachment-form>div{display:grid;gap:3px}
+.rnx-quote-attachment-form strong{font-size:11px;color:#315d35}
+.rnx-quote-attachment-form p{margin:0}
+.rnx-quote-attachment-form label{display:grid;gap:5px;font-size:10px;font-weight:800}
+.rnx-quote-attachment-form input[type=file],.rnx-quote-attachment-form input[type=text]{width:100%;min-width:0;padding:8px;border:1px solid #cbd8c7;border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-size:11px}
+.rnx-quote-attachment-form input[type=file]{font-size:10px}
+.rnx-quote-attachment-form button{justify-self:start}
+.rnx-quote-selected-file{overflow-wrap:anywhere}
+@media(max-width:620px){.rnx-quote-attachment-form{padding:9px}.rnx-quote-attachment-list li{align-items:flex-start}}

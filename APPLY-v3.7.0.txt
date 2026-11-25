@@ -1,0 +1,33 @@
+RUFFNECK EXCHANGE v3.7.0 — DEPLOYMENT INSTRUCTIONS
+
+Repository: https://github.com/zaksz1991/ruffneck-exchange
+Branch: main
+Production: https://ruffneck-exchange.vercel.app/
+Supabase project: RuffNeck Entertainment
+Vercel Root Directory: ./
+
+SUPABASE
+1. Confirm migrations 001–026 have already succeeded in RuffNeck Entertainment.
+2. Apply only: supabase/migrations/027_rnx_commercial_quote_attachments.sql
+3. Confirm the migration succeeds before deploying the application.
+4. Do not rerun migrations 001–026 or delete existing tables/data.
+
+GITHUB / VERCEL
+1. Extract the complete replacement ZIP.
+2. Open the included `ruffneck exchange` folder.
+3. Replace the existing GitHub repository contents with the complete contents of this folder.
+4. Commit to the existing `main` branch and allow Vercel to deploy.
+5. Keep the existing Vercel project, Root Directory `./`, and current environment variables.
+
+POST-DEPLOYMENT TEST
+1. Sign in to a customer account and an approved supplier account connected to the same quotation after RNX has recorded payment verification, customer approval and contact release.
+2. Open the quotation conversation from both dashboards.
+3. Send a short text message, then upload a small PDF and a JPEG/PNG/WebP sample from each side.
+4. Confirm the other participant receives the existing in-app notification and can download each file while signed in.
+5. Confirm an unrelated customer/supplier cannot retrieve a file; a closed/expired/finalised quotation cannot accept a new attachment, but eligible participants can still retrieve historical attachments.
+6. Test a file above 4 MB and a renamed/non-image file; both must be rejected.
+
+No new Vercel environment variables or third-party services are required. The private Storage bucket is created/configured automatically on the first valid upload. No beta Vercel large-body setting is required.
+
+VALIDATION BOUNDARY
+See BUILD_STATUS.md. Static regression tests and TypeScript syntax checks are run in this workspace. Full TypeScript semantic typechecking, Next.js production build, and live Supabase/Storage testing still require confirmation in the connected deployment environment.

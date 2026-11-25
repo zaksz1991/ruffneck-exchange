@@ -40,6 +40,7 @@ assert.match(component, /This quotation is no longer open for new messages/);
 assert.match(customerDashboard, /CommercialQuoteConversation/);
 assert.match(supplierDashboard, /CommercialQuoteConversation/);
 assert.match(supplierDashboard, /Open quotation conversation/);
-assert.equal(pkg.version, '3.6.0');
+const [releaseMajor, releaseMinor] = pkg.version.split('.').map(Number);
+assert.ok(releaseMajor > 3 || (releaseMajor === 3 && releaseMinor >= 6), 'Cumulative project must retain v3.6.0 conversation support.');
 assert.ok(pkg.scripts['test:rnx-v360']);
 console.log('RNX v3.6.0 commercial quotation conversation regression checks passed.');

@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v3.6.0
+# RuffNeck Exchange (RNX) — v3.7.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,14 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.7.0 — private commercial quotation attachments
+
+- Customers and introduced suppliers can attach one PDF, JPEG, PNG or WebP file to a quotation conversation message.
+- Files are limited to 4 MB each, with a maximum of 20 attachments per quotation, and are validated from their binary signature and stored in a private Supabase Storage bucket.
+- The conversation displays the attachment name and size. Message-list JSON does not expose raw storage paths; downloads require a participant-authenticated endpoint and use 5-minute signed URLs.
+- Attachment submission reuses the v3.6.0 participant, contact-release, quote status, expiry and transaction-outcome checks. The file metadata and message are saved in one database transaction.
+- Adds migration 027. Apply after migration 026. No new Vercel environment variables or external services are required.
 
 ## v3.6.0 — private commercial quotation conversations
 

@@ -59,3 +59,10 @@ Apply `supabase/migrations/024_rnx_commercial_quotes.sql` after migrations 001â€
 After an RNX introduction has passed supplier acceptance, payment verification, customer approval and contact release, the customer and introduced supplier can exchange quotation-specific messages from their dashboards. Messages are attached to one quotation, restricted to its two recorded participants and stored as plain text. Each new message creates a generic in-app notification for the other party; the content itself is not copied into the notification. Conversation history remains readable after closure, but sending is blocked for expired, withdrawn, declined, not-selected or otherwise closed quotes, and after a transaction outcome is completed, cancelled or disputed.
 
 Apply `supabase/migrations/026_rnx_commercial_quote_conversations.sql` after migration 025. Messages are not a contract, RNX does not process the commercial payment, and parties must independently verify final terms and payment details.
+
+
+## v3.7.0 â€” private quotation conversation attachments
+
+After the same RNX contact-release gate used for quotation conversations, either participant may share one PDF, JPEG, PNG or WebP file with an optional short note. Files are limited to 4 MB each, up to 20 attachments per quotation, and are validated from their file signatures. The object bucket is private; message-list JSON exposes only file metadata and does not include raw storage paths. A participant must sign in to the corresponding customer or supplier account to request a 5-minute signed download link. The database attachment RPC calls the existing message RPC, so the same quote ownership, account, contact-release, quote validity and transaction-outcome checks apply. Attachments are read-only conversation records; the application does not scan files for malware and users must share only material relevant to that quotation.
+
+Apply `supabase/migrations/027_rnx_commercial_quote_attachments.sql` after migration 026. The private Storage bucket is created/configured automatically on the first valid upload. No new environment variable or third-party provider is introduced.

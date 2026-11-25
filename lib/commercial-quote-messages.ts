@@ -59,6 +59,35 @@ export async function loadCommercialQuoteMessages(
     .limit(150);
   if (messagesError) throw messagesError;
 
+  const messageRows = messages ?? [];
+  const messageIds = messageRows.map((message) => message.id);
+  const attachmentsByMessage = new Map<string, Array<{
+    id: string;
+    file_name: string;
+    mime_type: string;
+    file_size_bytes: number;
+    created_at: string;
+  }>>();
+  if (messageIds.length) {
+    const { data: attachments, error: attachmentsError } = await db
+      .from('rnx_commercial_quote_message_attachments')
+      .select('id,message_id,file_name,mime_type,file_size_bytes,created_at')
+      .eq('quote_id', quoteId)
+      .in('message_id', messageIds);
+    if (attachmentsError) throw attachmentsError;
+    for (const attachment of attachments ?? []) {
+      const current = attachmentsByMessage.get(attachment.message_id) ?? [];
+      current.push({
+        id: attachment.id,
+        file_name: attachment.file_name,
+        mime_type: attachment.mime_type,
+        file_size_bytes: Number(attachment.file_size_bytes),
+        created_at: attachment.created_at,
+      });
+      attachmentsByMessage.set(attachment.message_id, current);
+    }
+  }
+
   const { data: outcome, error: outcomeError } = await db
     .from('rnx_transaction_outcomes')
     .select('status')
@@ -71,7 +100,10 @@ export async function loadCommercialQuoteMessages(
   return {
     notFound: false as const,
     quote: { id: quote.id, quote_reference: quote.quote_reference, status: quote.status },
-    messages: (messages ?? []).reverse(),
+    messages: messageRows.reverse().map((message) => ({
+      ...message,
+      attachments: attachmentsByMessage.get(message.id) ?? [],
+    })),
     canSend,
   };
 }
