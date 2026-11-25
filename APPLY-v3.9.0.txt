@@ -1,0 +1,24 @@
+RUFFNECK EXCHANGE v3.9.0 — DEPLOYMENT
+
+SOURCE
+Complete cumulative project archive. Replace the GitHub repository contents with the contents of the included `ruffneck exchange` folder. Commit to `main` and allow Vercel to deploy.
+
+SUPABASE
+Project: RuffNeck Entertainment
+Apply only: supabase/migrations/028_rnx_commercial_quote_revision_requests.sql
+Prerequisites: migrations 001–027 must already be applied. Do not rerun completed migrations.
+
+ENVIRONMENT
+No new Vercel environment variables are required. Existing Supabase server credentials and current customer/supplier session configuration are reused.
+
+FUNCTIONAL TEST
+1. Use a test customer and test supplier with an introduction that has passed the existing supplier acceptance, RNX payment verification, customer approval and contact-release gates.
+2. Supplier submits a quotation.
+3. Customer opens the quote and requests changes with a 10–800 character note.
+4. Confirm the original quote is retained with status `revision_requested` and the supplier notification is created.
+5. Supplier submits a revised quote from the matching opportunity card.
+6. Confirm a new quote row is created with `revision_of_quote_id` pointing to the original quote; verify the old quote amount/scope were not overwritten.
+7. Test that another account cannot request a revision or submit a revision for the supplier's quote.
+
+COMMERCIAL BOUNDARY
+A revision request or revised quotation does not create an order, payment, contract or RNX guarantee. RNX does not collect the supplier-customer commercial payment.

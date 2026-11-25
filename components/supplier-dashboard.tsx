@@ -10,7 +10,7 @@ type Membership = { id: string; status: string; quoted_amount: number | null; cu
 type GalleryImage = { id: string; image_url: string | null; sort_order: number };
 type ListingAnalytics = { views_7d: number; views_30d: number; saves_total: number; enquiries_total: number };
 type Listing = { id: string; title: string; slug: string; listing_type: string; category: string; description: string; state: string; city: string | null; price_type: string; price: number | null; currency: string; keywords: string[]; status: string; availability_status: 'unconfirmed' | 'available' | 'limited' | 'on_request' | 'out_of_stock'; availability_note: string | null; availability_updated_at: string | null; image_url: string | null; gallery_images: GalleryImage[]; analytics: ListingAnalytics; created_at: string; updated_at: string };
-type CommercialQuote = { id: string; lead_offer_id: string; quote_reference: string; title: string; scope_description: string; total_amount: number; currency: string; delivery_terms: string; estimated_fulfilment: string | null; valid_until: string; status: 'submitted' | 'selected' | 'not_selected' | 'declined' | 'withdrawn' | 'expired'; created_at: string; responded_at: string | null };
+type CommercialQuote = { id: string; lead_offer_id: string; quote_reference: string; title: string; scope_description: string; total_amount: number; currency: string; delivery_terms: string; estimated_fulfilment: string | null; valid_until: string; status: 'submitted' | 'selected' | 'not_selected' | 'declined' | 'withdrawn' | 'expired' | 'revision_requested'; created_at: string; responded_at: string | null; revision_of_quote_id?: string | null; revision_request_note?: string | null; revision_requested_at?: string | null };
 type SupplierNotification = { id: string; notification_type: string; title: string; message: string; related_quote_id: string | null; read_at: string | null; created_at: string };
 type Offer = { id: string; anonymised_summary: string; quoted_fee: number; currency: string; payment_status: string; supplier_accepted_at: string | null; supplier_declined_at: string | null; supplier_response_note: string | null; payment_verified_at: string | null; customer_approved_at: string | null; customer_declined_at: string | null; contact_released_at: string | null; created_at: string; outcome: { status: string; customer_outcome: string | null; supplier_outcome: string | null; completed_at: string | null } | null; review: { id: string; rating: number; title: string; body: string; moderation_status: string; supplier_response: string | null } | null; quotes: CommercialQuote[]; customer: { category: string; state: string; city: string | null; contact_released: boolean; name: string | null; email: string | null; phone: string | null; preferred_contact: string | null; request_details: string | null } };
 type DashboardData = { supplier: { business_name: string; contact_name: string; email: string; phone: string; category: string; state: string }; listings: Listing[]; listingAnalyticsAvailable: boolean; memberships: Membership[]; offers: Offer[]; plans: Plan[]; paymentInstructions: string; notifications: SupplierNotification[]; unreadNotificationCount: number; notificationsAvailable: boolean };
@@ -19,6 +19,10 @@ function planOf(membership: Membership) { return Array.isArray(membership.plan) 
 function dateText(value?: string | null) { return value ? new Date(value).toLocaleDateString('en-NG', { dateStyle: 'medium' }) : '—'; }
 function dateTimeText(value?: string | null) { return value ? new Date(value).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' }) : '—'; }
 function money(value: number | null, currency = 'NGN') { if (value === null) return 'Awaiting quotation'; try { return new Intl.NumberFormat('en-NG', { style: 'currency', currency, maximumFractionDigits: 2 }).format(Number(value)); } catch { return `${currency} ${value}`; } }
+function pendingRevisionQuote(quotes: CommercialQuote[]) {
+  const parentIdsWithRevision = new Set(quotes.map((quote) => quote.revision_of_quote_id).filter((id): id is string => Boolean(id)));
+  return quotes.find((quote) => quote.status === 'revision_requested' && !parentIdsWithRevision.has(quote.id)) || null;
+}
 
 export function SupplierDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -199,6 +203,7 @@ export function SupplierDashboard() {
     event.preventDefault();
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
+    const revisionOfQuoteId = String(form.get('revision_of_quote_id') || '').trim();
     const payload = {
       offer_id: offerId,
       title: String(form.get('quote_title') || ''),
@@ -208,6 +213,7 @@ export function SupplierDashboard() {
       delivery_terms: String(form.get('delivery_terms') || ''),
       estimated_fulfilment: String(form.get('estimated_fulfilment') || ''),
       valid_days: form.get('valid_days'),
+      ...(revisionOfQuoteId ? { revision_of_quote_id: revisionOfQuoteId } : {}),
     };
     setBusy(true); setError(''); setNotice('');
     try {
@@ -325,7 +331,7 @@ export function SupplierDashboard() {
 
     <section className="supplier-panel supplier-notifications-panel" aria-label="Commercial quotation notifications">
       <div className="supplier-section-heading">
-        <div><p className="eyebrow">COMMERCIAL QUOTATION UPDATES</p><h2>Notifications</h2><p>Customer decisions, quotation messages and system updates for your submitted quotations.</p></div>
+        <div><p className="eyebrow">COMMERCIAL QUOTATION UPDATES</p><h2>Notifications</h2><p>Customer decisions, revision requests, quotation messages and system updates for your submitted quotations.</p></div>
         <div className="supplier-notification-heading-actions"><span>{data.unreadNotificationCount} unread</span><button className="button button-small button-secondary" type="button" disabled={busy || data.unreadNotificationCount === 0} onClick={() => void markSupplierNotificationRead()}>Mark all read</button></div>
       </div>
       {!data.notificationsAvailable ? <div className="supplier-insights-unavailable"><strong>Supplier notifications are not active yet.</strong><p>Apply Supabase migration 025 to enable commercial quotation decision alerts. Your existing supplier workspace remains available.</p></div> : data.notifications.length ? <div className="supplier-notification-list">{data.notifications.map((item) => <article className={`supplier-notification-card${item.read_at ? '' : ' is-unread'}`} key={item.id}>
@@ -464,7 +470,9 @@ export function SupplierDashboard() {
         {offer.customer.contact_released && <section className="rnx-commercial-quote-panel" aria-label="Commercial quotation workspace">
           <div><strong>Commercial quotation</strong><p>Send the customer a priced proposal with clear scope, delivery terms and validity. This is separate from the RNX introduction fee.</p></div>
           {offer.quotes.map((quote) => <article className="rnx-quote-record" id={`supplier-quote-${quote.id}`} key={quote.id}>
-            <div className="rnx-quote-record-heading"><strong>{quote.quote_reference} · {quote.title}</strong><span className={`admin-state-${quote.status === 'selected' ? 'good' : quote.status === 'submitted' ? 'wait' : quote.status === 'declined' || quote.status === 'withdrawn' ? 'bad' : 'wait'}`}>{quote.status.replaceAll('_', ' ')}</span></div>
+            <div className="rnx-quote-record-heading"><strong>{quote.quote_reference} · {quote.title}</strong><span className={`admin-state-${quote.status === 'selected' ? 'good' : quote.status === 'submitted' || quote.status === 'revision_requested' ? 'wait' : quote.status === 'declined' || quote.status === 'withdrawn' ? 'bad' : 'wait'}`}>{quote.status.replaceAll('_', ' ')}</span></div>
+            {quote.revision_of_quote_id && <small className="rnx-quote-revision-line">Revised from {offer.quotes.find((previousQuote) => previousQuote.id === quote.revision_of_quote_id)?.quote_reference || 'an earlier quotation'}.</small>}
+            {quote.status === 'revision_requested' && <div className="rnx-quote-revision-note"><strong>Customer requested changes</strong><p>{quote.revision_request_note || 'The customer asked for a revised proposal.'}</p><small>Received {dateTimeText(quote.revision_requested_at || quote.responded_at)}</small></div>}
             <strong className="rnx-quote-amount">{money(quote.total_amount, quote.currency)}</strong>
             <p>{quote.scope_description}</p>
             <small>Fulfilment: {quote.estimated_fulfilment || 'Not stated'} · Valid until {dateText(quote.valid_until)}</small>
@@ -476,13 +484,14 @@ export function SupplierDashboard() {
             {quote.status === 'not_selected' && <small>The customer selected another quotation for this request.</small>}
           </article>)}
           {!offer.quotes.some((quote) => quote.status === 'submitted' || quote.status === 'selected') && !['completed','cancelled','disputed'].includes(offer.outcome?.status || '') && <form className="rnx-commercial-quote-form" onSubmit={(event) => void submitCommercialQuote(event, offer.id)}>
-            <h4>{offer.quotes.length ? 'Submit a revised quotation' : 'Prepare a commercial quotation'}</h4>
+            {pendingRevisionQuote(offer.quotes) && <><input type="hidden" name="revision_of_quote_id" value={pendingRevisionQuote(offer.quotes)?.id || ''} /><div className="rnx-quote-revision-note"><strong>Respond to the customer's revision request</strong><p>{pendingRevisionQuote(offer.quotes)?.revision_request_note || 'The customer has requested changes to the earlier quotation.'}</p><small>Your new proposal will be saved as a separate version linked to the original quotation.</small></div></>}
+            <h4>{pendingRevisionQuote(offer.quotes) ? 'Prepare the revised commercial quotation' : offer.quotes.length ? 'Submit a new commercial quotation' : 'Prepare a commercial quotation'}</h4>
             <label>Quote title<input name="quote_title" required minLength={3} maxLength={120} placeholder="e.g. Supply and delivery proposal" /></label>
             <label>Scope and specifications<textarea name="scope_description" required minLength={20} maxLength={3000} rows={4} placeholder="Describe exactly what is included, quantities, specifications and exclusions." /></label>
             <div className="rnx-quote-form-row"><label>Total quoted amount<input name="total_amount" required type="number" min="0" max="100000000000" step="0.01" inputMode="decimal" /></label><label>Currency<select name="currency" defaultValue="NGN"><option value="NGN">NGN — Naira</option><option value="USD">USD — US dollar</option><option value="GBP">GBP — Pound sterling</option><option value="EUR">EUR — Euro</option></select></label></div>
             <label>Delivery, payment and other terms<textarea name="delivery_terms" required minLength={2} maxLength={1200} rows={3} placeholder="State delivery fees, payment schedule, warranty/returns where applicable and any conditions." /></label>
             <div className="rnx-quote-form-row"><label>Estimated fulfilment<input name="estimated_fulfilment" maxLength={160} placeholder="e.g. 5–7 working days" /></label><label>Quote validity<select name="valid_days" defaultValue="14"><option value="7">7 days</option><option value="14">14 days</option><option value="30">30 days</option><option value="60">60 days</option></select></label></div>
-            <button className="button button-small" type="submit" disabled={busy}>{busy ? 'Submitting quotation…' : 'Send quotation to customer'}</button>
+            <button className="button button-small" type="submit" disabled={busy}>{busy ? 'Submitting quotation…' : pendingRevisionQuote(offer.quotes) ? 'Send revised quotation' : 'Send quotation to customer'}</button>
           </form>}
           <small className="rnx-quote-disclaimer">RNX records the proposal and customer preference only. RNX does not collect this commercial payment or guarantee price, quality, delivery or fulfilment.</small>
         </section>}

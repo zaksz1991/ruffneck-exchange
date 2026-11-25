@@ -19,7 +19,7 @@ export async function GET() {
     const db = supabaseAdmin();
     const { data: quoteRows, error: quoteError } = await db
       .from('rnx_commercial_quotes')
-      .select('id,quote_reference,lead_offer_id,lead_id,supplier_application_id,title,scope_description,total_amount,currency,delivery_terms,estimated_fulfilment,valid_until,status,created_at,updated_at,responded_at')
+      .select('id,quote_reference,lead_offer_id,lead_id,supplier_application_id,title,scope_description,total_amount,currency,delivery_terms,estimated_fulfilment,valid_until,status,created_at,updated_at,responded_at,revision_of_quote_id,revision_request_note,revision_requested_at')
       .order('created_at', { ascending: false })
       .limit(MAX_RECORDS);
 
@@ -85,6 +85,7 @@ export async function GET() {
       expired: rows.filter((row: any) => row.status === 'expired').length,
       withdrawn: rows.filter((row: any) => row.status === 'withdrawn').length,
       notSelected: rows.filter((row: any) => row.status === 'not_selected').length,
+      revisionRequested: rows.filter((row: any) => row.status === 'revision_requested').length,
     };
 
     return NextResponse.json({ quotes: rows, summary, capped: rows.length === MAX_RECORDS }, { headers: PRIVATE_HEADERS });

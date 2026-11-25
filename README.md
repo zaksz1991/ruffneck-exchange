@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v3.8.0
+# RuffNeck Exchange (RNX) — v3.9.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,16 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.9.0 — customer-requested commercial quotation revisions
+
+- Customers can request specific changes to a submitted commercial quotation using a 10–800 character explanation covering scope, price, delivery, validity or other terms.
+- The original quote is retained with a `revision_requested` status and an immutable event record. The customer request note is visible only to the associated customer, the supplier that owns the introduction and authorised RNX Operations.
+- The supplier receives an in-app notification and can submit a fresh quotation as a new immutable record linked to the earlier quote. Repeated revision cycles retain the parent/child history.
+- Only one child revision can be submitted for each individual revision request. The new proposal goes through the existing supplier acceptance, RNX payment verification, customer approval and contact-release checks.
+- If the customer selects another supplier proposal while a revision request is outstanding, the stale revision request is closed as `not_selected` and the supplier is notified.
+- A revision request is not acceptance, payment, a purchase order, contract or guarantee. RNX does not process the supplier-customer commercial payment.
+- Adds migration `028_rnx_commercial_quote_revision_requests.sql`. Apply after migrations 001–027. No new environment variables or third-party services are required.
 
 ## v3.8.0 — authenticated, print-ready commercial quotation documents
 

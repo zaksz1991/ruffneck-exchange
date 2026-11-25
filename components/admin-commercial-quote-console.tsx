@@ -23,10 +23,13 @@ type CommercialQuote = {
   delivery_terms: string;
   estimated_fulfilment: string | null;
   valid_until: string;
-  status: 'submitted' | 'selected' | 'not_selected' | 'declined' | 'withdrawn' | 'expired';
+  status: 'submitted' | 'selected' | 'not_selected' | 'declined' | 'withdrawn' | 'expired' | 'revision_requested';
   created_at: string;
   updated_at: string;
   responded_at: string | null;
+  revision_of_quote_id: string | null;
+  revision_request_note: string | null;
+  revision_requested_at: string | null;
   supplier: { business_name: string; public_slug: string | null } | null;
   request: { category: string; state: string; city: string | null } | null;
   events: QuoteEvent[];
@@ -34,7 +37,7 @@ type CommercialQuote = {
 
 type QuoteReport = {
   quotes: CommercialQuote[];
-  summary: { total: number; awaitingCustomer: number; preferred: number; declined: number; expired: number; withdrawn: number; notSelected: number };
+  summary: { total: number; awaitingCustomer: number; preferred: number; declined: number; expired: number; withdrawn: number; notSelected: number; revisionRequested: number };
   capped: boolean;
 };
 
@@ -45,6 +48,7 @@ const STATUS_LABELS: Record<CommercialQuote['status'], string> = {
   declined: 'Declined',
   withdrawn: 'Supplier withdrew',
   expired: 'Expired',
+  revision_requested: 'Customer requested revision',
 };
 
 function stamp(value: string | null | undefined) {
@@ -71,6 +75,8 @@ function eventLabel(event: QuoteEvent) {
     declined: 'declined the quotation',
     withdrawn: 'withdrew the quotation',
     expired: 'marked the quotation as expired',
+    revision_requested: 'requested changes to the quotation',
+    revision_submitted: 'submitted a revised quotation',
   };
   return `${actor} ${action[event.event_type] || event.event_type.replaceAll('_', ' ')}.`;
 }
@@ -144,6 +150,7 @@ export function AdminCommercialQuoteConsole() {
     ['Declined', summary.declined],
     ['Expired', summary.expired],
     ['Withdrawn', summary.withdrawn],
+    ['Revision requested', summary.revisionRequested],
   ] : [];
 
   return <section className="admin-commercial-quotes supplier-panel">
@@ -157,7 +164,7 @@ export function AdminCommercialQuoteConsole() {
       <div className="admin-commercial-stats">{stats.map(([label, value]) => <article key={label}><span>{label}</span><strong>{new Intl.NumberFormat('en-NG').format(value)}</strong></article>)}</div>
       <div className="admin-commercial-toolbar">
         <label>Search<input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Quote reference, supplier, title or location" /></label>
-        <label>Status<select value={filter} onChange={(event) => setFilter(event.target.value)}><option value="all">All statuses</option><option value="submitted">Awaiting customer</option><option value="selected">Customer preferred</option><option value="not_selected">Not selected</option><option value="declined">Declined</option><option value="withdrawn">Supplier withdrew</option><option value="expired">Expired</option></select></label>
+        <label>Status<select value={filter} onChange={(event) => setFilter(event.target.value)}><option value="all">All statuses</option><option value="submitted">Awaiting customer</option><option value="selected">Customer preferred</option><option value="not_selected">Not selected</option><option value="declined">Declined</option><option value="withdrawn">Supplier withdrew</option><option value="expired">Expired</option><option value="revision_requested">Customer requested revision</option></select></label>
       </div>
       {report.capped && <p className="admin-commercial-cap">Showing the latest 250 quotations. Older records are not included in these counts or this export.</p>}
       <p className="admin-commercial-result-count">{visible.length} quotation{visible.length === 1 ? '' : 's'} match the current view.</p>
@@ -171,9 +178,11 @@ export function AdminCommercialQuoteConsole() {
             <div><span>Delivery and payment terms</span><p>{quote.delivery_terms}</p></div>
             <div><span>Estimated fulfilment</span><p>{quote.estimated_fulfilment || 'Not specified'}</p></div>
             <div><span>Validity</span><p>Until {stamp(quote.valid_until)}</p></div>
+            {quote.status === 'revision_requested' && <div><span>Customer revision request</span><p>{quote.revision_request_note || 'No revision note recorded.'}</p></div>}
+            {quote.revision_of_quote_id && <div><span>Revision lineage</span><p>Revised from quote ID {quote.revision_of_quote_id}</p></div>}
           </div>
           <div className="admin-commercial-meta"><span>Submitted {stamp(quote.created_at)}</span><span>Last updated {stamp(quote.updated_at)}</span><span>Responded {stamp(quote.responded_at)}</span><span>Request {quote.lead_id}</span></div>
-          <details className="admin-commercial-events"><summary>Recorded history ({quote.events.length})</summary>{quote.events.length ? <ol>{quote.events.map((event) => <li key={event.id}><div><strong>{eventLabel(event)}</strong><time>{stamp(event.created_at)}</time></div>{event.event_type === 'submitted' && event.details && <small>Submitted amount: {String(event.details.currency || quote.currency)} {String(event.details.total_amount ?? quote.total_amount)}</small>}</li>)}</ol> : <p>No event history is available for this quotation.</p>}</details>
+          <details className="admin-commercial-events"><summary>Recorded history ({quote.events.length})</summary>{quote.events.length ? <ol>{quote.events.map((event) => <li key={event.id}><div><strong>{eventLabel(event)}</strong><time>{stamp(event.created_at)}</time></div>{event.event_type === 'submitted' && event.details && <small>Submitted amount: {String(event.details.currency || quote.currency)} {String(event.details.total_amount ?? quote.total_amount)}</small>}{event.event_type === 'revision_requested' && event.details?.revision_note && <small>Customer requested: {String(event.details.revision_note)}</small>}</li>)}</ol> : <p>No event history is available for this quotation.</p>}</details>
         </article>;
       })}</div>}
       <p className="admin-commercial-note">Operational note: a customer marking a quote as preferred is not a payment, purchase order, binding contract, proof of delivery or evidence of completed fulfilment. Supplier and customer remain responsible for their commercial agreement.</p>

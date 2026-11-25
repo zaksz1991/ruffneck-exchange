@@ -32,7 +32,7 @@ export async function GET() {
     let quoteRows: any[] = [];
     if (offerIds.length) {
       const { data: quotes, error: quotesError } = await db.from('rnx_commercial_quotes')
-        .select('id,lead_offer_id,quote_reference,title,scope_description,total_amount,currency,delivery_terms,estimated_fulfilment,valid_until,status,created_at,responded_at')
+        .select('id,lead_offer_id,quote_reference,title,scope_description,total_amount,currency,delivery_terms,estimated_fulfilment,valid_until,status,created_at,responded_at,revision_of_quote_id,revision_request_note,revision_requested_at')
         .in('lead_offer_id', offerIds)
         .eq('customer_id', customerId)
         .order('created_at', { ascending: false });

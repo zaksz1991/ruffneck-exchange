@@ -71,3 +71,14 @@ Apply `supabase/migrations/027_rnx_commercial_quote_attachments.sql` after migra
 ## v3.8.0 — printable quotation documents
 
 Customers and suppliers can open a private print-ready quotation document from their dashboards. The page reads the existing immutable quotation record and displays its reference, supplier/customer names, scope, amount/currency, delivery/payment/other terms, fulfilment estimate, issue date, validity and status. Access is scoped to the recorded customer or supplier and the loader rechecks the introduction payment, supplier acceptance, customer approval and contact-release fields. It does not query or expose phone numbers, email addresses, passwords, conversation text or attachment storage paths. The browser print dialog can be used to save the sheet as PDF; RNX does not create or digitally sign a PDF. The document is expressly not an invoice, receipt, purchase order, binding contract, proof of fulfilment or RNX guarantee. No database migration or environment variable is required.
+
+
+## v3.9.0 — customer-requested revisions
+
+Customers may request a revision of a quote while it is in `submitted` status and still within validity. The request must include a 10–800 character explanation. The original quotation is retained with status `revision_requested`, its request note and an immutable event. The supplier receives a supplier-scoped in-app notification.
+
+The supplier responds by submitting a new immutable quotation linked through `revision_of_quote_id`; the original price and scope are never overwritten. One child revision is permitted per revision request, and a later revision request can create the next link in the chain. The normal introduction eligibility gates are checked again when the revised quote is submitted. If another proposal for the same request is selected while a revision request is waiting, the old request is closed as `not_selected`.
+
+A revision request is a negotiation step only. It does not create an order, payment, purchase order, contract or RNX guarantee. RNX does not receive or process the supplier-customer commercial payment.
+
+Apply `supabase/migrations/028_rnx_commercial_quote_revision_requests.sql` after migrations 001–027. No additional environment variables or third-party providers are introduced.

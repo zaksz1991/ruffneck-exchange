@@ -431,3 +431,14 @@
   .rnx-quote-document-section,.rnx-quote-document-parties>div,.rnx-quote-document-price,.rnx-quote-document-disclaimer{break-inside:avoid;page-break-inside:avoid}
   a{color:inherit!important;text-decoration:none!important}
 }
+
+
+/* v3.9.0 — formal customer requests for a revised supplier quotation */
+.rnx-quote-revision-form,.rnx-quote-revision-note{display:grid;gap:8px;padding:12px;border:1px solid #d4dfcf;border-radius:9px;background:#f6f9f3;min-width:0}
+.rnx-quote-revision-form label{display:grid;gap:5px;font-size:11px;font-weight:800}
+.rnx-quote-revision-form textarea{width:100%;min-width:0;min-height:82px;padding:9px 10px;border:1px solid #cbd7c8;border-radius:8px;background:#fff;color:var(--ink);font:inherit;resize:vertical}
+.rnx-quote-revision-form p,.rnx-quote-revision-note p{margin:0;color:#4c594e;font-size:11px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.rnx-quote-revision-note strong{font-size:11px}
+.rnx-quote-revision-note small,.rnx-quote-revision-line{color:var(--muted);font-size:10px;line-height:1.5}
+.rnx-quote-revision-form .button{justify-self:start}
+@media(max-width:620px){.rnx-quote-revision-form{padding:10px}.rnx-quote-revision-form .button{width:100%}}

@@ -1,26 +1,22 @@
-# v3.8.0 build and validation status
+# v3.9.0 build and validation status
 
-- Source base: complete cumulative RuffNeck Exchange v3.7.0 project archive.
-- Version: 3.8.0.
-- Added authenticated, print-ready commercial quotation documents for customers and suppliers.
-- Complete project archive: 332 files, including 27 Supabase migrations and 27 regression scripts.
-- New Supabase migration: none. Existing migrations 001–027 remain unchanged.
-- No new Vercel environment variables, storage buckets, payment integrations or third-party services.
+- Source base: complete cumulative RuffNeck Exchange v3.8.0 project archive.
+- Version: 3.9.0.
+- Upgrade: customer-requested commercial quotation revisions, immutable parent/child revision lineage, supplier in-app notifications and Operations visibility.
+- New Supabase migration: `028_rnx_commercial_quote_revision_requests.sql`. Requires migrations 001–027 to have already succeeded.
+- No new Vercel environment variables, storage buckets, payment integrations or third-party providers.
 
-## Validation completed in this workspace
+## Validation performed in this workspace
 
-- All 27 cumulative static regression scripts: passed.
-- TypeScript/TSX syntax transpilation: 177 implementation files checked; zero syntax diagnostics. Ambient declaration files are excluded from this syntax-only count.
-- v3.8.0 regression test covers participant-specific ownership, introduction payment/acceptance/approval/contact-release gates, active customer and supplier state, non-indexable document metadata, exclusion of contact/credential fields, quotation contents, disclaimer, print action, print CSS and dashboard links.
-- ZIP structure and archive integrity: checked before packaging.
+- Cumulative static regression scripts: 28 passed, 0 failed.
+- TypeScript/TSX syntax transpilation: 177 files, 0 syntax diagnostics.
+- v3.9.0 regression coverage includes migration dependencies, revision states, one-child-per-request enforcement, customer/supplier authorization gates, preservation of the v3.6 supplier-message notification type, revision notifications and Operations visibility.
+- ZIP integrity: verified after packaging.
 
 ## Not verified in this workspace
 
-- Full TypeScript semantic typecheck; project dependencies are not installed in this workspace.
-- Next.js production build.
-- Live Supabase/customer/supplier session access with production data.
-- Browser print output and Save-as-PDF rendering across desktop and mobile browsers.
+- Full TypeScript semantic typecheck and Next.js production build. Project dependencies are not installed in this workspace; no full build was run.
+- Live Supabase migration execution, Postgres function compilation, RPC privileges, trigger delivery and concurrent quote workflow.
+- Browser-level customer/supplier workflow testing with two production-like accounts.
 
-The document pages use the existing customer and supplier signed-session cookies and the existing server-only Supabase credentials. The shared loader refreshes quotation expiry and rechecks the quote owner, linked lead and introduction, customer account status, supplier approval/portal status, supplier acceptance, RNX-verified payment, customer approval and contact-release timestamp. Vercel must confirm the full production build after deployment.
-
-Test with a non-production customer and supplier pair whose introduction has passed all existing release gates. Confirm each participant can open the quote document, an unrelated account cannot open it, and the browser's print dialog offers Save as PDF. This release is a document view only; it does not generate or digitally sign a PDF on the server.
+Apply migration 028 only after confirming migrations 001–027 are present in the existing RuffNeck Entertainment Supabase project. The migration extends the supplier notification constraint while retaining existing quotation status notifications and v3.6.0 message notifications. Vercel must confirm the full production build after deployment. Test with non-production customer and supplier accounts whose introduction has passed the existing release gates.

@@ -17,6 +17,7 @@ const submitSchema = z.object({
   delivery_terms: z.string().trim().min(2).max(1200),
   estimated_fulfilment: z.string().trim().max(160).optional().nullable(),
   valid_days: z.coerce.number().int().min(1).max(60),
+  revision_of_quote_id: z.string().uuid().optional(),
 });
 const withdrawSchema = z.object({ quote_id: z.string().uuid(), action: z.literal('withdraw') });
 
@@ -28,24 +29,37 @@ export async function POST(request: Request) {
   if (!parsed.success) return NextResponse.json({ error: 'Check the quotation title, scope, amount, currency, delivery terms and validity.' }, { status: 400, headers: PRIVATE_HEADERS });
 
   try {
-    const { data, error } = await supabaseAdmin().rpc('rnx_submit_commercial_quote', {
-      p_offer_id: parsed.data.offer_id,
-      p_supplier_id: supplier.id,
-      p_title: parsed.data.title,
-      p_scope_description: parsed.data.scope_description,
-      p_total_amount: parsed.data.total_amount,
-      p_currency: parsed.data.currency,
-      p_delivery_terms: parsed.data.delivery_terms,
-      p_estimated_fulfilment: parsed.data.estimated_fulfilment || null,
-      p_valid_days: parsed.data.valid_days,
-    });
+    const db = supabaseAdmin();
+    const { data, error } = parsed.data.revision_of_quote_id
+      ? await db.rpc('rnx_submit_commercial_quote_revision', {
+          p_previous_quote_id: parsed.data.revision_of_quote_id,
+          p_supplier_id: supplier.id,
+          p_title: parsed.data.title,
+          p_scope_description: parsed.data.scope_description,
+          p_total_amount: parsed.data.total_amount,
+          p_currency: parsed.data.currency,
+          p_delivery_terms: parsed.data.delivery_terms,
+          p_estimated_fulfilment: parsed.data.estimated_fulfilment || null,
+          p_valid_days: parsed.data.valid_days,
+        })
+      : await db.rpc('rnx_submit_commercial_quote', {
+          p_offer_id: parsed.data.offer_id,
+          p_supplier_id: supplier.id,
+          p_title: parsed.data.title,
+          p_scope_description: parsed.data.scope_description,
+          p_total_amount: parsed.data.total_amount,
+          p_currency: parsed.data.currency,
+          p_delivery_terms: parsed.data.delivery_terms,
+          p_estimated_fulfilment: parsed.data.estimated_fulfilment || null,
+          p_valid_days: parsed.data.valid_days,
+        });
     if (error) throw error;
     const result = data as { ok?: boolean; error?: string; quote_id?: string; quote_reference?: string; valid_until?: string };
     if (!result?.ok) return NextResponse.json({ error: result?.error || 'Quotation submission was rejected.' }, { status: 409, headers: PRIVATE_HEADERS });
     return NextResponse.json({ ok: true, quote: result, message: `Quotation ${result.quote_reference || ''} sent to the customer.` }, { status: 201, headers: PRIVATE_HEADERS });
   } catch (error) {
     console.error('[RNX supplier] Commercial quote submission failed:', error instanceof Error ? error.message : 'unknown');
-    return NextResponse.json({ error: 'The quotation could not be submitted. Confirm migration 024 is applied.' }, { status: 503, headers: PRIVATE_HEADERS });
+    return NextResponse.json({ error: 'The quotation could not be submitted. Confirm migrations 024 and 028 are applied.' }, { status: 503, headers: PRIVATE_HEADERS });
   }
 }
 
@@ -66,6 +80,6 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ ok: true, message: `Quotation ${result.quote_reference || ''} withdrawn.` }, { headers: PRIVATE_HEADERS });
   } catch (error) {
     console.error('[RNX supplier] Commercial quote withdrawal failed:', error instanceof Error ? error.message : 'unknown');
-    return NextResponse.json({ error: 'The quotation could not be withdrawn. Confirm migration 024 is applied.' }, { status: 503, headers: PRIVATE_HEADERS });
+    return NextResponse.json({ error: 'The quotation could not be withdrawn. Confirm migrations 024 and 028 are applied.' }, { status: 503, headers: PRIVATE_HEADERS });
   }
 }

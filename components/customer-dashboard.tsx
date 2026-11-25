@@ -82,9 +82,12 @@ type CustomerCommercialQuote = {
   delivery_terms: string;
   estimated_fulfilment: string | null;
   valid_until: string;
-  status: 'submitted' | 'selected' | 'not_selected' | 'declined' | 'withdrawn' | 'expired';
+  status: 'submitted' | 'selected' | 'not_selected' | 'declined' | 'withdrawn' | 'expired' | 'revision_requested';
   created_at: string;
   responded_at: string | null;
+  revision_of_quote_id?: string | null;
+  revision_request_note?: string | null;
+  revision_requested_at?: string | null;
 };
 
 type IntroducedOffer = {
@@ -190,6 +193,7 @@ export function CustomerDashboard() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
   const [quoteCompareIdsByRequest, setQuoteCompareIdsByRequest] = useState<Record<string, string[]>>({});
+  const [revisionForms, setRevisionForms] = useState<Record<string, boolean>>({});
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -383,6 +387,37 @@ export function CustomerDashboard() {
     }
   }
 
+  async function requestCommercialQuoteRevision(event: React.FormEvent<HTMLFormElement>, quote: CustomerCommercialQuote) {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    const revisionNote = String(form.get('revision_note') || '').trim();
+    if (revisionNote.length < 10 || revisionNote.length > 800) {
+      setError('Explain the requested changes in 10–800 characters.');
+      return;
+    }
+    if (!window.confirm('Send this revision request to the supplier? The existing quotation will be preserved and no contract or payment will be created.')) return;
+    setBusy(quote.id); setError(''); setNotice('');
+    try {
+      const response = await fetch(`/api/customer/quotes/${quote.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'request_revision', revision_note: revisionNote }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (response.status === 401) { window.location.assign('/customer/login'); return; }
+      if (!response.ok) throw new Error(result.error || 'Quotation revision request could not be sent.');
+      setRevisionForms((current) => ({ ...current, [quote.id]: false }));
+      formElement.reset();
+      setNotice(result.message || 'Quotation revision request sent.');
+      await refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Quotation revision request could not be sent.');
+    } finally {
+      setBusy('');
+    }
+  }
+
   async function confirmTransactionOutcome(offer: IntroducedOffer, outcome: 'completed' | 'not_completed') {
     const prompt = outcome === 'completed'
       ? 'Confirm that the transaction with this introduced supplier was completed. Both parties must confirm before a verified review can be submitted.'
@@ -524,7 +559,8 @@ export function CustomerDashboard() {
               {offer.quotes?.length > 0 && <section className="rnx-customer-quotes" aria-label="Supplier commercial quotations">
                 <div><p className="eyebrow">COMMERCIAL PROPOSALS</p><h5>Supplier quotations</h5><p>These proposals are separate from the RNX introduction fee. Compare scope, amount, delivery terms and validity.</p></div>
                 {offer.quotes.map((quote) => <article className="rnx-customer-quote" id={`quote-${quote.id}`} key={quote.id}>
-                  <div className="rnx-customer-quote-heading"><strong>{quote.quote_reference} · {quote.title}</strong><span className={`admin-state-${quote.status === 'selected' ? 'good' : quote.status === 'submitted' ? 'wait' : quote.status === 'declined' || quote.status === 'withdrawn' ? 'bad' : 'wait'}`}>{quote.status.replaceAll('_', ' ')}</span></div>
+                  <div className="rnx-customer-quote-heading"><strong>{quote.quote_reference} · {quote.title}</strong><span className={`admin-state-${quote.status === 'selected' ? 'good' : quote.status === 'submitted' || quote.status === 'revision_requested' ? 'wait' : quote.status === 'declined' || quote.status === 'withdrawn' ? 'bad' : 'wait'}`}>{quote.status.replaceAll('_', ' ')}</span></div>
+                  {quote.revision_of_quote_id && <small className="rnx-quote-revision-line">Revised from {offer.quotes.find((previousQuote) => previousQuote.id === quote.revision_of_quote_id)?.quote_reference || 'an earlier quotation'}.</small>}
                   <strong className="rnx-customer-quote-amount">{quoteMoney(quote.total_amount, quote.currency)}</strong>
                   <p>{quote.scope_description}</p>
                   <dl><div><dt>Estimated fulfilment</dt><dd>{quote.estimated_fulfilment || 'Not stated'}</dd></div><div><dt>Valid until</dt><dd>{date(quote.valid_until)}</dd></div></dl>
@@ -532,7 +568,11 @@ export function CustomerDashboard() {
                   <a className="button button-small button-secondary rnx-quote-document-link" href={`/customer/quotes/${quote.id}/document`} target="_blank" rel="noreferrer">Open print-ready quotation ↗</a>
                   <CommercialQuoteConversation quoteId={quote.id} quoteReference={quote.quote_reference} audience="customer" canSend={quote.status === 'submitted' || quote.status === 'selected'} />
                   {(quote.status === 'submitted' || quote.status === 'selected') && <button className="button button-small button-secondary rnx-quote-compare-toggle" type="button" onClick={() => toggleCommercialQuoteCompare(item.id, quote.id)} disabled={!(selectedQuoteIds.includes(quote.id)) && selectedQuoteIds.length >= 3}>{selectedQuoteIds.includes(quote.id) ? 'Remove from comparison' : selectedQuoteIds.length >= 3 ? 'Comparison limit reached' : 'Add to comparison'}</button>}
-                  {quote.status === 'submitted' && <div className="customer-outcome-actions"><button className="button button-small" type="button" disabled={busy === quote.id} onClick={() => void respondToCommercialQuote(quote, 'select')}>Mark as preferred</button><button className="button button-small button-secondary" type="button" disabled={busy === quote.id} onClick={() => void respondToCommercialQuote(quote, 'decline')}>Decline quotation</button></div>}
+                  {quote.status === 'submitted' && <>
+                    <div className="customer-outcome-actions"><button className="button button-small" type="button" disabled={busy === quote.id} onClick={() => void respondToCommercialQuote(quote, 'select')}>Mark as preferred</button><button className="button button-small button-secondary" type="button" disabled={busy === quote.id} onClick={() => void respondToCommercialQuote(quote, 'decline')}>Decline quotation</button><button className="button button-small button-secondary" type="button" disabled={busy === quote.id} onClick={() => setRevisionForms((current) => ({ ...current, [quote.id]: !current[quote.id] }))}>{revisionForms[quote.id] ? 'Close revision request' : 'Request changes'}</button></div>
+                    {revisionForms[quote.id] && <form className="rnx-quote-revision-form" onSubmit={(event) => void requestCommercialQuoteRevision(event, quote)}><label>What should the supplier revise?<textarea name="revision_note" required minLength={10} maxLength={800} rows={3} placeholder="For example, clarify quantities, adjust the scope, separate delivery charges or extend the validity period." /></label><p>The original quotation remains in your history. The supplier may submit a new version linked to this one.</p><button className="button button-small" type="submit" disabled={busy === quote.id}>{busy === quote.id ? 'Sending request…' : 'Send revision request'}</button></form>}
+                  </>}
+                  {quote.status === 'revision_requested' && <div className="rnx-quote-revision-note"><strong>Revision requested {quote.revision_requested_at ? `· ${date(quote.revision_requested_at)}` : ''}</strong><p>{quote.revision_request_note || 'You asked the supplier to revise this quotation.'}</p><small>The supplier has been notified. A revised proposal will appear as a separate quotation record.</small></div>}
                   {quote.status === 'selected' && <p className="form-status">You marked this as your preferred proposal. Confirm the final agreement and payment directly with the supplier.</p>}
                   {quote.status === 'not_selected' && <small>This quotation was not selected because you marked another proposal as preferred.</small>}
                   {quote.status === 'expired' && <small>This quotation has expired. Ask the supplier for an updated proposal.</small>}
