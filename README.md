@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v3.9.0
+# RuffNeck Exchange (RNX) — v3.10.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,14 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.10.0 — commercial quotation revision history
+
+- Customer and supplier dashboards now show a linked version timeline when a quotation has been revised.
+- Each linked proposal shows its reference, status, submission date, amount/currency and validity. Field-level comparisons identify changes to title, price, scope, delivery terms, estimated fulfilment and validity.
+- Same-currency price changes show the difference; currency changes are flagged and are not converted or ranked. The customer's original revision instruction remains visible.
+- This uses the existing `revision_of_quote_id` relationship from migration 028. No new migration or Vercel environment variable is required.
+- The timeline compares recorded data only; it does not create a contract, order, payment or fulfilment guarantee.
 
 ## v3.9.0 — customer-requested commercial quotation revisions
 
@@ -289,6 +297,6 @@ The cumulative static regression scripts, including the v3.2.0 commercial quote 
 
 Review Vercel plan terms for commercial use before monetised production operation. Do not assume a personal-use plan permits commercial marketplace operations.
 
-## Current release: v3.9.1
+## Current release: v3.10.0
 
-This cumulative release repairs the TypeScript JSX rendering error in the Operations commercial quotation history. It does not require a Supabase migration or environment-variable change. See `RELEASE-NOTES-v3.9.1.md` and `APPLY-v3.9.1.txt`.
+This cumulative release adds quotation revision history and field-level comparisons to the customer and supplier dashboards. It does not require a Supabase migration or environment-variable change. See `RELEASE-NOTES-v3.10.0.md` and `APPLY-v3.10.0.txt`.

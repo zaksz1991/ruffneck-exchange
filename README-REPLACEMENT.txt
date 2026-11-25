@@ -1,6 +1,6 @@
-RUFFNECK EXCHANGE v3.7.0 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v3.10.0 — COMPLETE CUMULATIVE REPLACEMENT
 
-This ZIP contains the complete cumulative RuffNeck Exchange source project, not an incremental overlay.
+This ZIP contains the complete cumulative RuffNeck Exchange source project, not an incremental overlay. It is based on v3.9.1 and includes the v3.10.0 quotation revision-history upgrade.
 
 DEPLOYMENT
 1. Extract this ZIP.
@@ -10,11 +10,10 @@ DEPLOYMENT
 
 SUPABASE
 Existing project: RuffNeck Entertainment.
-Confirm migrations 001–026 are applied, then apply only supabase/migrations/027_rnx_commercial_quote_attachments.sql.
-Do not rerun migrations 001–026.
+No new migration is required. Keep migrations 001–028 unchanged. Do not rerun them.
 
-NEW IN v3.7.0 — PRIVATE QUOTATION ATTACHMENTS
-Customers and introduced suppliers can attach PDF, JPEG, PNG or WebP files to private commercial quotation conversations. Files are limited to 4 MB each, up to 20 files per quotation. Storage is private and downloads require the participant's signed-in session and a short-lived signed link.
+NEW IN v3.10.0 — COMMERCIAL QUOTATION REVISION HISTORY
+Customer and supplier dashboards display linked versions of a revised quote, compare recorded fields, show same-currency price deltas and warn when currencies change. The customer revision instruction remains visible alongside the resulting revision.
 
-No new Vercel environment variables, third-party services or payment integrations are required.
+No new Vercel environment variables, third-party services, storage buckets or payment integrations are required.
 Full TypeScript typechecking and the Next.js production build must be confirmed by Vercel after deployment.

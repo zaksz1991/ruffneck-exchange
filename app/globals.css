@@ -442,3 +442,46 @@
 .rnx-quote-revision-note small,.rnx-quote-revision-line{color:var(--muted);font-size:10px;line-height:1.5}
 .rnx-quote-revision-form .button{justify-self:start}
 @media(max-width:620px){.rnx-quote-revision-form{padding:10px}.rnx-quote-revision-form .button{width:100%}}
+
+
+/* v3.10.0 — linked quotation revision timeline and field-level comparison */
+.rnx-quote-revision-history{display:grid;gap:10px;padding:13px;border:1px solid #cbdcc5;border-radius:10px;background:#f3f8f0;min-width:0}
+.rnx-quote-revision-history-intro{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.rnx-quote-revision-history-intro h5{margin:2px 0;font-size:14px}
+.rnx-quote-revision-history-intro p:not(.eyebrow){margin:3px 0 0;color:var(--muted);font-size:11px;line-height:1.55}
+.rnx-quote-revision-history-intro>span{padding:5px 9px;border-radius:999px;background:#e1eddb;color:#315d35;font-size:10px;font-weight:900;white-space:nowrap}
+.rnx-quote-revision-history-chains{display:grid;gap:8px;min-width:0}
+.rnx-quote-revision-history-chain{padding:9px;border:1px solid #dce7d7;border-radius:8px;background:#fff;min-width:0}
+.rnx-quote-revision-history-chain>summary{display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;list-style:none;font-size:11px;min-width:0}
+.rnx-quote-revision-history-chain>summary::-webkit-details-marker{display:none}
+.rnx-quote-revision-history-chain>summary:after{content:'＋';font-weight:900;color:#315d35}
+.rnx-quote-revision-history-chain[open]>summary:after{content:'−'}
+.rnx-quote-revision-history-chain>summary>span{overflow-wrap:anywhere}
+.rnx-quote-revision-history-chain>summary>small{color:var(--muted);white-space:nowrap}
+.rnx-quote-revision-history-list{display:grid;gap:11px;list-style:none;margin:12px 0 0;padding:0}
+.rnx-quote-revision-history-item{display:grid;grid-template-columns:27px minmax(0,1fr);gap:9px;min-width:0}
+.rnx-quote-revision-history-marker{display:grid;place-items:center;width:25px;height:25px;border-radius:50%;background:#315d35;color:#fff;font-size:10px;font-weight:900}
+.rnx-quote-revision-history-item>article{display:grid;gap:6px;min-width:0;padding:10px;border:1px solid #e1e9dd;border-radius:8px;background:#fff}
+.rnx-quote-revision-history-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.rnx-quote-revision-history-heading>div{display:grid;gap:3px;min-width:0}
+.rnx-quote-revision-history-heading strong{font-size:11px;overflow-wrap:anywhere}
+.rnx-quote-revision-history-heading small,.rnx-quote-revision-history-meta{color:var(--muted);font-size:10px}
+.rnx-quote-revision-history-item h5{margin:0;font-size:12px;overflow-wrap:anywhere}
+.rnx-quote-revision-history-price{margin:0;color:#315d35;font-size:16px;font-weight:900}
+.rnx-quote-revision-diff{display:grid;gap:6px;padding:9px;border-radius:7px;background:#f5f8f2;min-width:0}
+.rnx-quote-revision-diff>strong{font-size:10px}
+.rnx-quote-revision-diff>p,.rnx-quote-revision-diff-field p,.rnx-quote-revision-history-request p{margin:0;font-size:10px;line-height:1.55;color:#485649;white-space:pre-wrap;overflow-wrap:anywhere}
+.rnx-quote-revision-price-delta{font-weight:800;color:#315d35!important}
+.rnx-quote-revision-currency-warning{padding:7px;border-left:3px solid #b47b22;background:#fff8e9;color:#6d4c1a!important}
+.rnx-quote-revision-diff-field{padding:7px;border:1px solid #dfe8da;border-radius:6px;background:#fff;min-width:0}
+.rnx-quote-revision-diff-field summary{cursor:pointer;font-size:10px;font-weight:800;color:#315d35}
+.rnx-quote-revision-diff-values{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:7px}
+.rnx-quote-revision-diff-values>div{display:grid;gap:4px;min-width:0;padding:7px;border-radius:5px;background:#f6f8f4}
+.rnx-quote-revision-diff-values small{font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase}
+.rnx-quote-revision-validity-delta,.rnx-quote-revision-origin{margin:0;color:var(--muted);font-size:10px;line-height:1.5}
+.rnx-quote-revision-history-request{display:grid;gap:5px;margin:0;padding:9px;border-left:3px solid #78956c;border-radius:5px;background:#eef5ea}
+.rnx-quote-revision-history-request strong,.rnx-quote-revision-diff blockquote strong{font-size:10px}
+.rnx-quote-revision-history-request small{color:var(--muted);font-size:9px}
+.rnx-quote-revision-diff blockquote{display:grid;gap:5px;margin:0;padding:8px;border-left:3px solid #78956c;background:#eef5ea}
+.rnx-quote-revision-history-disclaimer{margin:0;color:var(--muted);font-size:9px;line-height:1.5}
+@media(max-width:620px){.rnx-quote-revision-history{padding:10px}.rnx-quote-revision-history-chain>summary{align-items:flex-start;flex-direction:column}.rnx-quote-revision-diff-values{grid-template-columns:1fr}.rnx-quote-revision-history-item{grid-template-columns:23px minmax(0,1fr);gap:6px}.rnx-quote-revision-history-marker{width:22px;height:22px}}

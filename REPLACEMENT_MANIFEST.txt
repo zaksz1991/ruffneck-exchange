@@ -1,11 +1,11 @@
-RUFFNECK EXCHANGE v3.7.0 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v3.10.0 — COMPLETE CUMULATIVE REPLACEMENT
 
-Complete cumulative Next.js source project based on v3.6.0.
-Includes all application routes, API routes, components, libraries, public assets, configuration, documentation, scripts, tests and Supabase migrations 001–027.
-New feature: private PDF/image attachments in customer/supplier commercial quotation conversations.
-New migration: 027_rnx_commercial_quote_attachments.sql.
-Private Storage bucket: rnx-commercial-quote-attachments (created/configured automatically on first valid upload).
-No new Vercel environment variables, third-party services or payment integrations.
+Complete cumulative Next.js source project based on v3.9.1.
+Includes application routes, API routes, components, libraries, public assets, configuration, documentation, scripts, tests and Supabase migrations 001–028.
+New feature: customer and supplier quotation revision history, field-level comparison, same-currency price changes and currency-change disclosure.
+New Supabase migration: none.
+No new Vercel environment variables, third-party services, storage buckets or payment integrations.
 Target: github.com/zaksz1991/ruffneck-exchange, main branch.
 Production: https://ruffneck-exchange.vercel.app/
 Supabase: RuffNeck Entertainment.
+Full TypeScript semantic check and Next.js production build remain subject to Vercel verification.

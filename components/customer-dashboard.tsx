@@ -1,6 +1,7 @@
 'use client';
 
 import { CommercialQuoteConversation } from '@/components/commercial-quote-conversation';
+import { CommercialQuoteRevisionHistory } from '@/components/commercial-quote-revision-history';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -558,6 +559,7 @@ export function CustomerDashboard() {
               {offer.supplier?.profile_url && <a className="text-link" href={offer.supplier.profile_url}>View introduced supplier ↗</a>}
               {offer.quotes?.length > 0 && <section className="rnx-customer-quotes" aria-label="Supplier commercial quotations">
                 <div><p className="eyebrow">COMMERCIAL PROPOSALS</p><h5>Supplier quotations</h5><p>These proposals are separate from the RNX introduction fee. Compare scope, amount, delivery terms and validity.</p></div>
+                <CommercialQuoteRevisionHistory quotes={offer.quotes} audience="customer" />
                 {offer.quotes.map((quote) => <article className="rnx-customer-quote" id={`quote-${quote.id}`} key={quote.id}>
                   <div className="rnx-customer-quote-heading"><strong>{quote.quote_reference} · {quote.title}</strong><span className={`admin-state-${quote.status === 'selected' ? 'good' : quote.status === 'submitted' || quote.status === 'revision_requested' ? 'wait' : quote.status === 'declined' || quote.status === 'withdrawn' ? 'bad' : 'wait'}`}>{quote.status.replaceAll('_', ' ')}</span></div>
                   {quote.revision_of_quote_id && <small className="rnx-quote-revision-line">Revised from {offer.quotes.find((previousQuote) => previousQuote.id === quote.revision_of_quote_id)?.quote_reference || 'an earlier quotation'}.</small>}
