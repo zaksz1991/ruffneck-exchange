@@ -288,3 +288,7 @@ The cumulative static regression scripts, including the v3.2.0 commercial quote 
 ## Commercial deployment
 
 Review Vercel plan terms for commercial use before monetised production operation. Do not assume a personal-use plan permits commercial marketplace operations.
+
+## Current release: v3.9.1
+
+This cumulative release repairs the TypeScript JSX rendering error in the Operations commercial quotation history. It does not require a Supabase migration or environment-variable change. See `RELEASE-NOTES-v3.9.1.md` and `APPLY-v3.9.1.txt`.

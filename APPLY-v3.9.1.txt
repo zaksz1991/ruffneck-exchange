@@ -1,0 +1,18 @@
+RUFFNECK EXCHANGE v3.9.1 — BUILD REPAIR
+
+This is a complete cumulative replacement project based on v3.9.0.
+
+DEPLOY
+1. Extract this ZIP.
+2. Open the `ruffneck exchange` folder.
+3. Replace the contents of the existing GitHub repository with the contents of this folder.
+4. Commit the replacement to the `main` branch.
+5. Allow Vercel to deploy.
+
+SUPABASE
+No new SQL migration is required. Keep the existing RuffNeck Entertainment project and migrations 001–028 unchanged. Do not rerun migrations.
+
+VERCEL
+No new environment variables are required. Keep the existing project settings.
+
+This release fixes the TypeScript error in the Operations commercial quotation history and the CSS alignment warning from the v3.9.0 build log.
