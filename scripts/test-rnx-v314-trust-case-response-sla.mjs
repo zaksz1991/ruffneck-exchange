@@ -32,7 +32,7 @@ assert.match(adminUi, /SLA MONITOR/);
 assert.match(adminUi, /first_response_due_at/);
 assert.match(adminUi, /first_response_at/);
 assert.match(css, /v3\.14\.0 — trust-case first response SLA monitoring/);
-assert.equal(packageJson.version, '3.14.1');
+assert.ok(packageJson.name === 'ruffneck-exchange' && packageJson.version.localeCompare('3.14.1', undefined, { numeric: true }) >= 0, 'This cumulative project must retain the v3.14.1-or-newer baseline.');
 assert.equal(packageJson.scripts['test:rnx-v314'], 'node scripts/test-rnx-v314-trust-case-response-sla.mjs');
 
-console.log('RNX v3.14.0 SLA feature regression checks passed under v3.14.1.');
+console.log(`RNX v3.14.0 SLA feature regression checks passed under ${packageJson.version}.`);

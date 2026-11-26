@@ -1,0 +1,14 @@
+RuffNeck Exchange v3.15.0 deployment
+
+1. Extract the complete replacement ZIP. It has a flat project root; the extracted root contains app/, components/, lib/, public/, scripts/, package.json and the other project files directly.
+2. Replace the existing GitHub repository contents with the extracted project-root contents and commit to main.
+3. Allow Vercel to deploy.
+4. No Supabase SQL migration is required. Keep migrations 001–032 unchanged.
+5. No new Vercel environment variables are required.
+
+Supplier CSV import:
+- Sign in to the supplier portal and open Your products and services.
+- Download the RNX CSV template from the Import multiple catalogue listings panel.
+- Complete the columns in the template and upload a CSV containing up to 25 rows (250 KB maximum).
+- All rows are validated before import. If any row fails validation, correct the listed row errors and upload the file again; no rows are inserted from an invalid file.
+- Successfully imported offers enter RNX moderation as pending. Add images separately from the catalogue manager after import.

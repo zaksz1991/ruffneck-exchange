@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v3.14.1
+# RuffNeck Exchange (RNX) — v3.15.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,13 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.15.0 — supplier catalogue CSV import
+
+- Suppliers can import up to 25 catalogue listings per CSV file from their private dashboard. The downloadable template includes the required fields, with quoted CSV support for commas and escaped quotation marks.
+- The server validates the whole file, including headers, descriptions, listing type, Nigerian state/FCT, pricing and active membership listing capacity, before writing any records. If one row is invalid, the complete import is rejected with row-numbered errors; no partial import is made.
+- Successful imports create `pending` listings in NGN for RNX moderation. Suppliers can add cover and gallery images separately after import.
+- CSV uploads are limited to 250 KB and 25 records. No new database migration, environment variable, external service or Storage bucket is required. Existing migrations 001–032 remain unchanged.
 
 ## v3.14.1 — Vercel root-module packaging repair
 

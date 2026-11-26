@@ -36,6 +36,7 @@ export function SupplierDashboard() {
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
   const [galleryListingId, setGalleryListingId] = useState('');
   const [reviewReplyDrafts, setReviewReplyDrafts] = useState<Record<string, string>>({});
+  const [catalogueImportSummary, setCatalogueImportSummary] = useState('');
 
   const refresh = useCallback(async () => {
     setLoading(true); setError('');
@@ -76,6 +77,41 @@ export function SupplierDashboard() {
       formElement.reset(); setNotice(result.message || 'Payment reference submitted.'); await refresh();
     } catch (err) { setError(err instanceof Error ? err.message : 'Payment reference could not be submitted.'); }
     finally { setBusy(false); }
+  }
+
+  async function importCatalogueCsv(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const fileInput = formElement.elements.namedItem('catalogueCsv');
+    const file = fileInput instanceof HTMLInputElement ? fileInput.files?.[0] : undefined;
+    if (!file) { setError('Choose a CSV file to import.'); return; }
+    if (!file.name.toLowerCase().endsWith('.csv') || file.size > 250 * 1024) {
+      setError('Choose a .csv file no larger than 250 KB.');
+      return;
+    }
+    setBusy(true); setError(''); setNotice(''); setCatalogueImportSummary('');
+    try {
+      const csv = await file.text();
+      const response = await fetch('/api/supplier/listings/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ csv }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (response.status === 401) { window.location.assign('/supplier/login'); return; }
+      if (!response.ok) {
+        const rowErrors = Array.isArray(result.rowErrors) ? result.rowErrors.filter((item: unknown): item is string => typeof item === 'string') : [];
+        throw new Error([result.error || 'Catalogue import failed.', ...rowErrors].join(' '));
+      }
+      formElement.reset();
+      setNotice(result.message || `${Number(result.created) || 0} catalogue listings imported.`);
+      setCatalogueImportSummary(`${Number(result.created) || 0} listing(s) added to your catalogue and submitted for RNX moderation.`);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Catalogue import failed.');
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function submitListing(event: React.FormEvent<HTMLFormElement>, listingId?: string) {
@@ -398,6 +434,20 @@ export function SupplierDashboard() {
     <section className="supplier-panel">
       <div className="supplier-section-heading"><div><p className="eyebrow">SUPPLIER CATALOGUE</p><h2>Your products and services</h2><p>New or edited offers remain private until reviewed and approved.</p></div><span>{data.listings.length} total</span></div>
       {editingListing && <div className="supplier-editing-banner"><div><strong>Editing: {editingListing.title}</strong><p>Saving changes sends this offer back to RNX review. It stays hidden from the public marketplace until it is approved.</p></div><button className="button button-small button-secondary" type="button" disabled={busy} onClick={() => setEditingListing(null)}>Cancel edit</button></div>}
+      <div className="supplier-catalogue-import">
+        <div>
+          <strong>Import multiple catalogue listings</strong>
+          <p>Upload a completed CSV template to submit up to 25 listings in one batch. Every imported listing enters RNX moderation and remains hidden until approved. Imports count against your active membership listing limit. Images can be added after import.</p>
+          <a className="text-link" href="/templates/rnx-catalogue-import-template.csv" download>Download CSV template ↗</a>
+        </div>
+        <form className="supplier-catalogue-import-form" onSubmit={(event) => void importCatalogueCsv(event)}>
+          <label htmlFor="supplier-catalogue-csv">Catalogue CSV (maximum 250 KB)</label>
+          <input id="supplier-catalogue-csv" name="catalogueCsv" type="file" accept=".csv,text/csv" required />
+          <button className="button button-small" type="submit" disabled={busy}>{busy ? 'Importing…' : 'Import catalogue CSV'}</button>
+        </form>
+        {catalogueImportSummary && <p className="supplier-catalogue-import-success" role="status">{catalogueImportSummary}</p>}
+        <p className="admin-footnote">Required columns: title, listing_type, category, description, state, city, price_type, price, keywords. Supported listing types: product, service, wholesale, rental. Pricing types: enquiry, fixed, from. Prices are imported in NGN. The complete file is validated before any rows are inserted.</p>
+      </div>
       {editingListing && <form key={editingListing.id} className="supplier-listing-form" onSubmit={(event) => void submitListing(event, editingListing.id)}>
         <label>Offer title<input name="title" required minLength={3} maxLength={180} defaultValue={editingListing.title} /></label>
         <label>Listing type<select name="listing_type" defaultValue={editingListing.listing_type}><option value="product">Product</option><option value="service">Service</option><option value="wholesale">Wholesale supply</option><option value="rental">Rental</option></select></label>
