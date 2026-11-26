@@ -1,0 +1,12 @@
+RuffNeck Exchange v3.13.1 — complete replacement deployment
+
+1. Extract the ZIP.
+2. Open the included `ruffneck exchange` folder.
+3. Replace the repository contents in github.com/zaksz1991/ruffneck-exchange with the complete contents of that folder.
+4. Commit to `main` and allow the existing Vercel project to deploy.
+
+Supabase: continue using the existing RuffNeck Entertainment project. No new migration is required. Keep migrations 001–031 unchanged; do not rerun them.
+
+Vercel: no environment-variable changes are required.
+
+The release fixes a TypeScript incompatibility in the backward-compatible trust-case query. Confirm that the Vercel build completes type checking and the Next.js production build before treating the release as deployed successfully.

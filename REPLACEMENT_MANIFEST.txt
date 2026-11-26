@@ -1,11 +1,11 @@
-RUFFNECK EXCHANGE v3.13.0 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v3.13.1 — COMPLETE CUMULATIVE REPLACEMENT
 
-Complete cumulative Next.js source project based on the v3.12.0 project archive.
-Includes application routes, API routes, components, libraries, public assets, configuration, documentation, scripts, tests and Supabase migrations 001–031.
-New feature: customer resolution review and appeal workflow with a 14-day server-enforced window, one appeal per case, customer tracking view, Operations appeal queue, staff decision response and event history.
-New Supabase migration: 031_rnx_trust_case_resolution_appeals.sql.
-No new Vercel environment variables, third-party services, storage buckets or payment integrations.
+Complete cumulative Next.js source project based on the verified v3.13.0 archive.
+Retains all RNX application routes, API routes, components, libraries, assets, configuration, documentation, scripts, and Supabase migrations 001–031.
+Repair: tracking API fallback query no longer assigns two incompatible Supabase response shapes; fallback rows explicitly normalise resolution_published_at to null for legacy schema compatibility.
+New Supabase migration: none. Keep migrations 001–031 unchanged.
+New Vercel environment variables: none.
 Target: github.com/zaksz1991/ruffneck-exchange, main branch.
 Production: https://ruffneck-exchange.vercel.app/
 Supabase: RuffNeck Entertainment.
-Full TypeScript semantic check and Next.js production build require Vercel verification after deployment.
+Full TypeScript semantic check and Next.js production build must be confirmed by Vercel.

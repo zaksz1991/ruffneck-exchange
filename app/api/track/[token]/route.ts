@@ -40,18 +40,27 @@ export async function GET(_request: Request, context: Context) {
     if (introductionsResult.error) throw introductionsResult.error;
 
     let caseAppealAvailable = true;
-    let casesResult = await db.from('rnx_trust_cases')
+    type TrackingTrustCase = { id: string; resolution_published_at: string | null; [key: string]: unknown };
+    const primaryCasesResult = await db.from('rnx_trust_cases')
       .select('id,case_reference,case_type,summary,status,public_resolution,resolution_published_at,created_at,updated_at')
       .eq('lead_id', lead.id).order('created_at', { ascending: false }).limit(20);
-    if (casesResult.error && String(casesResult.error.code || '') === '42703') {
+    let casesError = primaryCasesResult.error;
+    let cases: TrackingTrustCase[] = (primaryCasesResult.data || []) as unknown as TrackingTrustCase[];
+    if (casesError && String(casesError.code || '') === '42703') {
       caseAppealAvailable = false;
-      casesResult = await db.from('rnx_trust_cases')
+      const fallbackCasesResult = await db.from('rnx_trust_cases')
         .select('id,case_reference,case_type,summary,status,public_resolution,created_at,updated_at')
         .eq('lead_id', lead.id).order('created_at', { ascending: false }).limit(20);
+      casesError = fallbackCasesResult.error;
+      // Older installations may not yet have resolution_published_at. Normalise
+      // fallback rows to the same response shape without selecting the missing column.
+      cases = (fallbackCasesResult.data || []).map((row) => ({
+        ...row,
+        resolution_published_at: null,
+      })) as unknown as TrackingTrustCase[];
     }
-    let caseReportingAvailable = !casesResult.error;
-    if (casesResult.error && !isMissingTrustSchema(casesResult.error)) throw casesResult.error;
-    const cases = casesResult.data || [];
+    let caseReportingAvailable = !casesError;
+    if (casesError && !isMissingTrustSchema(casesError)) throw casesError;
     let caseMessages: any[] = [];
     let caseEvidenceAvailable = true;
     let caseAttachments: any[] = [];

@@ -86,3 +86,8 @@ Appeal records are stored in `rnx_trust_case_appeals`, a service-role-only table
 RNX staff with `trust:write` can accept an appeal or not uphold it. An accepted appeal reopens the case at `under_review` and clears the active resolution timestamp so a later resolution starts a new review window; the appeal record retains the original status and resolution timestamp. A not-upheld decision leaves the current case status unchanged. Both decisions require a 10–1,800 character customer-visible response and are recorded with the reviewer and event history.
 
 An appeal decision is an RNX operational review. It is not a legal determination, refund instruction, payment reversal or proof of wrongdoing. One appeal is allowed per case, including after an accepted appeal has led to further investigation. Apply `031_rnx_trust_case_resolution_appeals.sql` after migrations 001–030.
+
+
+## v3.13.1 tracking compatibility repair
+
+The public tracking API supports older trust-case schemas that do not yet expose `resolution_published_at`. Its fallback query omits that column and normalises the returned records to `resolution_published_at: null`; the resolution appeal feature is reported unavailable for that tracking response. The fallback does not modify the database. No migration is associated with v3.13.1.
