@@ -1,15 +1,14 @@
-# Build status — RuffNeck Exchange v3.13.1
+# Build status — RuffNeck Exchange v3.14.0
 
-- Source baseline: v3.13.0 complete cumulative project archive.
-- Upgrade type: production build repair; no new feature or database migration.
-- Fixed file: `app/api/track/[token]/route.ts`.
-- Cause: a fallback Supabase query omitted `resolution_published_at` and was assigned to a variable inferred from a query that selected that column. Supabase therefore inferred incompatible `PostgrestSingleResponse` row types.
-- Repair: keep the two query results separate, normalise legacy fallback rows by setting `resolution_published_at: null`, and use a shared response row type. This preserves support for older trust-case schemas without changing the database.
-- Database: migrations 001–031 remain unchanged. No new Vercel environment variables.
-- Regression scripts: 34 passed, 0 failed.
-- TypeScript/TSX syntax transpilation: 190 files passed, 0 syntax errors.
-- Full TypeScript semantic typecheck: not verified; dependency installation timed out in the release workspace.
-- Next.js production build: not verified; dependency installation timed out. Vercel must confirm after deployment.
-- Live Supabase workflow: not executed in this workspace; no database migration is associated with this release.
-
-Static regression checks and syntax transpilation do not establish full production build success.
+- Source baseline: complete cumulative v3.13.1 project archive.
+- Upgrade: first-response SLA tracking for RNX trust cases.
+- New migration: `supabase/migrations/032_rnx_trust_case_response_sla.sql`.
+- SLA targets: critical 60 minutes; high 240 minutes; normal 480 minutes; low 1,440 minutes.
+- Targets are elapsed time from case submission. Only the first customer-visible RNX staff message counts.
+- Added automatic database deadline calculation, severity-change recalculation before the first public response, first-response timestamp capture, and a case-history event.
+- Existing cases are backfilled using available message history, creation time and current severity. This reconstruction does not claim a previous SLA policy existed.
+- Admin trust queue: SLA counters, urgency sorting, response-state filters and per-case deadline/response details.
+- Summary counters cover the latest 150 cases loaded by the queue.
+- Database: requires migrations 001–031 followed by 032. No new Vercel environment variables or cron job.
+- Regression checks: 35 scripts passed, 0 failed.
+- TypeScript syntax transpilation: 3 changed TypeScript/TSX files passed. Full project semantic typecheck and Next.js production build could not be run because npm dependency installation failed with registry DNS error `EAI_AGAIN`. Confirm full typecheck and build in Vercel.

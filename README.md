@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v3.13.1
+# RuffNeck Exchange (RNX) — v3.14.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,16 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.14.0 — trust-case first-response SLA monitoring
+
+- RNX Operations now monitors first customer-visible staff response targets for trust cases: critical 60 minutes, high 4 hours, normal 8 hours and low 24 hours.
+- The database calculates deadlines from case submission and recalculates the target if severity changes before the first public staff response.
+- The first customer-visible RNX staff message is timestamped automatically and recorded in the case event history. Internal notes, customer messages and supplier responses do not count.
+- The Trust console displays overdue, due-soon, on-time and late/unanswered counts, with urgency sorting, response-state filters and per-case deadline details.
+- Existing cases are backfilled using their creation time, current severity and first public staff reply if one exists. This is an operational reconstruction, not evidence that an SLA policy previously existed.
+- Adds migration `032_rnx_trust_case_response_sla.sql`. Apply after migrations 001–031. No new environment variables, cron jobs or external services.
+- Targets are elapsed-time internal monitoring measures, not customer guarantees, business-hour calculations or case-resolution deadlines. Queue summary counts cover the latest 150 loaded cases.
 
 ## v3.13.1 — trust-case tracking build repair
 

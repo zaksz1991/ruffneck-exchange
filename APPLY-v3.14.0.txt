@@ -1,0 +1,27 @@
+RUFFNECK EXCHANGE v3.14.0 — DEPLOYMENT
+
+SOURCE: Complete cumulative project, based on v3.13.1.
+GITHUB: zaksz1991/ruffneck-exchange
+BRANCH: main
+VERCEL: https://ruffneck-exchange.vercel.app/
+SUPABASE: RuffNeck Entertainment (existing project)
+
+1. Open the Supabase project RuffNeck Entertainment.
+2. Confirm migrations 001–031 have already succeeded.
+3. In Supabase SQL Editor, run the complete file:
+   supabase/migrations/032_rnx_trust_case_response_sla.sql
+4. Confirm the migration succeeds before deploying the application code.
+5. Extract this complete ZIP archive.
+6. Open the `ruffneck exchange` folder.
+7. Replace the existing GitHub repository contents with the complete folder contents.
+8. Commit to `main` and let the existing Vercel project deploy.
+
+No existing migrations need to be rerun. No new Vercel environment variables or cron jobs are required.
+
+SLA policy:
+- Critical: 60 minutes
+- High: 240 minutes (4 hours)
+- Normal: 480 minutes (8 hours)
+- Low: 1,440 minutes (24 hours)
+
+The clock uses elapsed time from case submission. Only the first customer-visible RNX staff response counts. Internal notes and supplier/customer messages do not count. The targets are internal monitoring measures, not customer guarantees or resolution deadlines.

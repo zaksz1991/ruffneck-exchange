@@ -558,3 +558,30 @@
 .admin-trust-appeal-review>div{display:flex;gap:8px;flex-wrap:wrap}
 .admin-trust-appeal-badge{color:#8b5700!important;font-weight:900!important;background:#fff1d9;padding:4px 7px;border-radius:6px}
 @media(max-width:620px){.tracking-case-appeal-form>div,.admin-trust-appeal-review>div{align-items:stretch;flex-direction:column}.tracking-case-appeal-form .button,.admin-trust-appeal-review .button{width:100%}.tracking-case-appeal-heading{align-items:flex-start;flex-direction:column}}
+
+
+/* v3.14.0 — trust-case first response SLA monitoring */
+.admin-trust-sla-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.admin-trust-sla-summary>div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:#fff}
+.admin-trust-sla-summary span{font-size:11px;font-weight:750;color:var(--muted)}
+.admin-trust-sla-summary strong{font-size:22px;line-height:1}
+.admin-trust-sla-summary .is-overdue strong,.admin-trust-sla-summary .is-missed strong{color:#a42e24}
+.admin-trust-sla-summary .is-due-soon strong{color:#8b5700}
+.admin-trust-sla-summary .is-met strong{color:#356b3d}
+.admin-trust-sla-badge{display:inline-flex;align-self:start;width:fit-content;padding:4px 7px;border-radius:6px;background:#eef3ec;color:#435d42!important;font-size:10px!important;font-weight:800!important;line-height:1.45}
+.admin-trust-sla-badge.sla-overdue,.admin-trust-sla-badge.sla-unanswered,.admin-trust-sla-badge.sla-late{background:#fde8e5;color:#a42e24!important}
+.admin-trust-sla-badge.sla-due_soon{background:#fff1d9;color:#875400!important}
+.admin-trust-sla-badge.sla-met{background:#e8f4e8;color:#356b3d!important}
+.admin-trust-sla-badge.sla-unconfigured{background:#f0f1f0;color:#667066!important}
+.admin-trust-sla-detail{display:grid;gap:12px;margin:14px 0;padding:14px;border:1px solid #d9e2d5;border-left:4px solid #6d8b64;border-radius:11px;background:#f8faf6}
+.admin-trust-sla-detail.sla-overdue,.admin-trust-sla-detail.sla-unanswered,.admin-trust-sla-detail.sla-late{border-left-color:#b7473f;background:#fff8f7}
+.admin-trust-sla-detail.sla-due_soon{border-left-color:#b17a25;background:#fffbf2}
+.admin-trust-sla-detail>div{display:grid;gap:4px}
+.admin-trust-sla-detail>div strong{font-size:15px;text-transform:capitalize}
+.admin-trust-sla-detail>div span{font-size:12px;color:var(--muted)}
+.admin-trust-sla-detail dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:0}
+.admin-trust-sla-detail dl>div{min-width:0;padding:9px;border:1px solid #e3e9df;border-radius:8px;background:#fff}
+.admin-trust-sla-detail dt{font-size:10px;color:var(--muted);font-weight:750}
+.admin-trust-sla-detail dd{margin:4px 0 0;font-size:11px;font-weight:800;overflow-wrap:anywhere}
+.admin-trust-sla-detail>small{font-size:10px;line-height:1.55;color:var(--muted)}
+@media(max-width:760px){.admin-trust-sla-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-trust-sla-detail dl{grid-template-columns:1fr}}
