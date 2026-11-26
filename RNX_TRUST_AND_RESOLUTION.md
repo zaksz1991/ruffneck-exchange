@@ -61,3 +61,10 @@ Apply `010_rnx_trust_cases.sql` only after confirming migrations 001–009 have 
 - No refund, payment gateway or chargeback processing.
 - No case submission without a valid private request tracking link.
 - Supplier-specific complaints can only reference a completed, customer-approved introduction for that request.
+
+
+## Supplier response centre — v3.11.0
+
+RNX Operations may request a response from the supplier attached to an authorised, contact-released introduction by moving a case to `awaiting_supplier`. The supplier receives a dashboard notification and can submit a 10–3,000 character factual response from the private supplier portal. The response is attributed to the supplier account, visible to the customer and authorised staff, and recorded in the event history. Successful submission moves the case to `under_review`. RNX can request a further response by transitioning the case to `awaiting_supplier` again.
+
+The supplier response API returns only cases explicitly assigned to that supplier after RNX has requested a response. It excludes internal staff notes and customer contact fields. Supplier responses require the active supplier session and re-check the matching introduction's supplier acceptance, RNX-verified payment, customer approval and contact release. Supplier responses are account statements, not verified findings. RNX Operations retains authority over severity, assignment, resolution and closure. Apply migration `029_rnx_supplier_trust_case_responses.sql` after migrations 001–028.

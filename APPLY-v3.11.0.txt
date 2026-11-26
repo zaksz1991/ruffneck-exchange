@@ -1,0 +1,34 @@
+RUFFNECK EXCHANGE v3.11.0 — DEPLOYMENT
+
+SOURCE
+- Complete cumulative replacement project ZIP.
+- GitHub repository: zaksz1991/ruffneck-exchange
+- Branch: main
+- Production: https://ruffneck-exchange.vercel.app/
+
+SUPABASE
+Project: RuffNeck Entertainment
+New migration: supabase/migrations/029_rnx_supplier_trust_case_responses.sql
+
+Apply migration 029 only after confirming migrations 001–028 are applied.
+Do not rerun earlier migrations. Do not delete existing tables or customer data.
+No new Vercel environment variables are required.
+
+DEPLOY
+1. Extract the ZIP.
+2. Open the included "ruffneck exchange" folder.
+3. Replace the repository contents with the complete contents of that folder.
+4. Commit to the main branch and allow Vercel to deploy.
+5. Confirm the Vercel production build completes.
+
+TEST
+1. In RNX Operations → Trust & resolution, open a case tied to an authorised supplier introduction.
+2. Set its status to "awaiting_supplier" and save.
+3. Confirm the supplier receives a notification and sees the case in the private supplier dashboard.
+4. Submit a factual supplier response.
+5. Confirm the supplier response appears in the customer tracking case thread and RNX Operations case workspace.
+6. Confirm the case moves to "under_review" and internal staff notes remain hidden from the supplier and customer.
+7. Confirm the supplier cannot respond again until RNX explicitly requests another response.
+
+BOUNDARIES
+A supplier response is a recorded statement, not a verified finding. RNX Operations retains control of triage, severity, resolution and closure. No payments, refunds or legal determinations are made by this feature.

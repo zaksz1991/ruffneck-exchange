@@ -21,11 +21,11 @@ export async function GET() {
       db.from('rnx_lead_offers').select('id,anonymised_summary,quoted_fee,currency,payment_status,supplier_accepted_at,payment_verified_at,customer_approved_at,customer_declined_at,supplier_declined_at,supplier_response_note,contact_released_at,created_at,lead:rnx_leads!inner(id,name,email,phone,category,state,city,details,preferred_contact),outcome:rnx_transaction_outcomes(id,status,customer_outcome,supplier_outcome,completed_at),review:rnx_supplier_reviews(id,rating,title,body,moderation_status,supplier_response)')
         .eq('supplier_application_id', supplier.id).order('created_at', { ascending: false }).limit(50),
       db.from('rnx_membership_plans').select('id,code,name,description,listing_limit,display_price,features,sort_order').eq('active', true).order('sort_order', { ascending: true }),
-      db.from('rnx_supplier_notifications').select('id,notification_type,title,message,related_quote_id,read_at,created_at').eq('supplier_application_id', supplier.id).order('created_at', { ascending: false }).limit(40),
+      db.from('rnx_supplier_notifications').select('id,notification_type,title,message,related_quote_id,related_trust_case_id,read_at,created_at').eq('supplier_application_id', supplier.id).order('created_at', { ascending: false }).limit(40),
       db.from('rnx_supplier_notifications').select('id', { count: 'exact', head: true }).eq('supplier_application_id', supplier.id).is('read_at', null),
     ]);
     const notificationErrors = [notificationsResult.error, unreadNotificationsResult.error].filter(Boolean) as Array<{ code?: string; message?: string }>;
-    const isMissingNotificationsTable = (item: { code?: string }) => ['42P01', 'PGRST205'].includes(item.code || '');
+    const isMissingNotificationsTable = (item: { code?: string }) => ['42P01', 'PGRST205', '42703', 'PGRST204'].includes(item.code || '');
     const notificationsTableMissing = notificationErrors.some(isMissingNotificationsTable);
     const nonMissingNotificationError = notificationErrors.find((item) => !isMissingNotificationsTable(item));
     const error = listingsResult.error || membershipsResult.error || offersResult.error || plansResult.error || nonMissingNotificationError || null;

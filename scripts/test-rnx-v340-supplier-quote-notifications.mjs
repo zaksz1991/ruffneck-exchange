@@ -41,7 +41,7 @@ assert.match(dashboardApi, /getAuthenticatedSupplier\(\)/);
 assert.match(dashboardApi, /rnx_supplier_notifications/);
 assert.match(dashboardApi, /eq\('supplier_application_id', supplier\.id\)/);
 assert.match(dashboardApi, /unreadNotificationCount/);
-assert.match(dashboardApi, /select\('id,notification_type,title,message,related_quote_id,read_at,created_at'\)/, 'Supplier notification API payload must not select customer contact details');
+assert.match(dashboardApi, /select\('id,notification_type,title,message,related_quote_id,related_trust_case_id,read_at,created_at'\)/, 'Supplier notification API payload must include the case pointer without selecting contact details');
 assert.match(component, /COMMERCIAL QUOTATION UPDATES/i);
 assert.match(component, /markSupplierNotificationRead/);
 assert.match(component, /Open opportunity inbox/);

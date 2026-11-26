@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v3.10.0
+# RuffNeck Exchange (RNX) — v3.11.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,14 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.11.0 — supplier trust-case response centre
+
+- RNX Operations can move an authorised supplier-linked customer case to `awaiting_supplier` to request a factual response.
+- The assigned supplier receives a private notification and can respond from the supplier dashboard. Responses are attributed to the supplier, visible in the customer tracking case thread and RNX Operations workspace, and recorded in the event history.
+- A successful supplier response moves the case to `under_review`. RNX may request another response by moving the case to `awaiting_supplier` again.
+- Supplier access is scoped to cases linked to the supplier's own contact-released introduction. Internal staff notes and customer contact fields are excluded.
+- Adds migration `029_rnx_supplier_trust_case_responses.sql`. Apply after migrations 001–028. No new environment variables or third-party services.
 
 ## v3.10.0 — commercial quotation revision history
 
@@ -231,6 +239,7 @@ Customers can submit requests without paying RNX. Supplier memberships, promoted
 - Manual introduction-fee and membership-payment verification, customer consent links and database-enforced contact-release checks.
 - Supplier verification evidence vault with private storage and time-limited signed document links.
 - Customer trust cases and disputes with separate internal notes and customer-visible replies.
+- Supplier trust-case response centre: RNX can request a reply from the supplier attached to an authorised introduction; supplier responses are attributed, customer-visible and reviewed by RNX Operations.
 - Consent-based acquisition attribution and privacy-limited supplier listing insights (consented listing-detail views, aggregate saves and linked enquiries).
 - Verified supplier feedback based on dual-confirmed transaction completion, with RNX moderation and supplier responses.
 - Private supplier commercial quotations after authorised introductions, customer preference selection, withdrawal/expiry history, in-app customer alerts and configured supplier email notifications.
@@ -287,16 +296,16 @@ Do not paste, commit or expose actual secret values.
 
 ## Supabase migrations
 
-The cumulative v3.2.0 project contains RNX migrations 001–024. Migration 018 provides private customer saved-offer records; migration 019 adds opt-in saved-offer price and availability email alerts; migration 020 adds private in-app customer notifications. For older deployments, apply only missing RNX migrations in numerical order after reviewing the existing Supabase migration history. Never rerun a migration recorded as completed. These migrations create and modify only RNX-prefixed objects; do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects. For the previously encountered missing `availability_status` error, see `docs/SUPABASE_MIGRATION_RECOVERY.md` and the included idempotent repair script under `supabase/repairs/`.
+The cumulative v3.11.0 project contains RNX migrations 001–029. Migration 018 provides private customer saved-offer records; migration 019 adds opt-in saved-offer price and availability email alerts; migration 020 adds private in-app customer notifications. For older deployments, apply only missing RNX migrations in numerical order after reviewing the existing Supabase migration history. Never rerun a migration recorded as completed. These migrations create and modify only RNX-prefixed objects; do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects. For the previously encountered missing `availability_status` error, see `docs/SUPABASE_MIGRATION_RECOVERY.md` and the included idempotent repair script under `supabase/repairs/`.
 
 ## Verification boundary
 
-The cumulative static regression scripts, including the v3.2.0 commercial quote checks, are retained in the project. Full semantic TypeScript checking and the Next.js production build require installed project dependencies. Static tests do not prove live Supabase RPC behaviour; apply migration 024 and confirm the Vercel build before enabling the new workflow.
+The cumulative static regression scripts, including the v3.2.0 commercial quote checks, are retained in the project. Full semantic TypeScript checking and the Next.js production build require installed project dependencies. Static tests do not prove live Supabase RPC behaviour; apply the new migration 029 and confirm the Vercel build before enabling the supplier case response centre.
 
 ## Commercial deployment
 
 Review Vercel plan terms for commercial use before monetised production operation. Do not assume a personal-use plan permits commercial marketplace operations.
 
-## Current release: v3.10.0
+## Current release: v3.11.0
 
-This cumulative release adds quotation revision history and field-level comparisons to the customer and supplier dashboards. It does not require a Supabase migration or environment-variable change. See `RELEASE-NOTES-v3.10.0.md` and `APPLY-v3.10.0.txt`.
+This cumulative release adds an RNX-requested supplier trust-case response centre. Apply migration 029 in the existing RuffNeck Entertainment Supabase project after migrations 001–028. See `RELEASE-NOTES-v3.11.0.md` and `APPLY-v3.11.0.txt`.

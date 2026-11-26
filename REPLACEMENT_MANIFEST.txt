@@ -1,11 +1,11 @@
-RUFFNECK EXCHANGE v3.10.0 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v3.11.0 — COMPLETE CUMULATIVE REPLACEMENT
 
-Complete cumulative Next.js source project based on v3.9.1.
-Includes application routes, API routes, components, libraries, public assets, configuration, documentation, scripts, tests and Supabase migrations 001–028.
-New feature: customer and supplier quotation revision history, field-level comparison, same-currency price changes and currency-change disclosure.
-New Supabase migration: none.
+Complete cumulative Next.js source project based on the v3.10.0 project archive.
+Includes application routes, API routes, components, libraries, public assets, configuration, documentation, scripts, tests and Supabase migrations 001–029.
+New feature: supplier trust-case response centre with RNX-requested response windows, supplier-authored customer-visible messages, supplier notifications and operations event history.
+New Supabase migration: 029_rnx_supplier_trust_case_responses.sql.
 No new Vercel environment variables, third-party services, storage buckets or payment integrations.
 Target: github.com/zaksz1991/ruffneck-exchange, main branch.
 Production: https://ruffneck-exchange.vercel.app/
 Supabase: RuffNeck Entertainment.
-Full TypeScript semantic check and Next.js production build remain subject to Vercel verification.
+Full TypeScript semantic check and Next.js production build require Vercel verification after deployment.

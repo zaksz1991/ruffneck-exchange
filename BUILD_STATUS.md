@@ -1,21 +1,12 @@
-# v3.10.0 build and validation status
+# Build status — RuffNeck Exchange v3.11.0
 
-- Source base: complete cumulative RuffNeck Exchange v3.9.1 project archive.
-- Version: 3.10.0.
-- Feature: customer and supplier quotation revision timeline with field-level comparisons, same-currency price deltas and explicit currency-change warnings.
-- Database: no migration; existing migrations 001–028 remain unchanged.
-- Environment: no new Vercel environment variables or external services.
+- Source baseline: v3.10.0 complete cumulative archive supplied in this conversation.
+- Upgrade: supplier trust-case response centre.
+- New Supabase migration: `029_rnx_supplier_trust_case_responses.sql`.
+- Static regression scripts: 31 executed; 31 passed.
+- TypeScript/TSX syntax transpilation: 180 files checked; 0 syntax errors.
+- Full TypeScript semantic typecheck: not verified; dependency installation was unavailable in this workspace.
+- Next.js production build: not verified in this workspace; Vercel must confirm after deployment.
+- Live Supabase migration and two-account workflow: not executed in this workspace.
 
-## Validation completed in this workspace
-
-- Cumulative static regression scripts: 30 passed, 0 failed, including the new v3.10.0 revision-history checks.
-- TypeScript/TSX syntax transpilation: 177 source files, 0 syntax diagnostics.
-- ZIP integrity: verified after packaging.
-- The v3.10.0 regression test confirms revision links, field comparisons, customer-request visibility, currency-change disclosure and both dashboard integrations.
-
-## Not verified in this workspace
-
-- Full TypeScript semantic typecheck and Next.js production build. Project dependencies are not installed in this workspace. Vercel must confirm both checks after deployment.
-- Live customer/supplier browser workflow. Test with two non-production accounts and a quote that has at least one revision request and one revised version.
-
-Deploy the complete folder contents to the existing `main` branch. Keep the RuffNeck Entertainment Supabase project and migrations 001–028 unchanged.
+The static test and syntax results do not substitute for the full TypeScript typecheck, production build, or live Supabase verification.

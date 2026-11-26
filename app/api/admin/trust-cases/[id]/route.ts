@@ -35,7 +35,7 @@ export async function GET(_request: Request, context: Context) {
     const db = supabaseAdmin();
     const [caseResult, messagesResult, eventsResult] = await Promise.all([
       db.from('rnx_trust_cases').select('*,lead:rnx_leads!inner(id,name,email,phone,category,state,city,status,created_at),supplier:rnx_supplier_applications(business_name,status,category,state),assigned:rnx_staff_users(id,full_name,email,role)').eq('id', id).maybeSingle(),
-      db.from('rnx_trust_case_messages').select('id,sender_role,sender_staff_id,sender_name,visibility,body,created_at').eq('trust_case_id', id).order('created_at', { ascending: true }).limit(200),
+      db.from('rnx_trust_case_messages').select('id,sender_role,sender_staff_id,sender_supplier_id,sender_name,visibility,body,created_at').eq('trust_case_id', id).order('created_at', { ascending: true }).limit(200),
       db.from('rnx_trust_case_events').select('id,actor_role,actor_email,event_type,from_status,to_status,details,created_at').eq('trust_case_id', id).order('created_at', { ascending: false }).limit(100),
     ]);
     if (caseResult.error || !caseResult.data) return NextResponse.json({ error: 'Trust case not found.' }, { status: 404 });
@@ -60,11 +60,26 @@ export async function PATCH(request: Request, context: Context) {
 
   try {
     const db = supabaseAdmin();
-    const { data: before, error: lookupError } = await db.from('rnx_trust_cases').select('id,case_reference,status,severity,assigned_staff_id,public_resolution').eq('id', id).maybeSingle();
+    const { data: before, error: lookupError } = await db.from('rnx_trust_cases').select('id,case_reference,status,severity,assigned_staff_id,public_resolution,lead_id,lead_offer_id,supplier_application_id').eq('id', id).maybeSingle();
     if (lookupError || !before) return NextResponse.json({ error: 'Trust case not found.' }, { status: 404 });
     const input = parsed.data;
     if (input.status && input.status !== before.status && !transitions[before.status]?.includes(input.status)) {
       return NextResponse.json({ error: `This case cannot move from ${before.status} to ${input.status}.` }, { status: 409 });
+    }
+    if (input.status === 'awaiting_supplier' && before.status !== 'awaiting_supplier') {
+      if (!before.lead_offer_id || !before.supplier_application_id) {
+        return NextResponse.json({ error: 'This case is not linked to a specific introduced supplier. A supplier response cannot be requested.' }, { status: 409 });
+      }
+      const { data: authorisedOffer, error: offerError } = await db.from('rnx_lead_offers')
+        .select('id,lead_id,supplier_application_id,supplier_accepted_at,payment_status,payment_verified_at,customer_approved_at,contact_released_at')
+        .eq('id', before.lead_offer_id)
+        .eq('lead_id', before.lead_id)
+        .eq('supplier_application_id', before.supplier_application_id)
+        .maybeSingle();
+      if (offerError) throw offerError;
+      if (!authorisedOffer || !authorisedOffer.supplier_accepted_at || authorisedOffer.payment_status !== 'paid' || !authorisedOffer.payment_verified_at || !authorisedOffer.customer_approved_at || !authorisedOffer.contact_released_at) {
+        return NextResponse.json({ error: 'The supplier introduction must be accepted, payment-verified, customer-approved and contact-released before requesting a supplier response.' }, { status: 409 });
+      }
     }
     const nextResolution = input.publicResolution !== undefined ? input.publicResolution : before.public_resolution;
     if (['resolved','closed'].includes(input.status || '') && !String(nextResolution || '').trim()) {

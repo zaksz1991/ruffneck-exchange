@@ -4,6 +4,7 @@ import { CommercialQuoteConversation } from '@/components/commercial-quote-conve
 import { CommercialQuoteRevisionHistory } from '@/components/commercial-quote-revision-history';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { SupplierVerificationPanel } from '@/components/supplier-verification-panel';
+import { SupplierTrustCaseCentre } from '@/components/supplier-trust-case-centre';
 
 type Plan = { id: string; code: string; name: string; description: string; listing_limit: number; display_price: string; features: string[] };
 type Payment = { id: string; amount: number; currency: string; payment_method: string; transaction_reference: string; status: string; supplier_note?: string | null; verified_at?: string | null; created_at: string };
@@ -12,7 +13,7 @@ type GalleryImage = { id: string; image_url: string | null; sort_order: number }
 type ListingAnalytics = { views_7d: number; views_30d: number; saves_total: number; enquiries_total: number };
 type Listing = { id: string; title: string; slug: string; listing_type: string; category: string; description: string; state: string; city: string | null; price_type: string; price: number | null; currency: string; keywords: string[]; status: string; availability_status: 'unconfirmed' | 'available' | 'limited' | 'on_request' | 'out_of_stock'; availability_note: string | null; availability_updated_at: string | null; image_url: string | null; gallery_images: GalleryImage[]; analytics: ListingAnalytics; created_at: string; updated_at: string };
 type CommercialQuote = { id: string; lead_offer_id: string; quote_reference: string; title: string; scope_description: string; total_amount: number; currency: string; delivery_terms: string; estimated_fulfilment: string | null; valid_until: string; status: 'submitted' | 'selected' | 'not_selected' | 'declined' | 'withdrawn' | 'expired' | 'revision_requested'; created_at: string; responded_at: string | null; revision_of_quote_id?: string | null; revision_request_note?: string | null; revision_requested_at?: string | null };
-type SupplierNotification = { id: string; notification_type: string; title: string; message: string; related_quote_id: string | null; read_at: string | null; created_at: string };
+type SupplierNotification = { id: string; notification_type: string; title: string; message: string; related_quote_id: string | null; related_trust_case_id?: string | null; read_at: string | null; created_at: string };
 type Offer = { id: string; anonymised_summary: string; quoted_fee: number; currency: string; payment_status: string; supplier_accepted_at: string | null; supplier_declined_at: string | null; supplier_response_note: string | null; payment_verified_at: string | null; customer_approved_at: string | null; customer_declined_at: string | null; contact_released_at: string | null; created_at: string; outcome: { status: string; customer_outcome: string | null; supplier_outcome: string | null; completed_at: string | null } | null; review: { id: string; rating: number; title: string; body: string; moderation_status: string; supplier_response: string | null } | null; quotes: CommercialQuote[]; customer: { category: string; state: string; city: string | null; contact_released: boolean; name: string | null; email: string | null; phone: string | null; preferred_contact: string | null; request_details: string | null } };
 type DashboardData = { supplier: { business_name: string; contact_name: string; email: string; phone: string; category: string; state: string }; listings: Listing[]; listingAnalyticsAvailable: boolean; memberships: Membership[]; offers: Offer[]; plans: Plan[]; paymentInstructions: string; notifications: SupplierNotification[]; unreadNotificationCount: number; notificationsAvailable: boolean };
 
@@ -330,17 +331,19 @@ export function SupplierDashboard() {
     </div>
 
 
-    <section className="supplier-panel supplier-notifications-panel" aria-label="Commercial quotation notifications">
+    <section className="supplier-panel supplier-notifications-panel" aria-label="Supplier notifications">
       <div className="supplier-section-heading">
-        <div><p className="eyebrow">COMMERCIAL QUOTATION UPDATES</p><h2>Notifications</h2><p>Customer decisions, revision requests, quotation messages and system updates for your submitted quotations.</p></div>
+        <div><p className="eyebrow">COMMERCIAL QUOTATION UPDATES</p><h2>Notifications</h2><p>Commercial quotation updates and RNX customer-protection case requests assigned to your business.</p></div>
         <div className="supplier-notification-heading-actions"><span>{data.unreadNotificationCount} unread</span><button className="button button-small button-secondary" type="button" disabled={busy || data.unreadNotificationCount === 0} onClick={() => void markSupplierNotificationRead()}>Mark all read</button></div>
       </div>
-      {!data.notificationsAvailable ? <div className="supplier-insights-unavailable"><strong>Supplier notifications are not active yet.</strong><p>Apply Supabase migration 025 to enable commercial quotation decision alerts. Your existing supplier workspace remains available.</p></div> : data.notifications.length ? <div className="supplier-notification-list">{data.notifications.map((item) => <article className={`supplier-notification-card${item.read_at ? '' : ' is-unread'}`} key={item.id}>
+      {!data.notificationsAvailable ? <div className="supplier-insights-unavailable"><strong>Supplier notifications are not active yet.</strong><p>Confirm migrations 025 and 029 are applied to enable supplier quotation and customer-case notifications. Your remaining supplier workspace stays available.</p></div> : data.notifications.length ? <div className="supplier-notification-list">{data.notifications.map((item) => <article className={`supplier-notification-card${item.read_at ? '' : ' is-unread'}`} key={item.id}>
         <div className="supplier-notification-topline"><strong>{item.title}</strong><time>{dateTimeText(item.created_at)}</time></div>
         <p>{item.message}</p>
-        <div className="supplier-notification-actions">{item.related_quote_id ? <a href={`#supplier-quote-${encodeURIComponent(item.related_quote_id)}`}>Open quotation conversation</a> : <a href="#supplier-opportunities">Open opportunity inbox</a>}{item.read_at ? <small>Read {dateTimeText(item.read_at)}</small> : <button className="button button-small button-secondary" type="button" disabled={busy} onClick={() => void markSupplierNotificationRead(item.id)}>Mark as read</button>}</div>
-      </article>)}</div> : <div className="supplier-notifications-empty">No commercial quotation updates have been recorded for this supplier account.</div>}
+        <div className="supplier-notification-actions">{item.related_trust_case_id ? <a href={`#supplier-trust-case-${encodeURIComponent(item.related_trust_case_id)}`}>Open customer case</a> : item.related_quote_id ? <a href={`#supplier-quote-${encodeURIComponent(item.related_quote_id)}`}>Open quotation conversation</a> : <a href="#supplier-opportunities">Open opportunity inbox</a>}{item.read_at ? <small>Read {dateTimeText(item.read_at)}</small> : <button className="button button-small button-secondary" type="button" disabled={busy} onClick={() => void markSupplierNotificationRead(item.id)}>Mark as read</button>}</div>
+      </article>)}</div> : <div className="supplier-notifications-empty">No supplier notifications have been recorded for this account.</div>}
     </section>
+
+    <SupplierTrustCaseCentre />
 
     <SupplierVerificationPanel />
 
