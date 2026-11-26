@@ -1,10 +1,10 @@
-RUFFNECK EXCHANGE v3.16.0 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v3.16.1 — COMPLETE CUMULATIVE REPLACEMENT
 
 This archive is the complete cumulative project, not a patch or overlay.
 Archive layout is deliberately flat: app/, components/, lib/, public/, scripts/, supabase/, package.json and all other project files are located directly at the ZIP root. No wrapper folder is present.
 
 Baseline: v3.15.0, including all previous marketplace, supplier, customer, commercial quotation and trust-case functionality.
-New feature: authenticated supplier catalogue CSV export with status filters, explicit field selection, pagination, a 10,000-record cap, private no-store headers and spreadsheet formula-injection protection.
+Baseline feature: authenticated supplier catalogue CSV export. v3.16.1 repairs its Supabase result typing by validating and normalising both the first and subsequent query pages before CSV mapping.
 
 No new Supabase migration. Existing migrations 001–032 remain unchanged. No new Vercel environment variables.
 Target: github.com/zaksz1991/ruffneck-exchange, main branch.

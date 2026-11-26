@@ -31,6 +31,19 @@ function csvRow(values: unknown[]): string {
   return values.map(csvCell).join(',');
 }
 
+/**
+ * Supabase cannot infer a concrete row type from the dynamically composed
+ * SELECT_COLUMNS string. Normalise the returned payload at the boundary so
+ * the export mapper receives only plain object rows without unsafe casts from
+ * Supabase's GenericStringError[] fallback type.
+ */
+function asListingRows(data: unknown): Array<Record<string, unknown>> {
+  if (!Array.isArray(data)) return [];
+  return data.filter((row): row is Record<string, unknown> =>
+    typeof row === 'object' && row !== null && !Array.isArray(row)
+  );
+}
+
 export async function GET(request: Request) {
   const supplier = await getAuthenticatedSupplier();
   if (!supplier) {
@@ -62,11 +75,11 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: `This export contains ${total.toLocaleString('en-NG')} listings. Export a smaller status group; the per-file limit is ${MAX_EXPORT_ROWS.toLocaleString('en-NG')}.` }, { status: 413 });
     }
 
-    const listings: Array<Record<string, unknown>> = [...(firstPage.data ?? [])] as Array<Record<string, unknown>>;
+    const listings: Array<Record<string, unknown>> = asListingRows(firstPage.data);
     for (let offset = PAGE_SIZE; offset < total; offset += PAGE_SIZE) {
       const page = await loadPage(offset);
       if (page.error) throw page.error;
-      listings.push(...((page.data ?? []) as Array<Record<string, unknown>>));
+      listings.push(...asListingRows(page.data));
     }
 
     const headers = [

@@ -1,4 +1,4 @@
-RUFFNECK EXCHANGE v3.16.0 — APPLY INSTRUCTIONS
+RUFFNECK EXCHANGE v3.16.1 — APPLY INSTRUCTIONS
 
 GitHub repository: https://github.com/zaksz1991/ruffneck-exchange
 Branch: main
@@ -15,4 +15,4 @@ Vercel Root Directory: ./
 
 Supplier catalogue export: sign in to the supplier portal, open Your products and services, select all catalogue listings or a moderation-status group in Export your catalogue, then choose Download catalogue CSV. The dated CSV is a reporting/backup snapshot, not a direct import template. Exports are private to the authenticated supplier and exclude customer contact details and private image paths. Each download supports up to 10,000 records.
 
-See APPLY-v3.16.0.txt, RELEASE-NOTES-v3.16.0.md and BUILD_STATUS.md for release details.
+See APPLY-v3.16.1.txt, RELEASE-NOTES-v3.16.1.md and BUILD_STATUS.md for release details.

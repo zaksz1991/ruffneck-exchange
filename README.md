@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v3.16.0
+# RuffNeck Exchange (RNX) — v3.16.1
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,12 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.16.1 — supplier catalogue export type repair
+
+- Fixes the Vercel TypeScript failure caused by treating Supabase's `GenericStringError[]` inference for the dynamic export select as `Record<string, unknown>[]`.
+- Adds a checked row-normalisation boundary for the first and later catalogue pages. Only non-null object rows are passed to the CSV mapper.
+- No SQL migration or environment variable change is required; migrations 001–032 remain unchanged.
 
 ## v3.16.0 — supplier catalogue CSV export
 
@@ -349,16 +355,16 @@ Do not paste, commit or expose actual secret values.
 
 ## Supabase migrations
 
-The cumulative v3.13.1 project contains RNX migrations 001–031. Migration 018 provides private customer saved-offer records; migration 019 adds opt-in saved-offer price and availability email alerts; migration 020 adds private in-app customer notifications. For older deployments, apply only missing RNX migrations in numerical order after reviewing the existing Supabase migration history. Never rerun a migration recorded as completed. These migrations create and modify only RNX-prefixed objects; do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects. For the previously encountered missing `availability_status` error, see `docs/SUPABASE_MIGRATION_RECOVERY.md` and the included idempotent repair script under `supabase/repairs/`.
+The cumulative v3.16.1 project contains RNX migrations 001–032. Migration 018 provides private customer saved-offer records; migration 019 adds opt-in saved-offer price and availability email alerts; migration 020 adds private in-app customer notifications. For older deployments, apply only missing RNX migrations in numerical order after reviewing the existing Supabase migration history. Never rerun a migration recorded as completed. These migrations create and modify only RNX-prefixed objects; do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects. For the previously encountered missing `availability_status` error, see `docs/SUPABASE_MIGRATION_RECOVERY.md` and the included idempotent repair script under `supabase/repairs/`.
 
 ## Verification boundary
 
-The cumulative static regression scripts, including the v3.2.0 commercial quote checks, are retained in the project. Full semantic TypeScript checking and the Next.js production build require installed project dependencies. Static tests do not prove live Supabase RPC behaviour; confirm migration 031 and the Vercel build before enabling the customer resolution appeal workflow.
+The cumulative static regression scripts, including the v3.2.0 commercial quote checks, are retained in the project. Full semantic TypeScript checking and the Next.js production build require installed project dependencies. Static tests do not prove live Supabase RPC behaviour; confirm migration 031 and the Vercel build before enabling the customer resolution appeal workflow. Migration 032 adds trust-case response SLA monitoring.
 
 ## Commercial deployment
 
 Review Vercel plan terms for commercial use before monetised production operation. Do not assume a personal-use plan permits commercial marketplace operations.
 
-## Current release: v3.13.1
+## Current release: v3.16.1
 
-This cumulative release repairs the trust-case tracking TypeScript fallback introduced around the v3.13.0 schema compatibility path. No new database migration is required; retain migrations 001–031. See `RELEASE-NOTES-v3.13.1.md`, `APPLY-v3.13.1.txt` and `RNX_TRUST_AND_RESOLUTION.md`.
+This cumulative release repairs TypeScript inference in the supplier catalogue CSV export route. The export now validates and normalises Supabase query result rows before mapping them to CSV. No new database migration is required; retain migrations 001–032. See `RELEASE-NOTES-v3.16.1.md` and `APPLY-v3.16.1.txt`.

@@ -1,0 +1,11 @@
+RuffNeck Exchange v3.16.1 deployment
+
+1. Extract the complete cumulative replacement ZIP.
+2. Upload the extracted project-root contents directly into the existing GitHub repository, replacing the previous project files.
+3. Commit to the main branch and allow the existing Vercel project to deploy.
+4. No Supabase SQL migration is required. Keep migrations 001–032 unchanged.
+5. No Vercel environment variables need to be added or changed.
+
+This is a build-repair release for the supplier catalogue CSV export. The API now normalises Supabase query payloads before CSV mapping, avoiding a TypeScript incompatibility caused by Supabase's GenericStringError[] type fallback for a dynamically composed select string.
+
+The export remains restricted to the authenticated supplier, keeps the 10,000-row cap and status filters, and continues to exclude customer data and private Storage paths.
