@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v3.11.0
+# RuffNeck Exchange (RNX) — v3.12.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,15 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.12.0 — customer protection evidence vault
+
+- Customers can upload supporting case documents from their private tracking link. Suppliers can upload a factual response attachment only after RNX requests a response and while the case is `awaiting_supplier`. Authorised Operations staff can choose customer-visible or internal-only evidence.
+- PDF, JPEG, PNG and WebP only; 4 MB per file and 20 files per case. File signatures are inspected server-side.
+- Evidence objects are kept in the private `rnx-trust-case-evidence` bucket. Download links are issued for five minutes only after checking the customer's tracking token, supplier ownership or staff role permission.
+- Customer and supplier APIs receive customer-visible evidence only. Internal staff evidence remains staff-only. The upload is recorded in the trust-case event history.
+- Adds migration `030_rnx_trust_case_evidence_vault.sql`. Apply after migrations 001–029. The private bucket is created/configured automatically on first upload; no new Vercel environment variables are required.
+- RNX checks file signatures but does not scan uploads for malware. Uploading evidence does not establish authenticity or liability.
 
 ## v3.11.0 — supplier trust-case response centre
 
@@ -296,7 +305,7 @@ Do not paste, commit or expose actual secret values.
 
 ## Supabase migrations
 
-The cumulative v3.11.0 project contains RNX migrations 001–029. Migration 018 provides private customer saved-offer records; migration 019 adds opt-in saved-offer price and availability email alerts; migration 020 adds private in-app customer notifications. For older deployments, apply only missing RNX migrations in numerical order after reviewing the existing Supabase migration history. Never rerun a migration recorded as completed. These migrations create and modify only RNX-prefixed objects; do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects. For the previously encountered missing `availability_status` error, see `docs/SUPABASE_MIGRATION_RECOVERY.md` and the included idempotent repair script under `supabase/repairs/`.
+The cumulative v3.12.0 project contains RNX migrations 001–030. Migration 018 provides private customer saved-offer records; migration 019 adds opt-in saved-offer price and availability email alerts; migration 020 adds private in-app customer notifications. For older deployments, apply only missing RNX migrations in numerical order after reviewing the existing Supabase migration history. Never rerun a migration recorded as completed. These migrations create and modify only RNX-prefixed objects; do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects. For the previously encountered missing `availability_status` error, see `docs/SUPABASE_MIGRATION_RECOVERY.md` and the included idempotent repair script under `supabase/repairs/`.
 
 ## Verification boundary
 
@@ -306,6 +315,6 @@ The cumulative static regression scripts, including the v3.2.0 commercial quote 
 
 Review Vercel plan terms for commercial use before monetised production operation. Do not assume a personal-use plan permits commercial marketplace operations.
 
-## Current release: v3.11.0
+## Current release: v3.12.0
 
-This cumulative release adds an RNX-requested supplier trust-case response centre. Apply migration 029 in the existing RuffNeck Entertainment Supabase project after migrations 001–028. See `RELEASE-NOTES-v3.11.0.md` and `APPLY-v3.11.0.txt`.
+This cumulative release adds a private trust-case evidence vault. Apply migration 030 in the existing RuffNeck Entertainment Supabase project after migrations 001–029. See `RELEASE-NOTES-v3.12.0.md`, `APPLY-v3.12.0.txt` and `RNX_TRUST_EVIDENCE_VAULT.md`.

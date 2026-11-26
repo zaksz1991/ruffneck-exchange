@@ -8,10 +8,12 @@ type RequestRow = {
   referenced_listing_slug: string | null; referenced_listing_title: string | null; referenced_supplier_name: string | null;
   status: string; contact_release_status: string; created_at: string; last_activity_at: string | null;
 };
-type TrustCase = { id: string; case_reference: string; case_type: string; summary: string; status: string; public_resolution: string | null; created_at: string; updated_at: string; messages: Message[] };
+type EvidenceAttachment = { id: string; uploader_role: string; visibility: string; file_name: string; mime_type: string; file_size_bytes: number; note: string | null; created_at: string };
+type TrustCase = { id: string; case_reference: string; case_type: string; summary: string; status: string; public_resolution: string | null; created_at: string; updated_at: string; messages: Message[]; attachments: EvidenceAttachment[] };
 type IntroducedSupplier = { id: string; introduced_at: string; supplier: { business_name: string; category: string } };
 
 function stamp(value: string) { const date = new Date(value); return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' }); }
+function fileSize(value: number) { return value < 1024 * 1024 ? `${Math.max(1, Math.round(value / 1024))} KB` : `${(value / (1024 * 1024)).toFixed(1)} MB`; }
 const caseTypes = [
   ['general_complaint','General complaint'], ['delivery_issue','Delivery issue'], ['product_quality','Product quality'],
   ['service_quality','Service quality'], ['payment_dispute','Payment dispute'], ['supplier_conduct','Supplier conduct'],
@@ -24,6 +26,7 @@ export function TrackingPage({ token }: { token: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [cases, setCases] = useState<TrustCase[]>([]);
   const [caseReportingAvailable, setCaseReportingAvailable] = useState(true);
+  const [caseEvidenceAvailable, setCaseEvidenceAvailable] = useState(true);
   const [introducedSuppliers, setIntroducedSuppliers] = useState<IntroducedSupplier[]>([]);
   const [offerId, setOfferId] = useState('');
   const [draft, setDraft] = useState('');
@@ -35,6 +38,7 @@ export function TrackingPage({ token }: { token: string }) {
   const [busy, setBusy] = useState(false);
   const [caseBusy, setCaseBusy] = useState(false);
   const [messageBusy, setMessageBusy] = useState('');
+  const [evidenceBusy, setEvidenceBusy] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
@@ -48,6 +52,7 @@ export function TrackingPage({ token }: { token: string }) {
       setMessages(data.messages || []);
       setCases(data.cases || []);
       setCaseReportingAvailable(data.caseReportingAvailable !== false);
+      setCaseEvidenceAvailable(data.caseEvidenceAvailable !== false);
       setIntroducedSuppliers(data.introducedSuppliers || []);
     } catch (err) { setError(err instanceof Error ? err.message : 'Tracking is temporarily unavailable.'); }
   }, [token]);
@@ -92,6 +97,19 @@ export function TrackingPage({ token }: { token: string }) {
     finally { setMessageBusy(''); }
   }
 
+  async function uploadCaseEvidence(caseId: string, file: File | null) {
+    if (!file || !caseEvidenceAvailable) return;
+    setEvidenceBusy(caseId); setError(''); setNotice('');
+    try {
+      const form = new FormData(); form.set('file', file);
+      const response = await fetch(`/api/track/${token}/cases/${caseId}/attachments`, { method: 'POST', body: form });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Evidence upload failed.');
+      setNotice(`${file.name} added to the case evidence.`); await refresh();
+    } catch (err) { setError(err instanceof Error ? err.message : 'Evidence upload failed.'); }
+    finally { setEvidenceBusy(''); }
+  }
+
   return <div className="tracking-shell">
     {error && <div className="admin-error" role="alert">{error}</div>}
     {notice && <div className="admin-notice" role="status">{notice}</div>}
@@ -122,6 +140,10 @@ export function TrackingPage({ token }: { token: string }) {
           <div className="customer-request-heading"><div><span className="eyebrow">{trustCase.case_reference} · {label(trustCase.case_type)}</span><h4>{trustCase.summary}</h4><p>Submitted {stamp(trustCase.created_at)}</p></div><span className="customer-status">{label(trustCase.status)}</span></div>
           {trustCase.public_resolution && <div className="tracking-case-resolution"><strong>RNX resolution update</strong><p>{trustCase.public_resolution}</p></div>}
           <div className="tracking-case-messages">{trustCase.messages.map((message) => <div className={`customer-message ${message.sender_role === 'supplier' ? 'is-supplier' : message.sender_role === 'staff' ? 'is-operations' : 'is-customer'}`} key={message.id}><div><strong>{message.sender_name}</strong><small>{stamp(message.created_at)}</small></div><p>{message.body}</p></div>)}</div>
+          <div className="trust-evidence"><div className="trust-evidence-heading"><div><strong>Case evidence</strong><small>PDF or image files · maximum 4 MB each · 20 files per case</small></div><span>{trustCase.attachments?.length || 0}/20</span></div>
+            {(trustCase.attachments || []).length ? <div className="trust-evidence-list">{trustCase.attachments.map((attachment) => <article key={attachment.id}><div><strong>{attachment.file_name}</strong><small>{fileSize(attachment.file_size_bytes)} · {attachment.uploader_role} · {stamp(attachment.created_at)}</small>{attachment.note && <small>{attachment.note}</small>}</div><a className="button button-small button-secondary" href={`/api/track/${token}/cases/${trustCase.id}/attachments/${attachment.id}`} target="_blank" rel="noreferrer">Open file</a></article>)}</div> : <p className="fine-print">No evidence files have been added to this case.</p>}
+            {!caseEvidenceAvailable ? <p className="fine-print">The evidence vault is not yet available for this case.</p> : !['resolved','closed'].includes(trustCase.status) && (trustCase.attachments?.length || 0) < 20 ? <label className="trust-evidence-upload">{evidenceBusy === trustCase.id ? 'Uploading evidence…' : 'Add a supporting document'}<input type="file" accept="application/pdf,image/jpeg,image/png,image/webp" disabled={evidenceBusy === trustCase.id} onChange={(event) => { const file = event.target.files?.[0] || null; void uploadCaseEvidence(trustCase.id, file); event.currentTarget.value = ''; }} /><small>Use relevant invoices, delivery records, product photographs or other supporting records. Do not upload passwords, bank credentials or full identity-document numbers.</small></label> : null}
+          </div>
           {trustCase.status !== 'closed' ? <div className="customer-compose"><textarea rows={3} maxLength={3000} value={caseDrafts[trustCase.id] || ''} onChange={(event) => setCaseDrafts((current) => ({ ...current, [trustCase.id]: event.target.value }))} placeholder="Add a message about this case…" /><button className="button button-small" type="button" disabled={messageBusy === trustCase.id || (caseDrafts[trustCase.id] || '').trim().length < 2} onClick={() => void sendCaseMessage(trustCase.id)}>{messageBusy === trustCase.id ? 'Sending…' : 'Send case message'}</button></div> : <p className="fine-print">This case is closed. Contact RNX through your main request message thread if you need further assistance.</p>}
         </article>) : <p className="fine-print">You have not submitted a complaint or dispute for this request.</p>}
       </section>}

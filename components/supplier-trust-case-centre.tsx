@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 type CaseMessage = { id: string; sender_role: string; sender_name: string; visibility: string; body: string; created_at: string };
+type EvidenceAttachment = { id: string; uploader_role: string; visibility: string; file_name: string; mime_type: string; file_size_bytes: number; note: string | null; created_at: string };
 type SupplierTrustCase = {
   id: string;
   case_reference: string;
@@ -16,12 +17,14 @@ type SupplierTrustCase = {
   supplier_response_requested_at: string;
   can_respond: boolean;
   messages: CaseMessage[];
+  attachments: EvidenceAttachment[];
 };
 
 function stamp(value: string) {
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? '—' : parsed.toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' });
 }
+function fileSize(value: number) { return value < 1024 * 1024 ? `${Math.max(1, Math.round(value / 1024))} KB` : `${(value / (1024 * 1024)).toFixed(1)} MB`; }
 const label = (value: string) => value.replaceAll('_', ' ');
 
 export function SupplierTrustCaseCentre() {
@@ -29,6 +32,7 @@ export function SupplierTrustCaseCentre() {
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState('');
+  const [evidenceBusy, setEvidenceBusy] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
@@ -79,6 +83,20 @@ export function SupplierTrustCaseCentre() {
     }
   }
 
+  async function uploadEvidence(caseId: string, file: File | null) {
+    if (!file) return;
+    setEvidenceBusy(caseId); setError(''); setNotice('');
+    try {
+      const form = new FormData(); form.set('file', file);
+      const response = await fetch(`/api/supplier/trust-cases/${encodeURIComponent(caseId)}/attachments`, { method: 'POST', body: form });
+      const result = await response.json().catch(() => ({}));
+      if (response.status === 401) { window.location.assign('/supplier/login'); return; }
+      if (!response.ok) throw new Error(result.error || 'Evidence upload failed.');
+      setNotice(`${file.name} added to the case evidence.`); await refresh();
+    } catch (caught) { setError(caught instanceof Error ? caught.message : 'Evidence upload failed.'); }
+    finally { setEvidenceBusy(''); }
+  }
+
   return <section className="supplier-panel supplier-trust-case-centre" aria-label="Customer protection cases">
     <div className="supplier-section-heading">
       <div><p className="eyebrow">CUSTOMER PROTECTION</p><h2>Case response centre</h2><p>RNX may ask your business to respond to a customer complaint linked to an authorised introduction. Internal RNX notes and customer contact details are not shown here.</p></div>
@@ -97,6 +115,10 @@ export function SupplierTrustCaseCentre() {
           {trustCase.messages.length ? trustCase.messages.map((message) => <article className={`customer-message ${message.sender_role === 'supplier' ? 'is-supplier' : message.sender_role === 'staff' ? 'is-operations' : 'is-customer'}`} key={message.id}>
             <div><strong>{message.sender_name}</strong><small>{stamp(message.created_at)}</small></div><p>{message.body}</p>
           </article>) : <p className="fine-print">No customer-visible case messages have been recorded yet.</p>}
+        </div>
+        <div className="trust-evidence"><div className="trust-evidence-heading"><div><strong>Shared case evidence</strong><small>PDF or image files · maximum 4 MB each</small></div><span>{trustCase.attachments?.length || 0}/20</span></div>
+          {(trustCase.attachments || []).length ? <div className="trust-evidence-list">{trustCase.attachments.map((attachment) => <article key={attachment.id}><div><strong>{attachment.file_name}</strong><small>{fileSize(attachment.file_size_bytes)} · {attachment.uploader_role} · {stamp(attachment.created_at)}</small>{attachment.note && <small>{attachment.note}</small>}</div><a className="button button-small button-secondary" href={`/api/supplier/trust-cases/${trustCase.id}/attachments/${attachment.id}`} target="_blank" rel="noreferrer">Open file</a></article>)}</div> : <p className="fine-print">No files have been shared on this case.</p>}
+          {trustCase.can_respond && (trustCase.attachments?.length || 0) < 20 ? <label className="trust-evidence-upload">{evidenceBusy === trustCase.id ? 'Uploading evidence…' : 'Add supplier supporting evidence'}<input type="file" accept="application/pdf,image/jpeg,image/png,image/webp" disabled={evidenceBusy === trustCase.id} onChange={(event) => { const file = event.target.files?.[0] || null; void uploadEvidence(trustCase.id, file); event.currentTarget.value = ''; }} /><small>Upload records that support your factual response. Supplier evidence is visible to the customer and authorised RNX staff.</small></label> : null}
         </div>
         {trustCase.can_respond ? <form className="supplier-trust-case-compose" onSubmit={(event) => { event.preventDefault(); void submitResponse(trustCase.id); }}>
           <label htmlFor={`supplier-case-response-${trustCase.id}`}>Your response to the customer and RNX Operations<textarea id={`supplier-case-response-${trustCase.id}`} rows={4} minLength={10} maxLength={3000} value={drafts[trustCase.id] || ''} onChange={(event) => setDrafts((current) => ({ ...current, [trustCase.id]: event.target.value }))} placeholder="Address the issue factually. Include relevant dates, actions taken and any practical next steps. Do not include passwords, bank PINs or payment-card details." /></label>

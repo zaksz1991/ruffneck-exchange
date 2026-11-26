@@ -43,7 +43,7 @@ The tracking API filters messages to `visibility=customer`. Do not include inter
 
 ## Evidence and fair handling
 
-This release does not provide a document upload or evidence vault. Staff should follow internal data-minimisation procedures and use approved channels for any supporting records. Do not place bank credentials, payment-card details, passwords or full identity-document numbers in case notes.
+The v3.12.0 evidence vault supports case-related PDF, JPEG, PNG and WebP files, with a 4 MB per-file limit and 20 files per case. Customer, assigned supplier and authorised staff uploads are attributed and recorded in the event history. Staff may mark an upload as internal-only or customer-visible. Files are stored in a private Supabase Storage bucket and are available through five-minute signed links after case-specific access checks. The vault validates file signatures but does not scan for malware. Do not place bank credentials, payment-card details, passwords or unnecessary full identity-document numbers in case files or notes.
 
 Record what was reported, what was checked, who was assigned and what outcome was communicated. Distinguish a customer's allegation from evidence, supplier response and RNX's own findings. Do not label a supplier fraudulent or legally liable solely because a case was opened.
 
@@ -55,7 +55,7 @@ Apply `010_rnx_trust_cases.sql` only after confirming migrations 001–009 have 
 
 ## Known exclusions
 
-- No file uploads or evidence vault.
+- No automated malware scanning or independent authenticity verification for uploaded evidence.
 - No automatic legal, fraud, licence or identity determination.
 - No automated supplier suspension or public trust score.
 - No refund, payment gateway or chargeback processing.
@@ -68,3 +68,10 @@ Apply `010_rnx_trust_cases.sql` only after confirming migrations 001–009 have 
 RNX Operations may request a response from the supplier attached to an authorised, contact-released introduction by moving a case to `awaiting_supplier`. The supplier receives a dashboard notification and can submit a 10–3,000 character factual response from the private supplier portal. The response is attributed to the supplier account, visible to the customer and authorised staff, and recorded in the event history. Successful submission moves the case to `under_review`. RNX can request a further response by transitioning the case to `awaiting_supplier` again.
 
 The supplier response API returns only cases explicitly assigned to that supplier after RNX has requested a response. It excludes internal staff notes and customer contact fields. Supplier responses require the active supplier session and re-check the matching introduction's supplier acceptance, RNX-verified payment, customer approval and contact release. Supplier responses are account statements, not verified findings. RNX Operations retains authority over severity, assignment, resolution and closure. Apply migration `029_rnx_supplier_trust_case_responses.sql` after migrations 001–028.
+
+
+## Private evidence vault — v3.12.0
+
+Customers may add supporting records from the private tracking link while a case is open. An assigned supplier may attach a factual supporting record only after RNX has explicitly requested a response and the case is in `awaiting_supplier`. Staff with `trust:write` can add files with `customer` or `internal` visibility. Internal files are excluded from customer and supplier APIs.
+
+The `rnx-trust-case-evidence` bucket is private. The server creates/configures it automatically on the first upload. Metadata and `evidence_uploaded` events are written through the service-role-only RPC in migration `030_rnx_trust_case_evidence_vault.sql`. Migration 030 must be applied after migrations 001–029.

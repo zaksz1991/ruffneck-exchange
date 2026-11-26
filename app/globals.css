@@ -508,3 +508,27 @@
 .supplier-trust-case-compose small,.supplier-trust-case-readonly{font-size:10px;line-height:1.5;color:var(--muted)}
 .supplier-trust-case-readonly{margin:13px 0 0;padding:10px 12px;border-radius:9px;background:#f4f6f2}
 @media(max-width:620px){.supplier-trust-case-heading{flex-direction:column}.supplier-trust-case-compose>div{align-items:stretch;flex-direction:column}.supplier-trust-case-compose .button{width:100%}}
+
+/* v3.12.0 — private customer-protection case evidence vault */
+.trust-evidence{display:grid;gap:10px;margin-top:15px;padding:13px;border:1px solid var(--line);border-radius:12px;background:#fbfcfa}
+.trust-evidence-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.trust-evidence-heading>div{display:grid;gap:4px;min-width:0}
+.trust-evidence-heading strong,.trust-evidence-heading h3{font-size:14px;margin:0}
+.trust-evidence-heading small{font-size:10px;line-height:1.5;color:var(--muted)}
+.trust-evidence-heading>span{flex-shrink:0;padding:4px 8px;border-radius:999px;background:#edf2e9;color:#435a3f;font-size:10px;font-weight:900}
+.trust-evidence-list{display:grid;gap:7px}
+.trust-evidence-list article{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 11px;border:1px solid #e1e7df;border-radius:9px;background:#fff}
+.trust-evidence-list article>div{display:grid;gap:3px;min-width:0}
+.trust-evidence-list article strong{font-size:11px;overflow-wrap:anywhere}
+.trust-evidence-list article small{font-size:10px;color:var(--muted);overflow-wrap:anywhere}
+.trust-evidence-list article .trust-evidence-internal{color:#8b5700;font-weight:900}
+.trust-evidence-list article .trust-evidence-customer{color:#315d38;font-weight:900}
+.trust-evidence-list article .button{flex-shrink:0;white-space:nowrap}
+.trust-evidence-upload{display:grid;gap:7px;padding:11px;border:1px dashed #b9c7b5;border-radius:9px;background:#f6f9f4;color:var(--ink);font-size:11px;font-weight:800}
+.trust-evidence-upload input{width:100%;max-width:100%;font:inherit;font-size:11px}
+.trust-evidence-upload small{font-size:10px;font-weight:500;line-height:1.5;color:var(--muted)}
+.trust-evidence-admin-upload{display:grid;grid-template-columns:minmax(170px,.55fr) minmax(0,1fr);gap:10px;align-items:start}
+.trust-evidence-admin-upload>label:first-child{display:grid;gap:6px;font-size:11px;font-weight:800}
+.trust-evidence-admin-upload select{width:100%;min-width:0;border:1px solid #cfd9d0;border-radius:9px;padding:10px;background:#fff;color:var(--ink);font:inherit;font-size:12px}
+.admin-trust-evidence{display:grid;gap:11px;margin-top:17px;padding-top:15px;border-top:1px solid var(--line)}
+@media(max-width:620px){.trust-evidence-list article{align-items:flex-start;flex-direction:column}.trust-evidence-list article .button{width:100%}.trust-evidence-admin-upload{grid-template-columns:1fr}.trust-evidence-heading{align-items:center}}

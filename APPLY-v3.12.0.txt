@@ -1,0 +1,21 @@
+RuffNeck Exchange v3.12.0 — deployment
+
+1. Apply only this migration to the existing RuffNeck Entertainment Supabase project:
+   supabase/migrations/030_rnx_trust_case_evidence_vault.sql
+
+2. Apply it after confirming migrations 001–029 have succeeded. Do not rerun completed migrations.
+
+3. Replace the repository with the complete contents of the `ruffneck exchange` folder in this ZIP, then commit to the `main` branch and allow Vercel to deploy.
+
+4. No new Vercel environment variables are required. The private `rnx-trust-case-evidence` Storage bucket is created/configured automatically on the first successful upload.
+
+5. Test with separate customer tracking, approved supplier and RNX staff accounts:
+   - Customer uploads a PDF or image to an open case and downloads it from the private tracking link.
+   - Staff sees the customer upload and can add an internal-only file.
+   - Supplier cannot see the internal-only file. After staff moves the case to `awaiting_supplier`, the supplier can upload supporting evidence and download only customer-visible case files.
+   - Customer and supplier cannot fetch an internal-only attachment by changing an attachment ID.
+   - Resolved/closed cases reject new customer uploads; suppliers can only upload while `awaiting_supplier`.
+
+Limits: 20 evidence files per case; 4 MB per file; PDF/JPEG/PNG/WebP only; 5-minute signed download URLs.
+
+Security note: RNX validates file signatures but does not provide malware scanning. Never upload passwords, bank PINs, card data or unnecessary identity-document numbers.

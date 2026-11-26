@@ -32,11 +32,24 @@ export async function GET() {
       messages = data ?? [];
     }
 
+    let attachments: any[] = [];
+    if (cases.length) {
+      const { data, error: attachmentError } = await db.from('rnx_trust_case_attachments')
+        .select('id,trust_case_id,uploader_role,visibility,file_name,mime_type,file_size_bytes,note,created_at')
+        .in('trust_case_id', cases.map((row) => row.id))
+        .eq('visibility', 'customer')
+        .order('created_at', { ascending: true })
+        .limit(1000);
+      if (attachmentError) throw attachmentError;
+      attachments = data || [];
+    }
+
     return NextResponse.json({
       cases: cases.map((row) => ({
         ...row,
         can_respond: row.status === 'awaiting_supplier',
         messages: messages.filter((message) => message.trust_case_id === row.id),
+        attachments: attachments.filter((attachment) => attachment.trust_case_id === row.id),
       })),
     }, { headers: PRIVATE_HEADERS });
   } catch (error) {

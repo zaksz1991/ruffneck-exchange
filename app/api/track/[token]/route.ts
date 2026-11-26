@@ -43,17 +43,37 @@ export async function GET(_request: Request, context: Context) {
     if (casesResult.error && !isMissingTrustSchema(casesResult.error)) throw casesResult.error;
     const cases = casesResult.data || [];
     let caseMessages: any[] = [];
+    let caseEvidenceAvailable = true;
+    let caseAttachments: any[] = [];
     if (cases.length && caseReportingAvailable) {
       const result = await db.from('rnx_trust_case_messages').select('id,trust_case_id,sender_role,sender_name,body,created_at').in('trust_case_id', cases.map((row: any) => row.id)).eq('visibility', 'customer').order('created_at', { ascending: true }).limit(300);
       if (result.error && !isMissingTrustSchema(result.error)) throw result.error;
       if (result.error) caseReportingAvailable = false;
       caseMessages = result.data || [];
+      const attachmentResult = await db.from('rnx_trust_case_attachments')
+        .select('id,trust_case_id,uploader_role,visibility,file_name,mime_type,file_size_bytes,note,created_at')
+        .in('trust_case_id', cases.map((row: any) => row.id))
+        .eq('visibility', 'customer')
+        .order('created_at', { ascending: true })
+        .limit(400);
+      if (attachmentResult.error) {
+        const attachmentCode = String(attachmentResult.error.code || '');
+        const attachmentMessage = String(attachmentResult.error.message || '').toLowerCase();
+        if (attachmentCode === '42P01' || attachmentCode === 'PGRST205' || attachmentMessage.includes('rnx_trust_case_attachments')) {
+          caseEvidenceAvailable = false;
+        } else {
+          throw attachmentResult.error;
+        }
+      } else {
+        caseAttachments = attachmentResult.data || [];
+      }
     }
     return NextResponse.json({
       request: lead,
       messages: messagesResult.data || [],
-      cases: caseReportingAvailable ? cases.map((row: any) => ({ ...row, messages: caseMessages.filter((message: any) => message.trust_case_id === row.id) })) : [],
+      cases: caseReportingAvailable ? cases.map((row: any) => ({ ...row, messages: caseMessages.filter((message: any) => message.trust_case_id === row.id), attachments: caseAttachments.filter((attachment: any) => attachment.trust_case_id === row.id) })) : [],
       caseReportingAvailable,
+      caseEvidenceAvailable,
       introducedSuppliers: (introductionsResult.data || []).map((row: any) => ({ id: row.id, introduced_at: row.contact_released_at, supplier: Array.isArray(row.supplier) ? row.supplier[0] : row.supplier })),
     }, { headers: { 'Cache-Control': 'no-store, private', 'Referrer-Policy': 'no-referrer' } });
   } catch (error) {

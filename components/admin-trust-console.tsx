@@ -7,12 +7,14 @@ type Lead = { id: string; name: string; email: string | null; phone: string; cat
 type CaseRow = { id: string; case_reference: string; lead_id: string; case_type: string; summary: string; description: string; requested_resolution: string | null; severity: string; status: string; public_resolution: string | null; assigned_staff_id: string | null; created_at: string; updated_at: string; lead: Lead; supplier?: { business_name: string; status: string; category: string; state: string } | null; assigned?: StaffOption | null };
 type Message = { id: string; sender_role: string; sender_name: string; visibility: string; body: string; created_at: string; sender_supplier_id?: string | null };
 type EventRow = { id: string; actor_role: string; actor_email: string | null; event_type: string; from_status: string | null; to_status: string | null; created_at: string };
-type Detail = { case: CaseRow; messages: Message[]; events: EventRow[] };
+type EvidenceAttachment = { id: string; uploader_role: string; visibility: 'customer'|'internal'; file_name: string; mime_type: string; file_size_bytes: number; note: string | null; created_at: string };
+type Detail = { case: CaseRow; messages: Message[]; events: EventRow[]; attachments: EvidenceAttachment[] };
 
 const statuses = ['new','triaged','awaiting_customer','awaiting_supplier','under_review','resolved','closed'];
 const severities = ['low','normal','high','critical'];
 const statusLabel = (value: string) => value.replaceAll('_', ' ');
 function stamp(value: string) { const date = new Date(value); return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' }); }
+function fileSize(value: number) { return value < 1024 * 1024 ? `${Math.max(1, Math.round(value / 1024))} KB` : `${(value / (1024 * 1024)).toFixed(1)} MB`; }
 
 export function AdminTrustConsole({ canWrite }: { canWrite: boolean }) {
   const [cases, setCases] = useState<CaseRow[]>([]);
@@ -25,6 +27,8 @@ export function AdminTrustConsole({ canWrite }: { canWrite: boolean }) {
   const [resolution, setResolution] = useState('');
   const [message, setMessage] = useState('');
   const [visibility, setVisibility] = useState<'internal'|'customer'>('internal');
+  const [evidenceVisibility, setEvidenceVisibility] = useState<'internal'|'customer'>('internal');
+  const [evidenceBusy, setEvidenceBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -83,6 +87,20 @@ export function AdminTrustConsole({ canWrite }: { canWrite: boolean }) {
     finally { setBusy(false); }
   }
 
+  async function uploadEvidence(file: File | null) {
+    if (!detail || !canWrite || !file) return;
+    setEvidenceBusy(true); setError(''); setNotice('');
+    try {
+      const form = new FormData(); form.set('file', file); form.set('visibility', evidenceVisibility);
+      const response = await fetch(`/api/admin/trust-cases/${detail.case.id}/attachments`, { method: 'POST', body: form });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Evidence upload failed.');
+      setNotice(evidenceVisibility === 'internal' ? 'Internal evidence stored. Customers and suppliers cannot access it.' : 'Customer-visible evidence added to the case.');
+      await loadDetail(detail.case.id); await refresh();
+    } catch (err) { setError(err instanceof Error ? err.message : 'Evidence upload failed.'); }
+    finally { setEvidenceBusy(false); }
+  }
+
   return <div className="admin-trust-console">
     <div className="supplier-dashboard-toolbar"><div><p className="eyebrow">CUSTOMER PROTECTION</p><h2>Complaints and disputes</h2><p>Private cases linked to customer request tracking. Move a case to Awaiting supplier to request a response from the introduced supplier. Internal staff notes remain hidden from customers and suppliers.</p></div><button className="button button-small" type="button" onClick={() => void refresh()} disabled={loading}>Refresh cases</button></div>
     {notice && <p className="admin-notice">{notice}</p>}{error && <p className="admin-error" role="alert">{error}</p>}
@@ -99,6 +117,10 @@ export function AdminTrustConsole({ canWrite }: { canWrite: boolean }) {
           {canWrite && <button className="button button-small" type="button" disabled={busy} onClick={() => void saveCase()}>{busy ? 'Saving…' : 'Save case changes'}</button>}
           <div className="admin-trust-messages"><h3>Case conversation and internal notes</h3>{detail.messages.map((row) => <article className={`customer-message ${row.visibility === 'internal' ? 'is-internal' : row.sender_role === 'supplier' ? 'is-supplier' : row.sender_role === 'staff' ? 'is-operations' : 'is-customer'}`} key={row.id}><div><strong>{row.sender_name} · {row.visibility === 'internal' ? 'INTERNAL NOTE' : row.sender_role === 'supplier' ? 'SUPPLIER RESPONSE' : row.sender_role === 'staff' ? 'RNX OPERATIONS' : 'CUSTOMER MESSAGE'}</strong><small>{stamp(row.created_at)}</small></div><p>{row.body}</p></article>)}{detail.messages.length === 0 && <p className="fine-print">No case messages yet.</p>}
             {canWrite && <div className="customer-compose"><label>Message visibility<select value={visibility} onChange={(event) => setVisibility(event.target.value as 'internal'|'customer')}><option value="internal">Internal note — staff only</option><option value="customer">Customer-visible reply</option></select></label><textarea rows={3} maxLength={3000} value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Write a case update…" /><button className="button button-small" type="button" disabled={busy || message.trim().length < 2 || (detail.case.status === 'closed' && visibility === 'customer')} onClick={() => void sendMessage()}>{busy ? 'Saving…' : 'Add case message'}</button></div>}
+          </div>
+          <div className="admin-trust-evidence"><div className="trust-evidence-heading"><div><h3>Evidence vault</h3><small>Private files linked to this case. Internal evidence is not visible to the customer or supplier.</small></div><span>{detail.attachments?.length || 0}/20</span></div>
+            {(detail.attachments || []).length ? <div className="trust-evidence-list">{detail.attachments.map((attachment) => <article key={attachment.id}><div><strong>{attachment.file_name}</strong><small>{fileSize(attachment.file_size_bytes)} · {attachment.uploader_role} · {stamp(attachment.created_at)}</small><small className={attachment.visibility === 'internal' ? 'trust-evidence-internal' : 'trust-evidence-customer'}>{attachment.visibility === 'internal' ? 'INTERNAL — STAFF ONLY' : 'CUSTOMER AND ASSIGNED SUPPLIER'}</small>{attachment.note && <small>{attachment.note}</small>}</div><a className="button button-small button-secondary" href={`/api/admin/trust-cases/${detail.case.id}/attachments/${attachment.id}`} target="_blank" rel="noreferrer">Open file</a></article>)}</div> : <p className="fine-print">No evidence files have been uploaded.</p>}
+            {canWrite && (detail.attachments?.length || 0) < 20 && <div className="trust-evidence-admin-upload"><label>Evidence visibility<select value={evidenceVisibility} onChange={(event) => setEvidenceVisibility(event.target.value as 'internal'|'customer')}><option value="internal">Internal — staff only</option><option value="customer">Customer and supplier visible</option></select></label><label className="trust-evidence-upload">{evidenceBusy ? 'Uploading evidence…' : 'Add evidence file'}<input type="file" accept="application/pdf,image/jpeg,image/png,image/webp" disabled={evidenceBusy} onChange={(event) => { const file = event.target.files?.[0] || null; void uploadEvidence(file); event.currentTarget.value = ''; }} /><small>PDF, JPEG, PNG or WebP · maximum 4 MB per file.</small></label></div>}
           </div>
           <div className="admin-trust-events"><h3>Handling history</h3>{detail.events.map((event) => <p key={event.id}><strong>{event.event_type.replaceAll('_',' ')}</strong><span>{event.actor_email || event.actor_role} · {stamp(event.created_at)}</span>{event.from_status && event.to_status && <small>{statusLabel(event.from_status)} → {statusLabel(event.to_status)}</small>}</p>)}</div>
           <p className="admin-footnote">Case records preserve the customer's report and handling history. Investigate evidence independently. Do not state that a supplier committed fraud, breached a contract or is legally liable unless that conclusion is properly established. RNX case closure is an operational record, not a court or regulatory finding.</p>
