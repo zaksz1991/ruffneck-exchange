@@ -1,4 +1,4 @@
-RUFFNECK EXCHANGE v3.10.0 — APPLY INSTRUCTIONS
+RUFFNECK EXCHANGE v3.16.0 — APPLY INSTRUCTIONS
 
 GitHub repository: https://github.com/zaksz1991/ruffneck-exchange
 Branch: main
@@ -6,13 +6,13 @@ Production: https://ruffneck-exchange.vercel.app/
 Supabase project: RuffNeck Entertainment
 Vercel Root Directory: ./
 
-1. Keep migrations 001–028 as already applied. No new SQL migration is needed for v3.10.0.
-2. Extract the complete replacement ZIP and open the included `ruffneck exchange` folder.
-3. Replace the existing GitHub repository contents with the complete contents of that folder.
-4. Commit to main and allow the existing Vercel project to deploy.
-5. Confirm Vercel completes TypeScript validation and the Next.js production build.
-6. Test the customer and supplier dashboards using a non-production pair of linked accounts with at least one requested revision and one revised quote.
+1. No new Supabase migration is required. Keep migrations 001–032 unchanged; do not rerun completed migrations.
+2. No new Vercel environment variables are required.
+3. Extract the complete replacement ZIP. It has a flat layout: app/, components/, lib/, public/, scripts/, supabase/, package.json and other project files are directly at the ZIP root.
+4. Upload the extracted root contents directly into the existing GitHub repository, replacing the previous project files. Do not create a nested wrapper folder.
+5. Commit to main and allow the existing Vercel project to deploy.
+6. Confirm Vercel completes TypeScript validation and the Next.js production build.
 
-No new Vercel environment variables or external services are required.
+Supplier catalogue export: sign in to the supplier portal, open Your products and services, select all catalogue listings or a moderation-status group in Export your catalogue, then choose Download catalogue CSV. The dated CSV is a reporting/backup snapshot, not a direct import template. Exports are private to the authenticated supplier and exclude customer contact details and private image paths. Each download supports up to 10,000 records.
 
-See APPLY-v3.10.0.txt, RELEASE-NOTES-v3.10.0.md and BUILD_STATUS.md for release details.
+See APPLY-v3.16.0.txt, RELEASE-NOTES-v3.16.0.md and BUILD_STATUS.md for release details.

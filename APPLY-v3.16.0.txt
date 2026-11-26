@@ -1,0 +1,15 @@
+RuffNeck Exchange v3.16.0 deployment
+
+1. Extract the complete cumulative replacement ZIP.
+2. Upload the extracted project-root contents directly into the existing GitHub repository, replacing the previous project files.
+3. Commit to the main branch and allow the existing Vercel project to deploy.
+4. No Supabase SQL migration is required. Keep migrations 001–032 unchanged.
+5. No new Vercel environment variables are required.
+
+Supplier catalogue export
+- Sign in to the supplier portal and open Your products and services.
+- Under Export your catalogue, choose all listings or a moderation-status group.
+- Select Download catalogue CSV.
+- The download is a point-in-time snapshot for reporting and backup; it is not an import template. The export does not change listings.
+- The API exports only listings belonging to the authenticated supplier. It excludes customer contact details and private image-storage paths.
+- A single export can contain up to 10,000 listings. Export by status group if the catalogue is larger.

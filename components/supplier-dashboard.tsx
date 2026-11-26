@@ -15,6 +15,7 @@ type Listing = { id: string; title: string; slug: string; listing_type: string; 
 type CommercialQuote = { id: string; lead_offer_id: string; quote_reference: string; title: string; scope_description: string; total_amount: number; currency: string; delivery_terms: string; estimated_fulfilment: string | null; valid_until: string; status: 'submitted' | 'selected' | 'not_selected' | 'declined' | 'withdrawn' | 'expired' | 'revision_requested'; created_at: string; responded_at: string | null; revision_of_quote_id?: string | null; revision_request_note?: string | null; revision_requested_at?: string | null };
 type SupplierNotification = { id: string; notification_type: string; title: string; message: string; related_quote_id: string | null; related_trust_case_id?: string | null; read_at: string | null; created_at: string };
 type Offer = { id: string; anonymised_summary: string; quoted_fee: number; currency: string; payment_status: string; supplier_accepted_at: string | null; supplier_declined_at: string | null; supplier_response_note: string | null; payment_verified_at: string | null; customer_approved_at: string | null; customer_declined_at: string | null; contact_released_at: string | null; created_at: string; outcome: { status: string; customer_outcome: string | null; supplier_outcome: string | null; completed_at: string | null } | null; review: { id: string; rating: number; title: string; body: string; moderation_status: string; supplier_response: string | null } | null; quotes: CommercialQuote[]; customer: { category: string; state: string; city: string | null; contact_released: boolean; name: string | null; email: string | null; phone: string | null; preferred_contact: string | null; request_details: string | null } };
+type CatalogueExportStatus = 'all' | 'approved' | 'pending' | 'paused' | 'rejected';
 type DashboardData = { supplier: { business_name: string; contact_name: string; email: string; phone: string; category: string; state: string }; listings: Listing[]; listingAnalyticsAvailable: boolean; memberships: Membership[]; offers: Offer[]; plans: Plan[]; paymentInstructions: string; notifications: SupplierNotification[]; unreadNotificationCount: number; notificationsAvailable: boolean };
 
 function planOf(membership: Membership) { return Array.isArray(membership.plan) ? membership.plan[0] : membership.plan; }
@@ -37,6 +38,8 @@ export function SupplierDashboard() {
   const [galleryListingId, setGalleryListingId] = useState('');
   const [reviewReplyDrafts, setReviewReplyDrafts] = useState<Record<string, string>>({});
   const [catalogueImportSummary, setCatalogueImportSummary] = useState('');
+  const [catalogueExportStatus, setCatalogueExportStatus] = useState<CatalogueExportStatus>('all');
+  const [catalogueExporting, setCatalogueExporting] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true); setError('');
@@ -111,6 +114,34 @@ export function SupplierDashboard() {
       setError(err instanceof Error ? err.message : 'Catalogue import failed.');
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function exportCatalogueCsv() {
+    setCatalogueExporting(true); setError(''); setNotice('');
+    try {
+      const response = await fetch(`/api/supplier/listings/export?status=${encodeURIComponent(catalogueExportStatus)}`, { cache: 'no-store' });
+      if (response.status === 401) { window.location.assign('/supplier/login'); return; }
+      if (!response.ok) {
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result.error || 'Catalogue export failed.');
+      }
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const disposition = response.headers.get('Content-Disposition') || '';
+      const fileName = disposition.match(/filename="?([^";]+)"?/i)?.[1] || 'ruffneck-exchange-catalogue.csv';
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1_000);
+      setNotice('Your supplier catalogue CSV has been downloaded. The export contains listing information only; customer contact details are not included.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Catalogue export failed.');
+    } finally {
+      setCatalogueExporting(false);
     }
   }
 
@@ -447,6 +478,24 @@ export function SupplierDashboard() {
         </form>
         {catalogueImportSummary && <p className="supplier-catalogue-import-success" role="status">{catalogueImportSummary}</p>}
         <p className="admin-footnote">Required columns: title, listing_type, category, description, state, city, price_type, price, keywords. Supported listing types: product, service, wholesale, rental. Pricing types: enquiry, fixed, from. Prices are imported in NGN. The complete file is validated before any rows are inserted.</p>
+      </div>
+      <div className="supplier-catalogue-export">
+        <div>
+          <strong>Export your catalogue</strong>
+          <p>Download a dated CSV snapshot of your own listings, including moderation status and supplier-reported availability. Customer contact details and private image-storage paths are never included.</p>
+        </div>
+        <form className="supplier-catalogue-export-form" onSubmit={(event) => { event.preventDefault(); void exportCatalogueCsv(); }}>
+          <label htmlFor="supplier-catalogue-export-status">Listings to include</label>
+          <select id="supplier-catalogue-export-status" value={catalogueExportStatus} onChange={(event) => setCatalogueExportStatus(event.target.value as CatalogueExportStatus)}>
+            <option value="all">All catalogue listings</option>
+            <option value="approved">Approved / public listings</option>
+            <option value="pending">Pending RNX review</option>
+            <option value="paused">Paused listings</option>
+            <option value="rejected">Rejected listings</option>
+          </select>
+          <button className="button button-small button-secondary" type="submit" disabled={catalogueExporting || busy}>{catalogueExporting ? 'Preparing CSV…' : 'Download catalogue CSV'}</button>
+        </form>
+        <p className="admin-footnote">This export is a reporting and backup snapshot, not an import template. It does not change listings or their moderation status. The CSV export supports up to 10,000 records per download.</p>
       </div>
       {editingListing && <form key={editingListing.id} className="supplier-listing-form" onSubmit={(event) => void submitListing(event, editingListing.id)}>
         <label>Offer title<input name="title" required minLength={3} maxLength={180} defaultValue={editingListing.title} /></label>
