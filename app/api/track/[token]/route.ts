@@ -32,19 +32,30 @@ export async function GET(_request: Request, context: Context) {
     const lead = await findLead(token);
     if (!lead) return NextResponse.json({ error: 'This tracking link is invalid or has expired.' }, { status: 404, headers: { 'Cache-Control': 'no-store' } });
     const db = supabaseAdmin();
-    const [messagesResult, casesResult, introductionsResult] = await Promise.all([
+    const [messagesResult, introductionsResult] = await Promise.all([
       db.from('rnx_lead_messages').select('id,sender_role,sender_name,body,created_at').eq('lead_id', lead.id).order('created_at', { ascending: true }).limit(200),
-      db.from('rnx_trust_cases').select('id,case_reference,case_type,summary,status,public_resolution,created_at,updated_at').eq('lead_id', lead.id).order('created_at', { ascending: false }).limit(20),
       db.from('rnx_lead_offers').select('id,contact_released_at,supplier:rnx_supplier_applications!inner(business_name,category)').eq('lead_id', lead.id).eq('payment_status', 'paid').not('payment_verified_at', 'is', null).not('customer_approved_at', 'is', null).not('contact_released_at', 'is', null).order('contact_released_at', { ascending: false }).limit(20),
     ]);
     if (messagesResult.error) throw messagesResult.error;
     if (introductionsResult.error) throw introductionsResult.error;
+
+    let caseAppealAvailable = true;
+    let casesResult = await db.from('rnx_trust_cases')
+      .select('id,case_reference,case_type,summary,status,public_resolution,resolution_published_at,created_at,updated_at')
+      .eq('lead_id', lead.id).order('created_at', { ascending: false }).limit(20);
+    if (casesResult.error && String(casesResult.error.code || '') === '42703') {
+      caseAppealAvailable = false;
+      casesResult = await db.from('rnx_trust_cases')
+        .select('id,case_reference,case_type,summary,status,public_resolution,created_at,updated_at')
+        .eq('lead_id', lead.id).order('created_at', { ascending: false }).limit(20);
+    }
     let caseReportingAvailable = !casesResult.error;
     if (casesResult.error && !isMissingTrustSchema(casesResult.error)) throw casesResult.error;
     const cases = casesResult.data || [];
     let caseMessages: any[] = [];
     let caseEvidenceAvailable = true;
     let caseAttachments: any[] = [];
+    let caseAppeals: any[] = [];
     if (cases.length && caseReportingAvailable) {
       const result = await db.from('rnx_trust_case_messages').select('id,trust_case_id,sender_role,sender_name,body,created_at').in('trust_case_id', cases.map((row: any) => row.id)).eq('visibility', 'customer').order('created_at', { ascending: true }).limit(300);
       if (result.error && !isMissingTrustSchema(result.error)) throw result.error;
@@ -67,13 +78,33 @@ export async function GET(_request: Request, context: Context) {
       } else {
         caseAttachments = attachmentResult.data || [];
       }
+      if (caseAppealAvailable) {
+        const appealResult = await db.from('rnx_trust_case_appeals')
+          .select('id,trust_case_id,status,customer_reason,staff_response,created_at,reviewed_at')
+          .in('trust_case_id', cases.map((row: any) => row.id))
+          .limit(20);
+        if (appealResult.error) {
+          const appealCode = String(appealResult.error.code || '');
+          const appealMessage = String(appealResult.error.message || '').toLowerCase();
+          if (appealCode === '42P01' || appealCode === 'PGRST205' || appealMessage.includes('rnx_trust_case_appeals')) caseAppealAvailable = false;
+          else throw appealResult.error;
+        } else {
+          caseAppeals = appealResult.data || [];
+        }
+      }
     }
     return NextResponse.json({
       request: lead,
       messages: messagesResult.data || [],
-      cases: caseReportingAvailable ? cases.map((row: any) => ({ ...row, messages: caseMessages.filter((message: any) => message.trust_case_id === row.id), attachments: caseAttachments.filter((attachment: any) => attachment.trust_case_id === row.id) })) : [],
+      cases: caseReportingAvailable ? cases.map((row: any) => ({
+        ...row,
+        appeal: caseAppeals.find((appeal: any) => appeal.trust_case_id === row.id) || null,
+        messages: caseMessages.filter((message: any) => message.trust_case_id === row.id),
+        attachments: caseAttachments.filter((attachment: any) => attachment.trust_case_id === row.id),
+      })) : [],
       caseReportingAvailable,
       caseEvidenceAvailable,
+      caseAppealAvailable,
       introducedSuppliers: (introductionsResult.data || []).map((row: any) => ({ id: row.id, introduced_at: row.contact_released_at, supplier: Array.isArray(row.supplier) ? row.supplier[0] : row.supplier })),
     }, { headers: { 'Cache-Control': 'no-store, private', 'Referrer-Policy': 'no-referrer' } });
   } catch (error) {

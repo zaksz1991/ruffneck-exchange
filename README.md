@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v3.12.0
+# RuffNeck Exchange (RNX) — v3.13.0
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,14 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.13.0 — customer resolution review and appeals
+
+- Customers can request one review of a resolved or closed trust case within 14 days of the published resolution from their private request tracking link.
+- RNX Operations receives an appeal queue item, reviews the customer's explanation and records a customer-visible decision response.
+- Accepting an appeal reopens the case to `under_review`; not upholding it retains the original operational case status. One appeal is allowed per case.
+- Adds migration `031_rnx_trust_case_resolution_appeals.sql`. Apply after migrations 001–030. No new environment variables or external services.
+- Database functions enforce the appeal deadline, one-appeal rule and transactionally record case events. Accepting an appeal is not a liability finding or a payment/refund action.
 
 ## v3.12.0 — customer protection evidence vault
 
@@ -305,16 +313,16 @@ Do not paste, commit or expose actual secret values.
 
 ## Supabase migrations
 
-The cumulative v3.12.0 project contains RNX migrations 001–030. Migration 018 provides private customer saved-offer records; migration 019 adds opt-in saved-offer price and availability email alerts; migration 020 adds private in-app customer notifications. For older deployments, apply only missing RNX migrations in numerical order after reviewing the existing Supabase migration history. Never rerun a migration recorded as completed. These migrations create and modify only RNX-prefixed objects; do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects. For the previously encountered missing `availability_status` error, see `docs/SUPABASE_MIGRATION_RECOVERY.md` and the included idempotent repair script under `supabase/repairs/`.
+The cumulative v3.13.0 project contains RNX migrations 001–031. Migration 018 provides private customer saved-offer records; migration 019 adds opt-in saved-offer price and availability email alerts; migration 020 adds private in-app customer notifications. For older deployments, apply only missing RNX migrations in numerical order after reviewing the existing Supabase migration history. Never rerun a migration recorded as completed. These migrations create and modify only RNX-prefixed objects; do not alter unrelated RuffNeck Entertainment, Prospector, Social Hub, LMS, CALLORIA or other application objects. For the previously encountered missing `availability_status` error, see `docs/SUPABASE_MIGRATION_RECOVERY.md` and the included idempotent repair script under `supabase/repairs/`.
 
 ## Verification boundary
 
-The cumulative static regression scripts, including the v3.2.0 commercial quote checks, are retained in the project. Full semantic TypeScript checking and the Next.js production build require installed project dependencies. Static tests do not prove live Supabase RPC behaviour; apply the new migration 029 and confirm the Vercel build before enabling the supplier case response centre.
+The cumulative static regression scripts, including the v3.2.0 commercial quote checks, are retained in the project. Full semantic TypeScript checking and the Next.js production build require installed project dependencies. Static tests do not prove live Supabase RPC behaviour; confirm migration 031 and the Vercel build before enabling the customer resolution appeal workflow.
 
 ## Commercial deployment
 
 Review Vercel plan terms for commercial use before monetised production operation. Do not assume a personal-use plan permits commercial marketplace operations.
 
-## Current release: v3.12.0
+## Current release: v3.13.0
 
-This cumulative release adds a private trust-case evidence vault. Apply migration 030 in the existing RuffNeck Entertainment Supabase project after migrations 001–029. See `RELEASE-NOTES-v3.12.0.md`, `APPLY-v3.12.0.txt` and `RNX_TRUST_EVIDENCE_VAULT.md`.
+This cumulative release adds customer resolution review and appeals. Apply migration 031 in the existing RuffNeck Entertainment Supabase project after migrations 001–030. See `RELEASE-NOTES-v3.13.0.md`, `APPLY-v3.13.0.txt` and `RNX_TRUST_AND_RESOLUTION.md`.

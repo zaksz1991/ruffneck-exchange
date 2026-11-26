@@ -4,11 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 type StaffOption = { id: string; full_name: string; email: string; role: string };
 type Lead = { id: string; name: string; email: string | null; phone: string; category: string; state: string; city: string | null; status: string; created_at: string };
-type CaseRow = { id: string; case_reference: string; lead_id: string; case_type: string; summary: string; description: string; requested_resolution: string | null; severity: string; status: string; public_resolution: string | null; assigned_staff_id: string | null; created_at: string; updated_at: string; lead: Lead; supplier?: { business_name: string; status: string; category: string; state: string } | null; assigned?: StaffOption | null };
+type CaseRow = { id: string; case_reference: string; lead_id: string; case_type: string; summary: string; description: string; requested_resolution: string | null; severity: string; status: string; public_resolution: string | null; assigned_staff_id: string | null; created_at: string; updated_at: string; appeal_status?: string | null; appeal?: { status: string } | null; lead: Lead; supplier?: { business_name: string; status: string; category: string; state: string } | null; assigned?: StaffOption | null };
 type Message = { id: string; sender_role: string; sender_name: string; visibility: string; body: string; created_at: string; sender_supplier_id?: string | null };
 type EventRow = { id: string; actor_role: string; actor_email: string | null; event_type: string; from_status: string | null; to_status: string | null; created_at: string };
 type EvidenceAttachment = { id: string; uploader_role: string; visibility: 'customer'|'internal'; file_name: string; mime_type: string; file_size_bytes: number; note: string | null; created_at: string };
-type Detail = { case: CaseRow; messages: Message[]; events: EventRow[]; attachments: EvidenceAttachment[] };
+type TrustCaseAppeal = { id: string; trust_case_id: string; status: 'submitted'|'accepted'|'not_upheld'; customer_reason: string; original_case_status: string; original_resolution_published_at: string; staff_response: string | null; reviewer_email: string | null; reviewed_at: string | null; created_at: string };
+type Detail = { case: CaseRow; messages: Message[]; events: EventRow[]; attachments: EvidenceAttachment[]; appeal: TrustCaseAppeal | null };
 
 const statuses = ['new','triaged','awaiting_customer','awaiting_supplier','under_review','resolved','closed'];
 const severities = ['low','normal','high','critical'];
@@ -29,6 +30,8 @@ export function AdminTrustConsole({ canWrite }: { canWrite: boolean }) {
   const [visibility, setVisibility] = useState<'internal'|'customer'>('internal');
   const [evidenceVisibility, setEvidenceVisibility] = useState<'internal'|'customer'>('internal');
   const [evidenceBusy, setEvidenceBusy] = useState(false);
+  const [appealResponse, setAppealResponse] = useState('');
+  const [appealBusy, setAppealBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -54,13 +57,18 @@ export function AdminTrustConsole({ canWrite }: { canWrite: boolean }) {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Case details could not be loaded.');
       const next = data as Detail;
-      setDetail(next); setStatus(next.case.status); setSeverity(next.case.severity); setAssignee(next.case.assigned_staff_id || ''); setResolution(next.case.public_resolution || '');
+      setDetail(next); setStatus(next.case.status); setSeverity(next.case.severity); setAssignee(next.case.assigned_staff_id || ''); setResolution(next.case.public_resolution || ''); setAppealResponse('');
     } catch (err) { setError(err instanceof Error ? err.message : 'Case details could not be loaded.'); }
   }, []);
 
   useEffect(() => { void refresh(); }, [refresh]);
 
-  const visibleCases = useMemo(() => cases.filter((row) => filter === 'all' || (filter === 'open' ? !['resolved','closed'].includes(row.status) : row.status === filter)), [cases, filter]);
+  const visibleCases = useMemo(() => cases.filter((row) => {
+    if (filter === 'all') return true;
+    if (filter === 'appeals') return row.appeal_status === 'submitted';
+    if (filter === 'open') return !['resolved','closed'].includes(row.status) || row.appeal_status === 'submitted';
+    return row.status === filter;
+  }), [cases, filter]);
 
   async function saveCase() {
     if (!detail || !canWrite) return;
@@ -87,6 +95,25 @@ export function AdminTrustConsole({ canWrite }: { canWrite: boolean }) {
     finally { setBusy(false); }
   }
 
+
+  async function reviewAppeal(decision: 'accepted'|'not_upheld') {
+    if (!detail?.appeal || !canWrite || appealResponse.trim().length < 10) return;
+    setAppealBusy(true); setError(''); setNotice('');
+    try {
+      const response = await fetch(`/api/admin/trust-cases/${detail.case.id}/appeal`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision, staffResponse: appealResponse }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Appeal decision could not be saved.');
+      setAppealResponse('');
+      setNotice(decision === 'accepted' ? 'Appeal accepted. The case has been reopened for further review.' : 'Appeal not upheld. The original operational resolution remains in place.');
+      await refresh(); await loadDetail(detail.case.id);
+    } catch (err) { setError(err instanceof Error ? err.message : 'Appeal decision could not be saved.'); }
+    finally { setAppealBusy(false); }
+  }
+
   async function uploadEvidence(file: File | null) {
     if (!detail || !canWrite || !file) return;
     setEvidenceBusy(true); setError(''); setNotice('');
@@ -105,8 +132,8 @@ export function AdminTrustConsole({ canWrite }: { canWrite: boolean }) {
     <div className="supplier-dashboard-toolbar"><div><p className="eyebrow">CUSTOMER PROTECTION</p><h2>Complaints and disputes</h2><p>Private cases linked to customer request tracking. Move a case to Awaiting supplier to request a response from the introduced supplier. Internal staff notes remain hidden from customers and suppliers.</p></div><button className="button button-small" type="button" onClick={() => void refresh()} disabled={loading}>Refresh cases</button></div>
     {notice && <p className="admin-notice">{notice}</p>}{error && <p className="admin-error" role="alert">{error}</p>}
     <div className="admin-trust-layout">
-      <section className="supplier-panel admin-trust-list"><div className="supplier-section-heading"><div><p className="eyebrow">CASE QUEUE</p><h2>{visibleCases.length} cases</h2></div><label className="admin-trust-filter">Filter<select value={filter} onChange={(event) => setFilter(event.target.value)}><option value="open">Open cases</option><option value="all">All cases</option>{statuses.map((value) => <option key={value} value={value}>{statusLabel(value)}</option>)}</select></label></div>
-        {loading ? <p className="admin-empty">Loading cases…</p> : visibleCases.length === 0 ? <p className="admin-empty">No cases match this filter.</p> : <div className="admin-trust-case-list">{visibleCases.map((row) => <button className={`admin-trust-case-item ${detail?.case.id === row.id ? 'is-selected' : ''}`} key={row.id} type="button" onClick={() => void loadDetail(row.id)}><span className="admin-trust-case-top"><strong>{row.case_reference}</strong><small className={`trust-severity severity-${row.severity}`}>{row.severity}</small></span><b>{row.summary}</b><span>{row.lead?.category || 'Customer request'} · {[row.lead?.city,row.lead?.state].filter(Boolean).join(', ')}</span>{row.supplier?.business_name && <span>Supplier: {row.supplier.business_name}</span>}<small>{statusLabel(row.status)} · Updated {stamp(row.updated_at)}</small></button>)}</div>}
+      <section className="supplier-panel admin-trust-list"><div className="supplier-section-heading"><div><p className="eyebrow">CASE QUEUE</p><h2>{visibleCases.length} cases</h2></div><label className="admin-trust-filter">Filter<select value={filter} onChange={(event) => setFilter(event.target.value)}><option value="open">Open cases</option><option value="all">All cases</option><option value="appeals">Appeals awaiting review</option>{statuses.map((value) => <option key={value} value={value}>{statusLabel(value)}</option>)}</select></label></div>
+        {loading ? <p className="admin-empty">Loading cases…</p> : visibleCases.length === 0 ? <p className="admin-empty">No cases match this filter.</p> : <div className="admin-trust-case-list">{visibleCases.map((row) => <button className={`admin-trust-case-item ${detail?.case.id === row.id ? 'is-selected' : ''}`} key={row.id} type="button" onClick={() => void loadDetail(row.id)}><span className="admin-trust-case-top"><strong>{row.case_reference}</strong><small className={`trust-severity severity-${row.severity}`}>{row.severity}</small></span><b>{row.summary}</b><span>{row.lead?.category || 'Customer request'} · {[row.lead?.city,row.lead?.state].filter(Boolean).join(', ')}</span>{row.supplier?.business_name && <span>Supplier: {row.supplier.business_name}</span>}<small>{statusLabel(row.status)} · Updated {stamp(row.updated_at)}</small>{row.appeal_status === 'submitted' && <small className="admin-trust-appeal-badge">CUSTOMER APPEAL AWAITING REVIEW</small>}</button>)}</div>}
       </section>
       <section className="supplier-panel admin-trust-detail"><div className="supplier-section-heading"><div><p className="eyebrow">CASE WORKSPACE</p><h2>{detail?.case.case_reference || 'Select a case'}</h2></div>{detail && <span className="customer-status">{statusLabel(detail.case.status)}</span>}</div>
         {!detail ? <p className="admin-empty">Select a case to review the request context, handling history and customer messages.</p> : <>
@@ -115,6 +142,11 @@ export function AdminTrustConsole({ canWrite }: { canWrite: boolean }) {
           <div className="admin-trust-controls"><label>Status<select disabled={!canWrite} value={status} onChange={(event) => setStatus(event.target.value)}>{statuses.map((value) => <option key={value} value={value}>{statusLabel(value)}</option>)}</select></label><label>Severity<select disabled={!canWrite} value={severity} onChange={(event) => setSeverity(event.target.value)}>{severities.map((value) => <option key={value} value={value}>{value}</option>)}</select></label><label>Assigned staff<select disabled={!canWrite} value={assignee} onChange={(event) => setAssignee(event.target.value)}><option value="">Unassigned</option>{staff.map((row) => <option key={row.id} value={row.id}>{row.full_name} · {row.role.replaceAll('_',' ')}</option>)}</select></label></div>
           <label className="admin-trust-resolution">Customer-visible resolution summary<textarea disabled={!canWrite} rows={3} maxLength={1800} value={resolution} onChange={(event) => setResolution(event.target.value)} placeholder="Record an accurate summary of the agreed outcome. This becomes visible to the customer." /></label>
           {canWrite && <button className="button button-small" type="button" disabled={busy} onClick={() => void saveCase()}>{busy ? 'Saving…' : 'Save case changes'}</button>}
+          {detail.appeal && <section className="admin-trust-appeal" aria-label="Customer resolution appeal">
+            <div className="supplier-section-heading"><div><p className="eyebrow">CUSTOMER APPEAL</p><h3>Resolution review request</h3><small>Submitted {stamp(detail.appeal.created_at)} · Original case status: {statusLabel(detail.appeal.original_case_status)}</small></div><span className="customer-status">{statusLabel(detail.appeal.status)}</span></div>
+            <div className="admin-trust-appeal-reason"><strong>Customer explanation</strong><p>{detail.appeal.customer_reason}</p></div>
+            {detail.appeal.status === 'submitted' ? <div className="admin-trust-appeal-review"><label>Customer-visible decision response<textarea disabled={!canWrite} rows={4} maxLength={1800} minLength={10} value={appealResponse} onChange={(event) => setAppealResponse(event.target.value)} placeholder="Explain what RNX reviewed, what was considered and why the appeal is accepted or not upheld." /></label><small>10–1,800 characters. This response is shared with the customer and recorded in the case history.</small>{canWrite && <div><button className="button button-small" type="button" disabled={appealBusy || appealResponse.trim().length < 10} onClick={() => void reviewAppeal('accepted')}>{appealBusy ? 'Saving decision…' : 'Accept and reopen case'}</button><button className="button button-small button-secondary" type="button" disabled={appealBusy || appealResponse.trim().length < 10} onClick={() => void reviewAppeal('not_upheld')}>Do not uphold appeal</button></div>}</div> : <div className="admin-trust-appeal-result"><strong>{detail.appeal.status === 'accepted' ? 'Appeal accepted — case reopened' : 'Appeal not upheld'}</strong><p>{detail.appeal.staff_response}</p><small>{detail.appeal.reviewer_email || 'RNX Operations'} · {stamp(detail.appeal.reviewed_at || detail.appeal.created_at)}</small></div>}
+          </section>}
           <div className="admin-trust-messages"><h3>Case conversation and internal notes</h3>{detail.messages.map((row) => <article className={`customer-message ${row.visibility === 'internal' ? 'is-internal' : row.sender_role === 'supplier' ? 'is-supplier' : row.sender_role === 'staff' ? 'is-operations' : 'is-customer'}`} key={row.id}><div><strong>{row.sender_name} · {row.visibility === 'internal' ? 'INTERNAL NOTE' : row.sender_role === 'supplier' ? 'SUPPLIER RESPONSE' : row.sender_role === 'staff' ? 'RNX OPERATIONS' : 'CUSTOMER MESSAGE'}</strong><small>{stamp(row.created_at)}</small></div><p>{row.body}</p></article>)}{detail.messages.length === 0 && <p className="fine-print">No case messages yet.</p>}
             {canWrite && <div className="customer-compose"><label>Message visibility<select value={visibility} onChange={(event) => setVisibility(event.target.value as 'internal'|'customer')}><option value="internal">Internal note — staff only</option><option value="customer">Customer-visible reply</option></select></label><textarea rows={3} maxLength={3000} value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Write a case update…" /><button className="button button-small" type="button" disabled={busy || message.trim().length < 2 || (detail.case.status === 'closed' && visibility === 'customer')} onClick={() => void sendMessage()}>{busy ? 'Saving…' : 'Add case message'}</button></div>}
           </div>

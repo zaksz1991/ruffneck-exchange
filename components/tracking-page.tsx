@@ -9,7 +9,8 @@ type RequestRow = {
   status: string; contact_release_status: string; created_at: string; last_activity_at: string | null;
 };
 type EvidenceAttachment = { id: string; uploader_role: string; visibility: string; file_name: string; mime_type: string; file_size_bytes: number; note: string | null; created_at: string };
-type TrustCase = { id: string; case_reference: string; case_type: string; summary: string; status: string; public_resolution: string | null; created_at: string; updated_at: string; messages: Message[]; attachments: EvidenceAttachment[] };
+type TrustCaseAppeal = { id: string; status: 'submitted'|'accepted'|'not_upheld'; customer_reason: string; staff_response: string | null; created_at: string; reviewed_at: string | null };
+type TrustCase = { id: string; case_reference: string; case_type: string; summary: string; status: string; public_resolution: string | null; resolution_published_at?: string | null; appeal?: TrustCaseAppeal | null; created_at: string; updated_at: string; messages: Message[]; attachments: EvidenceAttachment[] };
 type IntroducedSupplier = { id: string; introduced_at: string; supplier: { business_name: string; category: string } };
 
 function stamp(value: string) { const date = new Date(value); return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' }); }
@@ -27,6 +28,7 @@ export function TrackingPage({ token }: { token: string }) {
   const [cases, setCases] = useState<TrustCase[]>([]);
   const [caseReportingAvailable, setCaseReportingAvailable] = useState(true);
   const [caseEvidenceAvailable, setCaseEvidenceAvailable] = useState(true);
+  const [caseAppealAvailable, setCaseAppealAvailable] = useState(true);
   const [introducedSuppliers, setIntroducedSuppliers] = useState<IntroducedSupplier[]>([]);
   const [offerId, setOfferId] = useState('');
   const [draft, setDraft] = useState('');
@@ -35,10 +37,12 @@ export function TrackingPage({ token }: { token: string }) {
   const [caseDescription, setCaseDescription] = useState('');
   const [requestedResolution, setRequestedResolution] = useState('');
   const [caseDrafts, setCaseDrafts] = useState<Record<string, string>>({});
+  const [appealDrafts, setAppealDrafts] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [caseBusy, setCaseBusy] = useState(false);
   const [messageBusy, setMessageBusy] = useState('');
   const [evidenceBusy, setEvidenceBusy] = useState('');
+  const [appealBusy, setAppealBusy] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
@@ -53,6 +57,7 @@ export function TrackingPage({ token }: { token: string }) {
       setCases(data.cases || []);
       setCaseReportingAvailable(data.caseReportingAvailable !== false);
       setCaseEvidenceAvailable(data.caseEvidenceAvailable !== false);
+      setCaseAppealAvailable(data.caseAppealAvailable !== false);
       setIntroducedSuppliers(data.introducedSuppliers || []);
     } catch (err) { setError(err instanceof Error ? err.message : 'Tracking is temporarily unavailable.'); }
   }, [token]);
@@ -110,6 +115,31 @@ export function TrackingPage({ token }: { token: string }) {
     finally { setEvidenceBusy(''); }
   }
 
+  async function submitAppeal(caseId: string) {
+    const reason = (appealDrafts[caseId] || '').trim();
+    if (reason.length < 20) return;
+    setAppealBusy(caseId); setError(''); setNotice('');
+    try {
+      const response = await fetch(`/api/track/${token}/cases/${caseId}/appeal`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Resolution review request could not be submitted.');
+      setAppealDrafts((current) => ({ ...current, [caseId]: '' }));
+      setNotice('Your request for a resolution review has been submitted to RNX Operations.');
+      await refresh();
+    } catch (err) { setError(err instanceof Error ? err.message : 'Resolution review request could not be submitted.'); }
+    finally { setAppealBusy(''); }
+  }
+
+  function appealWindowOpen(trustCase: TrustCase) {
+    if (!trustCase.resolution_published_at) return false;
+    const publishedAt = new Date(trustCase.resolution_published_at).getTime();
+    return Number.isFinite(publishedAt) && Date.now() <= publishedAt + 14 * 24 * 60 * 60 * 1000;
+  }
+
   return <div className="tracking-shell">
     {error && <div className="admin-error" role="alert">{error}</div>}
     {notice && <div className="admin-notice" role="status">{notice}</div>}
@@ -138,7 +168,14 @@ export function TrackingPage({ token }: { token: string }) {
         <h3>Your reported cases</h3>
         {cases.length ? cases.map((trustCase) => <article className="tracking-case-card" key={trustCase.id}>
           <div className="customer-request-heading"><div><span className="eyebrow">{trustCase.case_reference} · {label(trustCase.case_type)}</span><h4>{trustCase.summary}</h4><p>Submitted {stamp(trustCase.created_at)}</p></div><span className="customer-status">{label(trustCase.status)}</span></div>
-          {trustCase.public_resolution && <div className="tracking-case-resolution"><strong>RNX resolution update</strong><p>{trustCase.public_resolution}</p></div>}
+          {trustCase.public_resolution && <div className="tracking-case-resolution"><strong>{trustCase.appeal?.status === 'accepted' ? 'Previous resolution summary — review reopened' : 'RNX resolution update'}</strong><p>{trustCase.public_resolution}</p></div>}
+          {(trustCase.appeal || trustCase.status === 'resolved' || trustCase.status === 'closed') ? <section className="tracking-case-appeal" aria-label="Resolution review">
+            <div className="tracking-case-appeal-heading"><strong>Resolution review</strong><span className={`customer-status${trustCase.appeal ? ' status-invalid' : ''}`}>{trustCase.appeal ? label(trustCase.appeal.status) : '14-day review window'}</span></div>
+            {trustCase.appeal ? <div className="tracking-case-appeal-result"><p>Your request: {trustCase.appeal.customer_reason}</p><small>Submitted {stamp(trustCase.appeal.created_at)}{trustCase.appeal.reviewed_at ? ` · Reviewed ${stamp(trustCase.appeal.reviewed_at)}` : ''}</small>{trustCase.appeal.staff_response && <div><strong>RNX Operations response</strong><p>{trustCase.appeal.staff_response}</p></div>}{trustCase.appeal.status === 'accepted' && <p className="fine-print">RNX accepted the request for further review. The case is reopened for investigation; acceptance is not a finding of liability.</p>}{trustCase.appeal.status === 'not_upheld' && <p className="fine-print">RNX completed the review and the original operational resolution remains in place.</p>}</div>
+              : !caseAppealAvailable ? <p className="fine-print">Resolution review requests are not available until the latest RNX trust update is deployed.</p>
+              : appealWindowOpen(trustCase) ? <form className="tracking-case-appeal-form" onSubmit={(event) => { event.preventDefault(); void submitAppeal(trustCase.id); }}><p className="fine-print">You may request one review within 14 days of the published resolution. Explain what you believe was missed, why the outcome should be reconsidered, or what new information should be considered. RNX Operations will review the request.</p><label htmlFor={`case-appeal-${trustCase.id}`}>Why should this resolution be reviewed?<textarea id={`case-appeal-${trustCase.id}`} rows={4} minLength={20} maxLength={2000} value={appealDrafts[trustCase.id] || ''} onChange={(event) => setAppealDrafts((current) => ({ ...current, [trustCase.id]: event.target.value }))} placeholder="Describe the specific point you want RNX to reconsider and include any relevant new information." /></label><div><small>{(appealDrafts[trustCase.id] || '').trim().length}/2,000 characters · One appeal per case</small><button className="button button-small" type="submit" disabled={appealBusy === trustCase.id || (appealDrafts[trustCase.id] || '').trim().length < 20}>{appealBusy === trustCase.id ? 'Submitting review request…' : 'Request resolution review'}</button></div></form>
+              : <p className="fine-print">The 14-day resolution review window has ended. You can still contact RNX Operations through the main request message thread.</p>}
+          </section> : null}
           <div className="tracking-case-messages">{trustCase.messages.map((message) => <div className={`customer-message ${message.sender_role === 'supplier' ? 'is-supplier' : message.sender_role === 'staff' ? 'is-operations' : 'is-customer'}`} key={message.id}><div><strong>{message.sender_name}</strong><small>{stamp(message.created_at)}</small></div><p>{message.body}</p></div>)}</div>
           <div className="trust-evidence"><div className="trust-evidence-heading"><div><strong>Case evidence</strong><small>PDF or image files · maximum 4 MB each · 20 files per case</small></div><span>{trustCase.attachments?.length || 0}/20</span></div>
             {(trustCase.attachments || []).length ? <div className="trust-evidence-list">{trustCase.attachments.map((attachment) => <article key={attachment.id}><div><strong>{attachment.file_name}</strong><small>{fileSize(attachment.file_size_bytes)} · {attachment.uploader_role} · {stamp(attachment.created_at)}</small>{attachment.note && <small>{attachment.note}</small>}</div><a className="button button-small button-secondary" href={`/api/track/${token}/cases/${trustCase.id}/attachments/${attachment.id}`} target="_blank" rel="noreferrer">Open file</a></article>)}</div> : <p className="fine-print">No evidence files have been added to this case.</p>}

@@ -33,17 +33,19 @@ export async function GET(_request: Request, context: Context) {
   if (!/^[0-9a-f-]{36}$/i.test(id)) return NextResponse.json({ error: 'Invalid case reference.' }, { status: 400 });
   try {
     const db = supabaseAdmin();
-    const [caseResult, messagesResult, eventsResult, attachmentsResult] = await Promise.all([
+    const [caseResult, messagesResult, eventsResult, attachmentsResult, appealResult] = await Promise.all([
       db.from('rnx_trust_cases').select('*,lead:rnx_leads!inner(id,name,email,phone,category,state,city,status,created_at),supplier:rnx_supplier_applications(business_name,status,category,state),assigned:rnx_staff_users(id,full_name,email,role)').eq('id', id).maybeSingle(),
       db.from('rnx_trust_case_messages').select('id,sender_role,sender_staff_id,sender_supplier_id,sender_name,visibility,body,created_at').eq('trust_case_id', id).order('created_at', { ascending: true }).limit(200),
       db.from('rnx_trust_case_events').select('id,actor_role,actor_email,event_type,from_status,to_status,details,created_at').eq('trust_case_id', id).order('created_at', { ascending: false }).limit(100),
       db.from('rnx_trust_case_attachments').select('id,trust_case_id,uploader_role,visibility,file_name,mime_type,file_size_bytes,note,created_at').eq('trust_case_id', id).order('created_at', { ascending: true }).limit(20),
+      db.from('rnx_trust_case_appeals').select('id,trust_case_id,status,customer_reason,original_case_status,original_resolution_published_at,staff_response,reviewer_email,reviewed_at,created_at').eq('trust_case_id', id).maybeSingle(),
     ]);
     if (caseResult.error || !caseResult.data) return NextResponse.json({ error: 'Trust case not found.' }, { status: 404 });
     if (messagesResult.error) throw messagesResult.error;
     if (eventsResult.error) throw eventsResult.error;
     if (attachmentsResult.error) throw attachmentsResult.error;
-    return NextResponse.json({ case: caseResult.data, messages: messagesResult.data || [], events: eventsResult.data || [], attachments: attachmentsResult.data || [] }, { headers: { 'Cache-Control': 'no-store, private' } });
+    if (appealResult.error) throw appealResult.error;
+    return NextResponse.json({ case: caseResult.data, messages: messagesResult.data || [], events: eventsResult.data || [], attachments: attachmentsResult.data || [], appeal: appealResult.data || null }, { headers: { 'Cache-Control': 'no-store, private' } });
   } catch (error) {
     console.error('[RNX trust cases] Case detail failed:', error instanceof Error ? error.message : 'unknown');
     return NextResponse.json({ error: 'Case details could not be loaded.' }, { status: 503 });

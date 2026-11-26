@@ -1,13 +1,14 @@
-# Build status — RuffNeck Exchange v3.12.0
+# Build status — RuffNeck Exchange v3.13.0
 
-- Source baseline: v3.11.0 complete cumulative project archive.
-- Upgrade: private trust-case evidence vault for customers, assigned suppliers and RNX Operations.
-- New Supabase migration: `030_rnx_trust_case_evidence_vault.sql`.
-- File controls: PDF/JPEG/PNG/WebP; 4 MB per file; 20 files per case; private Storage; 5-minute signed URLs.
-- Static regression scripts: 32 passed, 0 failed (all `scripts/test-*.mjs` executed individually).
-- TypeScript/TSX syntax transpilation: 187 files passed, 0 syntax errors (TypeScript 5.8.3 `transpileModule`).
-- Full TypeScript semantic typecheck: not verified in this workspace; project dependencies are not installed in the release workspace.
-- Next.js production build: not verified in this workspace; Vercel must confirm after deployment.
-- Live Supabase migration, Storage uploads/downloads and role-separation tests: not executed in this workspace.
+- Source baseline: v3.12.0 complete cumulative project archive.
+- Upgrade: customer resolution review and appeals for RNX trust cases.
+- New Supabase migration: `031_rnx_trust_case_resolution_appeals.sql`.
+- Appeal window: one appeal per resolved/closed case within 14 days of `resolution_published_at`; deadline enforced in a service-role-only database function.
+- Accepted appeals reopen the case to `under_review`; not-upheld appeals retain the current case status. Each decision requires a customer-visible staff response.
+- Regression checks: 33 scripts passed, 0 failed (all `scripts/test-*.mjs` executed individually).
+- TypeScript/TSX syntax transpilation: 190 files passed, 0 syntax errors (TypeScript 5.8.3 `transpileModule`, excluding declaration-only files).
+- Full TypeScript semantic typecheck: not verified; npm dependency installation timed out in the release workspace.
+- Next.js production build: not verified; npm dependency installation timed out. Vercel must confirm after deployment.
+- Live Supabase migration and end-to-end customer/staff appeal workflow: not executed in this workspace.
 
-Static tests and syntax transpilation do not establish production build success or live Supabase behaviour.
+Static regression checks and syntax transpilation do not establish production build success or live Supabase behaviour.

@@ -532,3 +532,29 @@
 .trust-evidence-admin-upload select{width:100%;min-width:0;border:1px solid #cfd9d0;border-radius:9px;padding:10px;background:#fff;color:var(--ink);font:inherit;font-size:12px}
 .admin-trust-evidence{display:grid;gap:11px;margin-top:17px;padding-top:15px;border-top:1px solid var(--line)}
 @media(max-width:620px){.trust-evidence-list article{align-items:flex-start;flex-direction:column}.trust-evidence-list article .button{width:100%}.trust-evidence-admin-upload{grid-template-columns:1fr}.trust-evidence-heading{align-items:center}}
+
+
+/* v3.13.0 — customer resolution review and appeal workflow */
+.tracking-case-appeal{display:grid;gap:11px;margin:14px 0;padding:13px;border:1px solid #d7dfd1;border-radius:12px;background:#f7faf5}
+.tracking-case-appeal-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.tracking-case-appeal-heading>strong{font-size:13px}
+.tracking-case-appeal-form,.tracking-case-appeal-result{display:grid;gap:9px}
+.tracking-case-appeal-form>label{display:grid;gap:6px;font-size:12px;font-weight:800;color:var(--ink)}
+.tracking-case-appeal-form textarea,.admin-trust-appeal-review textarea{width:100%;min-width:0;border:1px solid #cfd9d0;border-radius:9px;padding:11px 12px;background:#fff;color:var(--ink);font:inherit;font-size:13px;line-height:1.55;resize:vertical}
+.tracking-case-appeal-form>div{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.tracking-case-appeal-form small,.tracking-case-appeal-result small{font-size:10px;color:var(--muted);line-height:1.5}
+.tracking-case-appeal-result>p,.tracking-case-appeal-result>div p{font-size:12px;line-height:1.65;white-space:pre-wrap;margin:5px 0}
+.tracking-case-appeal-result>div{padding:10px;border-radius:9px;background:#fff;border:1px solid var(--line)}
+.admin-trust-appeal{display:grid;gap:11px;margin:17px 0;padding:14px;border:1px solid #d9e0d5;border-radius:12px;background:#f8faf6}
+.admin-trust-appeal h3{font-size:16px;margin:4px 0}
+.admin-trust-appeal .supplier-section-heading small{font-size:10px;color:var(--muted)}
+.admin-trust-appeal-reason,.admin-trust-appeal-result{padding:11px;border:1px solid #e0e6dc;border-radius:9px;background:#fff}
+.admin-trust-appeal-reason strong,.admin-trust-appeal-result strong{font-size:11px}
+.admin-trust-appeal-reason p,.admin-trust-appeal-result p{margin:6px 0 0;font-size:12px;line-height:1.65;white-space:pre-wrap}
+.admin-trust-appeal-result small{display:block;margin-top:7px;font-size:10px;color:var(--muted)}
+.admin-trust-appeal-review{display:grid;gap:8px}
+.admin-trust-appeal-review label{display:grid;gap:6px;font-size:11px;font-weight:800}
+.admin-trust-appeal-review>small{font-size:10px;color:var(--muted)}
+.admin-trust-appeal-review>div{display:flex;gap:8px;flex-wrap:wrap}
+.admin-trust-appeal-badge{color:#8b5700!important;font-weight:900!important;background:#fff1d9;padding:4px 7px;border-radius:6px}
+@media(max-width:620px){.tracking-case-appeal-form>div,.admin-trust-appeal-review>div{align-items:stretch;flex-direction:column}.tracking-case-appeal-form .button,.admin-trust-appeal-review .button{width:100%}.tracking-case-appeal-heading{align-items:flex-start;flex-direction:column}}

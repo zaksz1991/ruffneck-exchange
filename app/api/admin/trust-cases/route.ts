@@ -17,9 +17,22 @@ export async function GET() {
     ]);
     if (casesResult.error) throw casesResult.error;
     if (staffResult.error) throw staffResult.error;
-    return NextResponse.json({ cases: casesResult.data || [], staff: staffResult.data || [] }, { headers: { 'Cache-Control': 'no-store, private' } });
+    const rows = casesResult.data || [];
+    let appeals: any[] = [];
+    if (rows.length) {
+      const appealResult = await db.from('rnx_trust_case_appeals')
+        .select('trust_case_id,status,created_at')
+        .in('trust_case_id', rows.map((row) => row.id));
+      if (appealResult.error) throw appealResult.error;
+      appeals = appealResult.data || [];
+    }
+    const appealByCase = new Map(appeals.map((appeal) => [appeal.trust_case_id, appeal]));
+    return NextResponse.json({
+      cases: rows.map((row) => ({ ...row, appeal: appealByCase.get(row.id) || null, appeal_status: appealByCase.get(row.id)?.status || null })),
+      staff: staffResult.data || [],
+    }, { headers: { 'Cache-Control': 'no-store, private' } });
   } catch (error) {
     console.error('[RNX trust cases] Admin load failed:', error instanceof Error ? error.message : 'unknown');
-    return NextResponse.json({ error: 'Trust cases could not be loaded. Confirm migration 010 is applied.' }, { status: 503 });
+    return NextResponse.json({ error: 'Trust cases could not be loaded. Confirm migrations 010 and 031 are applied.' }, { status: 503 });
   }
 }

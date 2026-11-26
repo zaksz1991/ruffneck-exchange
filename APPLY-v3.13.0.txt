@@ -1,0 +1,22 @@
+RuffNeck Exchange v3.13.0 — deployment
+
+1. Use the existing RuffNeck Entertainment Supabase project.
+
+2. Apply only:
+   supabase/migrations/031_rnx_trust_case_resolution_appeals.sql
+
+3. Apply it after confirming migrations 001–030 have succeeded. Do not rerun completed migrations. Migration 031 is additive and retains existing trust cases, customer messages, supplier responses and evidence files.
+
+4. Replace the repository with the complete contents of the `ruffneck exchange` folder in this ZIP, then commit to the `main` branch and allow Vercel to deploy.
+
+5. No new Vercel environment variables, external services, Storage buckets or payment integrations are required. Customer and Operations emails use the existing notification outbox. RNX_OPERATIONS_NOTIFICATION_EMAIL remains optional.
+
+6. Test with the customer tracking token and an RNX staff account that has trust:write:
+   - Resolve a test trust case with a customer-visible resolution summary.
+   - Confirm resolution_published_at is populated and the customer tracking page displays the resolution review window.
+   - Submit one appeal using the case's private tracking link; confirm the case remains linked to the same lead and the appeal appears in the Operations queue.
+   - Accept the appeal; confirm the case returns to under_review, the customer sees the staff response, and the case event history records the review.
+   - In a separate test case, do not uphold the appeal; confirm the original resolved/closed status remains and the customer sees the response.
+   - Confirm a second appeal for the same case is rejected and an appeal submitted after 14 days is rejected by the database deadline check.
+
+7. No refund, chargeback or payment action is triggered by an appeal decision. Acceptance reopens the RNX case for further review; it does not determine legal liability.

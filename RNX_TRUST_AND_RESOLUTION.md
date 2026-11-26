@@ -75,3 +75,14 @@ The supplier response API returns only cases explicitly assigned to that supplie
 Customers may add supporting records from the private tracking link while a case is open. An assigned supplier may attach a factual supporting record only after RNX has explicitly requested a response and the case is in `awaiting_supplier`. Staff with `trust:write` can add files with `customer` or `internal` visibility. Internal files are excluded from customer and supplier APIs.
 
 The `rnx-trust-case-evidence` bucket is private. The server creates/configures it automatically on the first upload. Metadata and `evidence_uploaded` events are written through the service-role-only RPC in migration `030_rnx_trust_case_evidence_vault.sql`. Migration 030 must be applied after migrations 001–029.
+
+
+## Customer resolution review and appeals — v3.13.0
+
+When RNX publishes a customer-visible resolution and moves a trust case to `resolved` or `closed`, the customer can request one review within 14 days using the same private request tracking link. The customer must provide a 20–2,000 character explanation. The database checks the deadline against `resolution_published_at`; the browser display is informational only. The case must belong to the lead resolved from the high-entropy tracking token.
+
+Appeal records are stored in `rnx_trust_case_appeals`, a service-role-only table with RLS enabled and browser roles revoked. The RPC `rnx_submit_trust_case_appeal` locks the case, checks the terminal status and 14-day window, enforces one appeal per case, creates the appeal and records the event transactionally. Migration 031 backfills resolution timestamps for older terminal cases and adds a trigger for later status transitions.
+
+RNX staff with `trust:write` can accept an appeal or not uphold it. An accepted appeal reopens the case at `under_review` and clears the active resolution timestamp so a later resolution starts a new review window; the appeal record retains the original status and resolution timestamp. A not-upheld decision leaves the current case status unchanged. Both decisions require a 10–1,800 character customer-visible response and are recorded with the reviewer and event history.
+
+An appeal decision is an RNX operational review. It is not a legal determination, refund instruction, payment reversal or proof of wrongdoing. One appeal is allowed per case, including after an accepted appeal has led to further investigation. Apply `031_rnx_trust_case_resolution_appeals.sql` after migrations 001–030.
