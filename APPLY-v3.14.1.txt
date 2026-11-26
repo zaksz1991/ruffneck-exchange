@@ -1,0 +1,17 @@
+RUFFNECK EXCHANGE v3.14.1 — BUILD REPAIR DEPLOYMENT
+
+GITHUB: zaksz1991/ruffneck-exchange
+BRANCH: main
+VERCEL: https://ruffneck-exchange.vercel.app/
+SUPABASE: RuffNeck Entertainment (existing project)
+
+IMPORTANT ARCHIVE LAYOUT
+This ZIP extracts directly to the project files. There is no wrapper folder. Upload all extracted root contents into the existing GitHub repository root. Do not create a nested `ruffneck exchange` folder.
+
+Before committing, verify that these two files appear at the GitHub repository root under `lib/`:
+- lib/analytics-client.ts
+- lib/admin-auth.ts
+
+The v3.14.0 build log shows Vercel could not find those two imports. This release includes both modules at the exact paths required by the existing imports and adds a packaging regression test.
+
+No Supabase migration is required. Keep migrations 001–032 unchanged. No Vercel environment variables or project settings need to change.

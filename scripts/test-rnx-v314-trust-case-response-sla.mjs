@@ -32,7 +32,7 @@ assert.match(adminUi, /SLA MONITOR/);
 assert.match(adminUi, /first_response_due_at/);
 assert.match(adminUi, /first_response_at/);
 assert.match(css, /v3\.14\.0 — trust-case first response SLA monitoring/);
-assert.equal(packageJson.version, '3.14.0');
+assert.equal(packageJson.version, '3.14.1');
 assert.equal(packageJson.scripts['test:rnx-v314'], 'node scripts/test-rnx-v314-trust-case-response-sla.mjs');
 
-console.log('RNX v3.14.0 trust-case first-response SLA regression checks passed.');
+console.log('RNX v3.14.0 SLA feature regression checks passed under v3.14.1.');

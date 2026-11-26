@@ -1,11 +1,11 @@
-RUFFNECK EXCHANGE v3.14.0 — COMPLETE CUMULATIVE REPLACEMENT
+RUFFNECK EXCHANGE v3.14.1 — COMPLETE CUMULATIVE REPLACEMENT
 
-Complete cumulative Next.js source project based on the v3.13.1 project archive.
-Retains all marketplace routes, API routes, customer and supplier dashboards, operations consoles, brand assets, documentation, scripts, configuration and Supabase migrations 001–031.
-New feature: first-response SLA tracking for RNX trust cases, including severity-based elapsed-time deadlines, automatic first public staff-response capture, event history, Operations queue metrics, filters and urgency ordering.
-New Supabase migration: supabase/migrations/032_rnx_trust_case_response_sla.sql. Apply after migrations 001–031.
-No new Vercel environment variables, cron jobs or external services.
+This archive is the complete project, not a patch or overlay.
+Archive layout is deliberately flat: app/, components/, lib/, public/, scripts/, supabase/, package.json and all other project files are located directly at the ZIP root. No wrapper folder is present.
+
+Build repair: includes lib/analytics-client.ts and lib/admin-auth.ts at the exact root-relative paths referenced by the current app imports. Adds a regression test to prevent these modules being omitted from future repository replacements.
+
+All previous functionality through v3.14.0 is retained. No new Supabase migration. Existing migrations 001–032 remain unchanged.
 Target: github.com/zaksz1991/ruffneck-exchange, main branch.
 Production: https://ruffneck-exchange.vercel.app/
 Supabase: RuffNeck Entertainment.
-Static regression scripts and TypeScript syntax transpilation passed. Full TypeScript semantic check and Next.js production build could not be completed because npm registry dependency resolution returned EAI_AGAIN; confirm these through Vercel after deployment.

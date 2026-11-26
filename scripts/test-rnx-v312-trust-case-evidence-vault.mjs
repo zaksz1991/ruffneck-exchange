@@ -1,0 +1,70 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+const read = (path) => readFileSync(new URL(path, `file://${process.cwd()}/`), 'utf8');
+const migration = read('supabase/migrations/030_rnx_trust_case_evidence_vault.sql');
+const helper = read('lib/trust-case-evidence.ts');
+const customerUpload = read('app/api/track/[token]/cases/[caseId]/attachments/route.ts');
+const customerDownload = read('app/api/track/[token]/cases/[caseId]/attachments/[attachmentId]/route.ts');
+const supplierUpload = read('app/api/supplier/trust-cases/[id]/attachments/route.ts');
+const supplierDownload = read('app/api/supplier/trust-cases/[id]/attachments/[attachmentId]/route.ts');
+const adminUpload = read('app/api/admin/trust-cases/[id]/attachments/route.ts');
+const adminDownload = read('app/api/admin/trust-cases/[id]/attachments/[attachmentId]/route.ts');
+const trackApi = read('app/api/track/[token]/route.ts');
+const supplierApi = read('app/api/supplier/trust-cases/route.ts');
+const adminApi = read('app/api/admin/trust-cases/[id]/route.ts');
+const customerUi = read('components/tracking-page.tsx');
+const supplierUi = read('components/supplier-trust-case-centre.tsx');
+const adminUi = read('components/admin-trust-console.tsx');
+
+assert.match(migration, /create table if not exists public\.rnx_trust_case_attachments/i);
+assert.match(migration, /enable row level security/i);
+assert.match(migration, /revoke all on public\.rnx_trust_case_attachments from public, anon, authenticated/i);
+assert.match(migration, /grant all on public\.rnx_trust_case_attachments to service_role/i);
+assert.match(migration, /rnx_record_trust_case_attachment/i);
+assert.match(migration, /security definer/i);
+assert.match(migration, /TRUST_CASE_ATTACHMENT_LIMIT/);
+assert.match(migration, /evidence_uploaded/);
+assert.match(migration, /visibility = 'customer'/);
+assert.match(migration, /uploader_role = 'staff' and uploader_supplier_id is null/);
+assert.match(migration, /4194304/);
+
+assert.match(helper, /rnx-trust-case-evidence/);
+assert.match(helper, /4 \* 1024 \* 1024/);
+assert.match(helper, /TRUST_CASE_EVIDENCE_MAX_FILES = 20/);
+assert.match(helper, /detectTrustCaseEvidence/);
+assert.match(helper, /%PDF-/);
+assert.match(helper, /image\/jpeg/);
+assert.match(helper, /image\/png/);
+assert.match(helper, /image\/webp/);
+assert.match(helper, /createSignedUrl\([\s\S]*TRUST_CASE_EVIDENCE_SIGNED_URL_SECONDS/);
+assert.match(helper, /p_visibility: visibility/);
+assert.match(helper, /rnx_record_trust_case_attachment/);
+
+assert.match(customerUpload, /hashTrackingToken/);
+assert.match(customerUpload, /eq\('lead_id', lead\.id\)/);
+assert.match(customerUpload, /\['resolved', 'closed'\]/);
+assert.match(customerDownload, /eq\('visibility', 'customer'\)/);
+assert.match(customerDownload, /eq\('lead_id', lead\.id\)/);
+assert.match(supplierUpload, /getAuthenticatedSupplier/);
+assert.match(supplierUpload, /eq\('supplier_application_id', supplier\.id\)/);
+assert.match(supplierUpload, /trustCase\.status !== 'awaiting_supplier'/);
+assert.match(supplierDownload, /eq\('supplier_application_id', supplier\.id\)/);
+assert.match(supplierDownload, /eq\('visibility', 'customer'\)/);
+assert.match(adminUpload, /hasPermission\(actor\.role, 'trust:write'\)/);
+assert.match(adminDownload, /hasPermission\(actor\.role, 'trust:read'\)/);
+assert.match(adminUpload, /visibilityValue !== 'customer' && visibilityValue !== 'internal'/);
+
+assert.match(trackApi, /rnx_trust_case_attachments/);
+assert.match(trackApi, /eq\('visibility', 'customer'\)/);
+assert.match(supplierApi, /rnx_trust_case_attachments/);
+assert.match(supplierApi, /eq\('visibility', 'customer'\)/);
+assert.match(adminApi, /rnx_trust_case_attachments/);
+assert.match(customerUi, /Add a supporting document/);
+assert.match(customerUi, /Open file/);
+assert.match(supplierUi, /Add supplier supporting evidence/);
+assert.match(adminUi, /Evidence vault/);
+assert.match(adminUi, /INTERNAL — STAFF ONLY/);
+assert.match(adminUi, /Customer and supplier visible/);
+
+console.log('RNX v3.12.0 trust-case evidence vault regression checks passed.');

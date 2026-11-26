@@ -1,4 +1,4 @@
-# RuffNeck Exchange (RNX) — v3.14.0
+# RuffNeck Exchange (RNX) — v3.14.1
 
 **Products. Services. Businesses. Opportunities.**
 
@@ -7,6 +7,10 @@ RuffNeck Exchange is a Nigeria-first, multi-industry business-to-business market
 Production: https://ruffneck-exchange.vercel.app/  
 Repository: https://github.com/zaksz1991/ruffneck-exchange  
 Canonical domain: `https://ruffneck-exchange.vercel.app`
+
+## v3.14.1 — Vercel root-module packaging repair
+
+This repair release packages `lib/analytics-client.ts` and `lib/admin-auth.ts` at the project root paths required by their imports. The complete archive has no wrapper folder. Extract it and place its root contents directly in the GitHub repository root. No new Supabase migration is required; migrations 001–032 remain unchanged.
 
 ## v3.14.0 — trust-case first-response SLA monitoring
 

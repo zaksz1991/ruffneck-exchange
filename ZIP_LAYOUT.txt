@@ -1,0 +1,18 @@
+RUFFNECK EXCHANGE v3.14.1 ARCHIVE LAYOUT
+
+This archive is deliberately flat. It does NOT contain a wrapper folder.
+After extraction, the project root is the folder containing:
+  app/
+  components/
+  lib/
+  public/
+  scripts/
+  supabase/
+  package.json
+  tsconfig.json
+
+Upload the contents of this extracted folder directly into the root of the existing GitHub repository.
+Do not create a nested folder named "ruffneck exchange" inside the repository.
+Before deploying, confirm GitHub contains these exact paths:
+  lib/analytics-client.ts
+  lib/admin-auth.ts

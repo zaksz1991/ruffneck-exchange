@@ -1,14 +1,10 @@
-# Build status — RuffNeck Exchange v3.14.0
+# Build status — RuffNeck Exchange v3.14.1
 
-- Source baseline: complete cumulative v3.13.1 project archive.
-- Upgrade: first-response SLA tracking for RNX trust cases.
-- New migration: `supabase/migrations/032_rnx_trust_case_response_sla.sql`.
-- SLA targets: critical 60 minutes; high 240 minutes; normal 480 minutes; low 1,440 minutes.
-- Targets are elapsed time from case submission. Only the first customer-visible RNX staff message counts.
-- Added automatic database deadline calculation, severity-change recalculation before the first public response, first-response timestamp capture, and a case-history event.
-- Existing cases are backfilled using available message history, creation time and current severity. This reconstruction does not claim a previous SLA policy existed.
-- Admin trust queue: SLA counters, urgency sorting, response-state filters and per-case deadline/response details.
-- Summary counters cover the latest 150 cases loaded by the queue.
-- Database: requires migrations 001–031 followed by 032. No new Vercel environment variables or cron job.
-- Regression checks: 35 scripts passed, 0 failed.
-- TypeScript syntax transpilation: 3 changed TypeScript/TSX files passed. Full project semantic typecheck and Next.js production build could not be run because npm dependency installation failed with registry DNS error `EAI_AGAIN`. Confirm full typecheck and build in Vercel.
+- Baseline: complete cumulative v3.14.0 source project.
+- Repair: ensure `lib/analytics-client.ts` and `lib/admin-auth.ts` are included at exact root-relative paths expected by current imports.
+- Archive layout: flat project root with no wrapper folder, to prevent nested extraction/upload errors.
+- Added `scripts/test-rnx-v3141-required-root-modules.mjs` and `npm run test:rnx-v3141` to verify both files, their consumers and the `@/*` root alias.
+- Alias import audit: 0 missing `@/` targets across the source archive.
+- Existing static regression scripts: 35 passed.
+- Database: no new migration. Existing migrations 001–032 remain unchanged.
+- Full Next.js production build: not verified in this environment because npm dependency installation timed out. Vercel must confirm the build after the corrected repository contents are committed.

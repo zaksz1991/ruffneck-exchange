@@ -1,0 +1,45 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
+const migration = read('supabase/migrations/029_rnx_supplier_trust_case_responses.sql');
+const supplierList = read('app/api/supplier/trust-cases/route.ts');
+const supplierMessage = read('app/api/supplier/trust-cases/[id]/messages/route.ts');
+const centre = read('components/supplier-trust-case-centre.tsx');
+const supplierDashboard = read('components/supplier-dashboard.tsx');
+const supplierDashboardApi = read('app/api/supplier/dashboard/route.ts');
+const trackingApi = read('app/api/track/[token]/route.ts');
+const trackingUi = read('components/tracking-page.tsx');
+const adminUi = read('components/admin-trust-console.tsx');
+const adminRoute = read('app/api/admin/trust-cases/[id]/route.ts');
+
+assert.match(migration, /supplier_response_requested_at/);
+assert.match(migration, /rnx_supplier_notifications[\s\S]*trust_case_response_requested/);
+assert.match(migration, /sender_role in \('customer','staff','supplier'\)/);
+assert.match(migration, /sender_supplier_id is not null and visibility = 'customer'/);
+assert.match(migration, /rnx_supplier_submit_trust_case_response/);
+assert.match(migration, /v_case\.status <> 'awaiting_supplier'/);
+assert.match(migration, /payment_status = 'paid'[\s\S]*payment_verified_at is not null[\s\S]*customer_approved_at is not null[\s\S]*contact_released_at is not null/);
+assert.match(migration, /set status = 'under_review'/);
+assert.match(migration, /and lo\.payment_status = 'paid'[\s\S]*and lo\.contact_released_at is not null/);
+assert.match(supplierList, /eq\('supplier_application_id', supplier\.id\)/);
+assert.match(supplierList, /not\('supplier_response_requested_at', 'is', null\)/);
+assert.match(supplierList, /eq\('visibility', 'customer'\)/);
+assert.doesNotMatch(supplierList, /lead:rnx_leads|email|phone/);
+assert.match(supplierMessage, /isSameOriginRequest/);
+assert.match(supplierMessage, /getAuthenticatedSupplier/);
+assert.match(supplierMessage, /rnx_supplier_submit_trust_case_response/);
+assert.match(supplierMessage, /Supplier response received/);
+assert.match(supplierMessage, /lead\.email/);
+assert.match(centre, /can_respond/);
+assert.match(centre, /Your response will be visible to the customer and authorised RNX staff/);
+assert.match(supplierDashboard, /SupplierTrustCaseCentre/);
+assert.match(supplierDashboard, /related_trust_case_id/);
+assert.match(supplierDashboardApi, /related_trust_case_id/);
+assert.match(trackingApi, /eq\('visibility', 'customer'\)/);
+assert.match(trackingUi, /message\.sender_role === 'supplier' \? 'is-supplier'/);
+assert.match(adminUi, /row\.sender_role === 'supplier' \? 'is-supplier'/);
+assert.match(adminRoute, /input\.status === 'awaiting_supplier'/);
+assert.match(adminRoute, /supplier_accepted_at[\s\S]*payment_status !== 'paid'[\s\S]*contact_released_at/);
+
+console.log('RNX v3.11.0 supplier trust-case response centre regression checks passed.');

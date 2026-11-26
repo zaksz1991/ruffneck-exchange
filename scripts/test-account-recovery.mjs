@@ -1,0 +1,43 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+
+const root = process.cwd();
+const read = (path) => readFile(resolve(root, path), 'utf8');
+const requestRoute = await read('app/api/account/recovery/request/route.ts');
+const completeRoute = await read('app/api/account/recovery/complete/route.ts');
+const migration = await read('supabase/migrations/012_rnx_account_recovery.sql');
+const form = await read('components/account-recovery-form.tsx');
+const customerLogin = await read('app/customer/login/page.tsx');
+const supplierLogin = await read('app/supplier/login/page.tsx');
+const recoveryPage = await read('app/account/recovery/page.tsx');
+const resetPage = await read('app/account/reset/page.tsx');
+
+assert.match(requestRoute, /isSameOriginRequest\(request\)/, 'Recovery request must reject cross-origin POSTs.');
+assert.match(requestRoute, /randomBytes\(32\)/, 'Recovery token must be cryptographically random.');
+assert.match(requestRoute, /createHash\('sha256'\)/, 'Only a token hash should be stored.');
+assert.match(requestRoute, /rnx_account_recovery_allow_request/, 'Recovery request throttling must be enabled.');
+assert.match(requestRoute, /rnx-account-recovery-ip/, 'Recovery requests must also be throttled per IP fingerprint.');
+assert.match(requestRoute, /portal_enabled/, 'Supplier recovery must require enabled portal access.');
+assert.match(requestRoute, /RESEND_API_KEY/, 'Email delivery must use the existing Resend configuration.');
+assert.doesNotMatch(requestRoute, /queueNotification\(/, 'Recovery bearer links must not enter the general staff notification outbox.');
+assert.match(completeRoute, /rnx_consume_account_recovery_token/, 'Reset must use the atomic database function.');
+assert.match(completeRoute, /hashCustomerPassword/, 'Customer passwords must retain the existing scrypt hash.');
+assert.match(completeRoute, /hashSupplierPassword/, 'Supplier passwords must retain the existing scrypt hash.');
+assert.match(completeRoute, /cookies\.set\(/, 'The current session cookie must be cleared after reset.');
+assert.match(migration, /enable row level security/gi, 'Recovery tables must have RLS enabled.');
+assert.match(migration, /revoke all on table public\.rnx_account_recovery_tokens from public, anon, authenticated/i, 'Recovery tokens must be inaccessible to browser roles.');
+assert.match(migration, /grant execute on function public\.rnx_consume_account_recovery_token\(text, text, text\) to service_role/i, 'Only service_role may consume recovery tokens.');
+assert.match(migration, /for update/i, 'Token consumption must lock the token row.');
+assert.match(migration, /expires_at <= now\(\)/i, 'Expired tokens must be rejected.');
+assert.match(migration, /consumed_at = now\(\)/i, 'Used tokens must be invalidated.');
+assert.match(migration, /lower\(email\) = lower\(v_token\.recipient_email\)/i, 'A reset token must still match the account email when it is consumed.');
+assert.match(form, /password\.length < 10/, 'The UI must enforce the minimum password length.');
+assert.match(form, /password !== confirmPassword/, 'The UI must confirm the new password.');
+assert.match(customerLogin, /account\/recovery\?type=customer/, 'Customer sign-in must link to customer recovery.');
+assert.match(supplierLogin, /account\/recovery\?type=supplier/, 'Supplier sign-in must link to supplier recovery.');
+assert.match(recoveryPage, /AccountRecoveryRequestForm/, 'The recovery page must render the request form.');
+assert.match(resetPage, /AccountPasswordResetForm/, 'The reset page must render the completion form.');
+
+console.log('RNX account recovery static contract: PASS');
+console.log('Checks: origin protection, token hashing, rate limiting, supplier eligibility, Resend delivery, atomic consume, role restrictions, token expiry/reuse protection, password policy and sign-in links.');
